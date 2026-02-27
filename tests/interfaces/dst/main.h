@@ -1,0 +1,14 @@
+#include "so.h"
+
+typedef struct {
+    void* self;
+    so_int (*Area)(void* self);
+    so_int (*Perim)(void* self, so_int n);
+} main_Shape;
+
+typedef struct main_Rect {
+    so_int width;
+    so_int height;
+} main_Rect;
+so_int main_Rect_Area(void* self);
+so_int main_Rect_Perim(void* self, so_int n);

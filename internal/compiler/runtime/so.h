@@ -1,0 +1,123 @@
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SO_CONCAT(a, b) a##b
+#define SO_NAME(a, b) SO_CONCAT(a, b)
+
+#define so_auto __auto_type
+#define so_byte uint8_t
+#define so_rune int32_t
+typedef int64_t so_int;
+
+// Strings.
+
+// String is a pointer to array of bytes plus a length.
+typedef struct {
+    const char* ptr;
+    size_t len;
+} so_String;
+
+// so_strlit creates a String from a string literal.
+#define so_strlit(s) ((so_String){s, sizeof(s) - 1})
+
+// so_string_eq returns true if two strings are equal.
+#define so_string_eq(s1, s2) so_string_eq_impl(s1, s2)
+static inline bool so_string_eq_impl(so_String s1, so_String s2) {
+    return s1.len == s2.len && memcmp(s1.ptr, s2.ptr, s1.len) == 0;
+}
+
+// so_utf8_decode decodes one UTF-8 rune from string s at byte offset i.
+// Stores the byte width in *w.
+// Returns the decoded rune, or 0xFFFD for invalid UTF-8.
+so_rune so_utf8_decode(so_String s, so_int i, int* w);
+
+// Slices.
+
+// Slice is a pointer to array of elements plus a length.
+typedef struct {
+    void* ptr;
+    size_t len;
+    size_t cap;
+} so_Slice;
+
+// so_make_slice creates a slice of the given type, length, and capacity.
+#define so_make_slice(type, len, cap) ((so_Slice){(type[cap]){0}, (len), (cap)})
+
+// so_append appends elements to a slice without resizing.
+// Returns the new slice with updated length.
+// Panics if the new length exceeds the capacity.
+#define so_append(s, T, ...) ({                                    \
+    so_Slice _s = (s);                                             \
+    T _vals[] = {__VA_ARGS__};                                     \
+    size_t _n = sizeof(_vals) / sizeof(T);                         \
+    if (_s.len + _n > _s.cap) so_panic("append: out of capacity"); \
+    memcpy((T*)_s.ptr + _s.len, _vals, sizeof(_vals));             \
+    _s.len += _n;                                                  \
+    _s;                                                            \
+})
+
+// so_index returns a reference to the element at index i in a slice or string.
+#define so_index(s, T, i) (((T*)(s).ptr)[i])
+
+// so_len returns the length of a slice or string.
+#define so_len(s) ((so_int)(s).len)
+
+// so_cap returns the capacity of a slice.
+#define so_cap(s) ((so_int)(s).cap)
+
+// so_slice creates a slice from an array or another slice
+// from index 'from' (inclusive) to index 'to' (exclusive).
+#define so_slice(s, T, from, to) ((so_Slice){(T*)(s).ptr + (from), (to) - (from), (s).cap - (from)})
+
+// so_copy copies elements from src to dst. Returns the number of elements copied
+// (which is the minimum of dst.len and src.len).
+static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) {
+    size_t n = dst.len < src.len ? dst.len : src.len;
+    memmove(dst.ptr, src.ptr, n * elem_size);
+    return (so_int)n;
+}
+#define so_copy(dst, src, T) so_copy_impl(dst, src, sizeof(T))
+
+// Error handling.
+
+struct so_Error_ {
+    const char* msg;
+};
+typedef struct so_Error_* so_Error;
+#define so_error(s) (&(struct so_Error_){s})
+
+// so_panic aborts the program with the given message.
+void so_panic(const char* msg);
+
+// Defer.
+
+// Deferred function and its argument.
+struct so_Deferred {
+    void (*fn)(void*);
+    void* arg;
+};
+
+// Calls the deferred function with its argument.
+static inline void so_defer_cleanup(struct so_Deferred* ctx) {
+    if (ctx->fn) ctx->fn(ctx->arg);
+}
+
+// Create a deferred function call for the current scope.
+#define so_defer(fn, ptr)                                \
+    struct so_Deferred SO_NAME(_defer_var_, __COUNTER__) \
+        __attribute__((cleanup(so_defer_cleanup))) =     \
+            {(void (*)(void*))(fn), (void*)(ptr)}
+
+// Printing.
+
+// print writes the formatted string to stdout.
+// Returns the number of bytes written.
+int so_print(const char* format, ...);
+
+// println writes the formatted string to stdout with a newline.
+// Returns the number of bytes written.
+int so_println(const char* format, ...);

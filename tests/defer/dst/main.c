@@ -1,0 +1,17 @@
+#include "main.h"
+
+static void xopen(so_int* x) {
+    so_println("%s %lld", "open", *x);
+}
+
+static void xclose(void* a) {
+    so_int* x = (so_int*)a;
+    so_println("%s %lld", "close", *x);
+}
+
+int main(void) {
+    so_int x = 42;
+    xopen(&x);
+    so_defer(xclose, &x);
+    so_println("%s", "working...");
+}

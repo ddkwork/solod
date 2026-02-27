@@ -1,0 +1,87 @@
+package clang
+
+import (
+	"fmt"
+	"go/ast"
+	"go/types"
+	"io"
+)
+
+// emitInterfaceTypeSpec emits a typedef struct with void* self and function pointers.
+func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
+	typ := g.types.Defs[spec.Name].Type().(*types.Named)
+	iface := typ.Underlying().(*types.Interface)
+	fmt.Fprintf(w, "\ntypedef struct {\n")
+	fmt.Fprintf(w, "    void* self;\n")
+	for m := range iface.Methods() {
+		sig := m.Type().(*types.Signature)
+		retType := g.mapType(spec, sig.Results().At(0).Type())
+		params := "void* self"
+		for p := range sig.Params().Variables() {
+			params += ", " + g.mapType(spec, p.Type()) + " " + p.Name()
+		}
+		fmt.Fprintf(w, "    %s (*%s)(%s);\n", retType, m.Name(), params)
+	}
+	fmt.Fprintf(w, "} %s;\n", g.symbolName(spec.Name.Name))
+}
+
+// emitInterfaceLit emits a compound literal that wraps a concrete value as an interface.
+// Example: (main_Shape){.self = &r, .Area = main_Rect_Area, .Perim = main_Rect_Perim}
+func (g *Generator) emitInterfaceLit(ifaceType types.Type, expr ast.Expr) {
+	w := g.state.writer
+	named := ifaceType.(*types.Named)
+	iface := named.Underlying().(*types.Interface)
+	concreteNamed := g.types.TypeOf(expr).(*types.Named)
+
+	cIface := g.symbolName(named.Obj().Name())
+	cConcrete := g.symbolName(concreteNamed.Obj().Name())
+
+	fmt.Fprintf(w, "(%s){.self = &", cIface)
+	g.emitExpr(expr)
+	for m := range iface.Methods() {
+		fmt.Fprintf(w, ", .%s = %s_%s", m.Name(), cConcrete, m.Name())
+	}
+	fmt.Fprintf(w, "}")
+}
+
+// emitTypeAssertion emits a comma-ok type assertion (e.g. _, ok := s.(Rect)).
+// Uses function pointer comparison to identify the concrete type.
+func (g *Generator) emitTypeAssertion(w io.Writer, stmt *ast.AssignStmt, ta *ast.TypeAssertExpr) {
+	ifaceType := g.types.TypeOf(ta.X).(*types.Named)
+	iface := ifaceType.Underlying().(*types.Interface)
+	firstMethod := iface.Method(0).Name()
+
+	concreteType := g.types.TypeOf(ta.Type).(*types.Named)
+	cConcrete := g.symbolName(concreteType.Obj().Name())
+
+	okIdent := stmt.Lhs[1].(*ast.Ident)
+	fmt.Fprintf(w, "%sbool %s = (", g.indent(), okIdent.Name)
+	g.emitExpr(ta.X)
+	fmt.Fprintf(w, ".%s == %s_%s);\n", firstMethod, cConcrete, firstMethod)
+}
+
+// emitTypeAssertExpr emits a type assertion.
+func (g *Generator) emitTypeAssertExpr(n *ast.TypeAssertExpr) {
+	sourceType := g.types.TypeOf(n.X)
+	if iface, ok := sourceType.Underlying().(*types.Interface); ok && iface.Empty() {
+		// Empty interface, emit a simple cast: (void*)expr
+		cType := g.mapType(n, g.types.TypeOf(n.Type))
+		fmt.Fprintf(g.state.writer, "(%s)", cType)
+		g.emitExpr(n.X)
+		return
+	}
+
+	// Non-empty interface, emit a dereference of the concrete type pointer:
+	// ival.(Type) → *((Type*)ival.self)
+	concreteType := g.types.TypeOf(n.Type).(*types.Named)
+	cConcrete := g.symbolName(concreteType.Obj().Name())
+	fmt.Fprintf(g.state.writer, "*((%s*)", cConcrete)
+	g.emitExpr(n.X)
+	fmt.Fprintf(g.state.writer, ".self)")
+}
+
+// isInterfaceType reports whether t is an interface type.
+func isInterfaceType(t types.Type) bool {
+	_, ok := t.Underlying().(*types.Interface)
+	return ok
+}
