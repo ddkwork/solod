@@ -1,32 +1,114 @@
 package main
 
 import (
+	"errors"
 	"flag"
-	"log/slog"
+	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/nalgeon/soan/internal/compiler"
 )
 
 func main() {
-	var dir string
-	var outDir string
-	flag.StringVar(&dir, "dir", "", "source directory (.go)")
-	flag.StringVar(&outDir, "out", "", "output directory (.c)")
-	flag.Parse()
-
-	if dir == "" {
-		slog.Error("must specify -dir")
+	if len(os.Args) < 2 {
+		usage()
 		os.Exit(1)
 	}
-	if outDir == "" {
-		outDir = dir
+
+	cmd := os.Args[1]
+	args := os.Args[2:]
+
+	var err error
+	switch cmd {
+	case "translate":
+		err = translate(args)
+	case "build":
+		err = build(args)
+	case "run":
+		err = run(args)
+	default:
+		usage()
+		os.Exit(1)
 	}
 
-	// Set up logging
-	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
-	logger := slog.New(handler)
-	slog.SetDefault(logger)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "so %s: %s\n", cmd, err)
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			os.Exit(exitErr.ExitCode())
+		}
+		os.Exit(1)
+	}
+}
 
-	compiler.Translate(dir, outDir)
+func usage() {
+	fmt.Fprintf(os.Stderr, `Usage: so <command> [arguments]
+
+Commands:
+    build        compile package to executable
+    run          compile and run a package
+    translate    translate package to C
+
+Run 'so <command> -h' for details.
+`)
+}
+
+func translate(args []string) error {
+	flags := flag.NewFlagSet("translate", flag.ContinueOnError)
+	outDir := flags.String("o", "", "output directory (default: package directory)")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+
+	pkg := "."
+	if flags.NArg() > 0 {
+		pkg = flags.Arg(0)
+	}
+
+	out := *outDir
+	if out == "" {
+		out = pkg
+	}
+
+	return compiler.Translate(pkg, out)
+}
+
+func build(args []string) error {
+	flags := flag.NewFlagSet("build", flag.ContinueOnError)
+	outFile := flags.String("o", "", "output file (default: basename of package directory)")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+
+	pkg := "."
+	if flags.NArg() > 0 {
+		pkg = flags.Arg(0)
+	}
+
+	out := *outFile
+	if out == "" {
+		absDir, err := filepath.Abs(pkg)
+		if err != nil {
+			return err
+		}
+		out = filepath.Base(absDir)
+	}
+
+	return compiler.Build(pkg, out)
+}
+
+func run(args []string) error {
+	flags := flag.NewFlagSet("run", flag.ContinueOnError)
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+
+	pkg := "."
+	if flags.NArg() > 0 {
+		pkg = flags.Arg(0)
+	}
+
+	return compiler.Run(pkg)
 }

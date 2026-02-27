@@ -33,7 +33,8 @@ func testPackage(t *testing.T, testDir string) {
 	be.Err(t, err, nil)
 	defer os.RemoveAll(tempOut)
 
-	Translate(srcDir, tempOut)
+	err = Translate(srcDir, tempOut)
+	be.Err(t, err, nil)
 
 	// Compare output with expected (recursively)
 	err = filepath.WalkDir(expectedDir, func(path string, d fs.DirEntry, err error) error {

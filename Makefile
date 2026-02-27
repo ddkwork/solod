@@ -3,7 +3,7 @@ CFLAGS = -g -std=gnu11 -Wall -Wextra -Werror -Wshadow -fsanitize=address -fsanit
 example:
 	@rm -f generated/$(name)/*
 	@mkdir -p generated/$(name)
-	@go run ./cmd/so -dir tests/$(name)/src -out generated/$(name)
+	@go run ./cmd/so translate tests/$(name)/src -o generated/$(name)
 
 inspect:
 	go run ./cmd/inspect -- $(path)

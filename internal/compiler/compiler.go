@@ -1,8 +1,7 @@
 package compiler
 
 import (
-	"log/slog"
-	"os"
+	"fmt"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
@@ -12,31 +11,89 @@ import (
 	"github.com/nalgeon/soan/internal/clang"
 )
 
-// Translate loads all Go packages from dir (including So stdlib dependencies),
+// Translate loads all Go packages from srcDir (including Soan stdlib dependencies),
 // translates them to C, and writes the output to outDir.
-func Translate(dir string, outDir string) {
-	pkgs := loadPackages(dir)
+func Translate(srcDir string, outDir string) error {
+	pkgs, err := loadPackages(srcDir)
+	if err != nil {
+		return err
+	}
 	if len(pkgs) == 0 {
-		slog.Error("no packages found")
-		os.Exit(1)
+		return fmt.Errorf("no packages found")
 	}
 
 	entry := pkgs[0]
 
+	var entryModulePath string
+	if entry.Module != nil {
+		entryModulePath = entry.Module.Path
+	}
+
+	var soanModulePath string
+	if info, ok := debug.ReadBuildInfo(); ok {
+		soanModulePath = info.Main.Path
+	}
+
 	// Walk import graph and collect transpilable packages in topological order
-	ordered := topoSort(entry, entry.Module)
+	ordered := topoSort(entry, entryModulePath, soanModulePath)
 
 	// Translate each package
 	for _, pkg := range ordered {
 		pkgOutDir := packageOutDir(pkg, entry, outDir)
-		clang.Emit(clang.EmitOptions{
+		if err := clang.Emit(clang.EmitOptions{
 			Pkg:    pkg,
 			OutDir: pkgOutDir,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 
 	// Write embedded builtin files (so.h, so.c) into the output directory
-	writeBuiltin(outDir)
+	return writeBuiltin(outDir)
+}
+
+// loadPackages uses go/packages to load the entry package and all dependencies.
+func loadPackages(dir string) ([]*packages.Package, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax |
+			packages.NeedTypes | packages.NeedImports | packages.NeedDeps |
+			packages.NeedModule | packages.NeedTypesInfo,
+		Dir: dir,
+	}
+
+	pkgs, err := packages.Load(cfg, ".")
+	if err != nil {
+		return nil, fmt.Errorf("load packages: %w", err)
+	}
+	if packages.PrintErrors(pkgs) > 0 {
+		return nil, fmt.Errorf("packages contain errors")
+	}
+	return pkgs, nil
+}
+
+// topoSort walks the import graph from entry and returns transpilable packages
+// (module-internal + Soan stdlib) in topological order (dependencies before dependents).
+func topoSort(entry *packages.Package, entryModulePath, soanModulePath string) []*packages.Package {
+	var ordered []*packages.Package
+	visited := make(map[string]bool)
+
+	var walk func(pkg *packages.Package)
+	walk = func(pkg *packages.Package) {
+		if visited[pkg.PkgPath] {
+			return
+		}
+		visited[pkg.PkgPath] = true
+
+		// Visit dependencies first (post-order)
+		for _, dep := range pkg.Imports {
+			if shouldTranspile(dep, entryModulePath, soanModulePath) {
+				walk(dep)
+			}
+		}
+		ordered = append(ordered, pkg)
+	}
+	walk(entry)
+	return ordered
 }
 
 // packageOutDir returns the output directory for a package.
@@ -50,73 +107,11 @@ func packageOutDir(pkg, entry *packages.Package, outDir string) string {
 	return filepath.Join(outDir, relPath)
 }
 
-// loadPackages uses go/packages to load the entry package and all dependencies.
-func loadPackages(dir string) []*packages.Package {
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax |
-			packages.NeedTypes | packages.NeedImports | packages.NeedDeps |
-			packages.NeedModule | packages.NeedTypesInfo,
-		Dir: dir,
-	}
-
-	pkgs, err := packages.Load(cfg, ".")
-	if err != nil {
-		slog.Error("failed to load packages", "error", err)
-		os.Exit(1)
-	}
-	if packages.PrintErrors(pkgs) > 0 {
-		os.Exit(1)
-	}
-	return pkgs
-}
-
-// topoSort walks the import graph from entry and returns transpilable packages
-// (module-internal + So stdlib) in topological order (dependencies before dependents).
-func topoSort(entry *packages.Package, entryModule *packages.Module) []*packages.Package {
-	var ordered []*packages.Package
-	visited := make(map[string]bool)
-
-	var walk func(pkg *packages.Package)
-	walk = func(pkg *packages.Package) {
-		if visited[pkg.PkgPath] {
-			return
-		}
-		visited[pkg.PkgPath] = true
-
-		// Visit dependencies first (post-order)
-		for _, dep := range pkg.Imports {
-			if shouldTranspile(dep, entryModule) {
-				walk(dep)
-			}
-		}
-		ordered = append(ordered, pkg)
-	}
-	walk(entry)
-	return ordered
-}
-
 // shouldTranspile returns true if a package should be transpiled to C.
-// This includes module-internal packages and So stdlib packages.
-func shouldTranspile(pkg *packages.Package, entryModule *packages.Module) bool {
-	if isModuleInternal(pkg, entryModule) {
-		return true
-	}
-	return pkg.Module != nil && pkg.Module.Path == getOwnModulePath()
-}
-
-// isModuleInternal checks if a package belongs to the same module as the entry package.
-func isModuleInternal(pkg *packages.Package, entryModule *packages.Module) bool {
-	if entryModule == nil || pkg.Module == nil {
+// This includes packages from the entry module and Soan stdlib packages.
+func shouldTranspile(pkg *packages.Package, entryModulePath, soanModulePath string) bool {
+	if pkg.Module == nil {
 		return false
 	}
-	return pkg.Module.Path == entryModule.Path
-}
-
-// getOwnModulePath returns the module path of the running binary.
-func getOwnModulePath() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return ""
-	}
-	return info.Main.Path
+	return pkg.Module.Path == entryModulePath || pkg.Module.Path == soanModulePath
 }

@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/types"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,15 +21,16 @@ type EmitOptions struct {
 // Emit generates C code for the given Go package and all its subpackages,
 // and writes it to the specified output directory. Creates a single header
 // file with typedefs (.h) and a single implementation file (.c) for each package.
-func Emit(opts EmitOptions) {
+func Emit(opts EmitOptions) error {
 	if err := os.MkdirAll(opts.OutDir, 0o755); err != nil {
-		slog.Error("failed to create output directory", "path", opts.OutDir, "error", err)
-		os.Exit(1)
+		return fmt.Errorf("create output directory %s: %w", opts.OutDir, err)
 	}
 	g := newGenerator(opts.Pkg)
 	g.collectExterns()
-	g.emitHeader(opts.OutDir)
-	g.emitImpl(opts.OutDir)
+	if err := g.emitHeader(opts.OutDir); err != nil {
+		return err
+	}
+	return g.emitImpl(opts.OutDir)
 }
 
 // State holds the code generation state for the current scope.
@@ -67,27 +67,26 @@ func newGenerator(pkg *packages.Package) *Generator {
 }
 
 // emitHeader creates the .h file with typedefs, includes, and extern declarations.
-func (g *Generator) emitHeader(dir string) {
+func (g *Generator) emitHeader(dir string) error {
 	hName := g.pkg.Name + ".h"
 	hPath := filepath.Join(dir, hName)
 	hFile, err := os.Create(hPath)
 	if err != nil {
-		slog.Error("failed to create header file", "path", hPath, "error", err)
-		os.Exit(1)
+		return fmt.Errorf("create header file %s: %w", hPath, err)
 	}
 	defer hFile.Close()
 	fmt.Fprintf(hFile, "#include \"so.h\"\n")
 	g.emitHeaderDecls(hFile)
+	return nil
 }
 
 // emitImpl creates the .c implementation file by walking the AST.
-func (g *Generator) emitImpl(dir string) {
+func (g *Generator) emitImpl(dir string) error {
 	cName := g.pkg.Name + ".c"
 	cPath := filepath.Join(dir, cName)
 	cFile, err := os.Create(cPath)
 	if err != nil {
-		slog.Error("failed to create C file", "path", cPath, "error", err)
-		os.Exit(1)
+		return fmt.Errorf("create C file %s: %w", cPath, err)
 	}
 	defer cFile.Close()
 	fmt.Fprintf(cFile, "#include \"%s.h\"\n", g.pkg.Name)
@@ -99,6 +98,7 @@ func (g *Generator) emitImpl(dir string) {
 	for _, file := range g.pkg.Syntax {
 		ast.Walk(g, file)
 	}
+	return nil
 }
 
 // collectExterns scans all files for extern symbols and #include directives.
