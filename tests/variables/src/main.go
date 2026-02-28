@@ -159,4 +159,22 @@ func main() {
 		_ = vSlice
 		_ = vStruct
 	}
+
+	{
+		// Discarding values with blank identifier.
+		var v1, _ = 11, 12
+		var _, v2 = 21, 22
+		var _, _ = 31, 32
+		var _ = 41
+
+		v3, _ := 51, 52
+		_, v4 := 61, 62
+		_, _ = 71, 72
+		_ = 81
+
+		_ = v1
+		_ = v2
+		_ = v3
+		_ = v4
+	}
 }

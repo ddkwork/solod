@@ -206,6 +206,10 @@ func (g *Generator) emitVarSpec(spec *ast.ValueSpec) {
 		i := 0
 		for i < len(spec.Names) {
 			name := spec.Names[i]
+			if name.Name == "_" {
+				i++
+				continue
+			}
 			typ := g.types.Defs[name].Type()
 			cType := g.mapType(spec, typ)
 			fmt.Fprintf(w, "%s%s %s = ", g.indent(), cType, name.Name)
@@ -217,6 +221,9 @@ func (g *Generator) emitVarSpec(spec *ast.ValueSpec) {
 			i++
 			for i < len(spec.Names) {
 				nextName := spec.Names[i]
+				if nextName.Name == "_" {
+					break
+				}
 				nextTyp := g.types.Defs[nextName].Type()
 				nextCType := g.mapType(spec, nextTyp)
 				if nextCType != cType {
@@ -237,6 +244,9 @@ func (g *Generator) emitVarSpec(spec *ast.ValueSpec) {
 
 	// Single variable or package-level declaration.
 	for i, name := range spec.Names {
+		if name.Name == "_" {
+			continue
+		}
 		typ := g.types.Defs[name].Type()
 		cType := g.mapType(spec, typ)
 		specifier := ""

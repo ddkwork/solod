@@ -154,4 +154,17 @@ int main(void) {
         (void)vSlice;
         (void)vStruct;
     }
+    {
+        so_int v1 = 11;
+        so_int v2 = 22;
+        so_int v3 = 51;
+        so_int v4 = 62;
+        (void)71;
+        (void)72;
+        (void)81;
+        (void)v1;
+        (void)v2;
+        (void)v3;
+        (void)v4;
+    }
 }

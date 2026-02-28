@@ -31,6 +31,10 @@ func (g *Generator) emitAssignStmt(stmt *ast.AssignStmt) {
 		i := 0
 		for i < len(stmt.Lhs) {
 			ident := stmt.Lhs[i].(*ast.Ident)
+			if ident.Name == "_" {
+				i++
+				continue
+			}
 			typ := g.types.Defs[ident].Type()
 			cType := g.mapType(stmt, typ)
 			fmt.Fprintf(w, "%s%s %s = ", g.indent(), cType, ident.Name)
@@ -38,6 +42,9 @@ func (g *Generator) emitAssignStmt(stmt *ast.AssignStmt) {
 			i++
 			for i < len(stmt.Lhs) {
 				nextIdent := stmt.Lhs[i].(*ast.Ident)
+				if nextIdent.Name == "_" {
+					break
+				}
 				nextCType := g.mapType(stmt, g.types.Defs[nextIdent].Type())
 				if nextCType != cType {
 					break
