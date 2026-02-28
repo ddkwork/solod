@@ -1,9 +1,9 @@
 CFLAGS = -g -std=gnu11 -Wall -Wextra -Werror -Wshadow -fsanitize=address -fsanitize=undefined -fstack-protector-all
 
 example:
-	@rm -f generated/$(name)/*
+	@rm -rf generated/$(name)
 	@mkdir -p generated/$(name)
-	@go run ./cmd/so translate tests/$(name)/src -o generated/$(name)
+	@go run ./cmd/so translate -o generated/$(name) tests/$(name)/src
 
 inspect:
 	go run ./cmd/inspect -- $(path)

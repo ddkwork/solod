@@ -155,10 +155,6 @@ func (g *Generator) emitGenDecl(decl *ast.GenDecl) {
 // emitImportSpec emits a #include directive for an import.
 func (g *Generator) emitImportSpec(spec *ast.ImportSpec) {
 	path := strings.Trim(spec.Path.Value, `"`)
-	if path == "errors" {
-		// Errors are handled as builtins, so we have to skip the stdlib import.
-		return
-	}
 	// Strip the imported package's own module prefix.
 	if imp, ok := g.pkg.Imports[path]; ok && imp.Module != nil {
 		path = strings.TrimPrefix(path, imp.Module.Path+"/")

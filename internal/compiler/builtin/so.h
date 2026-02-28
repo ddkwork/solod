@@ -13,9 +13,7 @@
 #define so_rune int32_t
 typedef int64_t so_int;
 
-// Strings.
-
-// String is a pointer to array of bytes plus a length.
+// so_String is a pointer to array of bytes plus a length.
 typedef struct {
     const char* ptr;
     size_t len;
@@ -55,9 +53,7 @@ static inline bool so_string_gt_impl(so_String s1, so_String s2) {
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
 so_rune so_utf8_decode(so_String s, so_int i, int* w);
 
-// Slices.
-
-// Slice is a pointer to array of elements plus a length.
+// so_Slice is a pointer to array of elements plus a length.
 typedef struct {
     void* ptr;
     size_t len;
@@ -102,31 +98,34 @@ static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) 
 }
 #define so_copy(dst, src, T) so_copy_impl(dst, src, sizeof(T))
 
-// Error handling.
-
+// so_Error is a pointer to an error message string, or NULL for no error.
+// Errors are immutable and compared by pointer equality.
 struct so_Error_ {
     const char* msg;
 };
 typedef struct so_Error_* so_Error;
-#define so_error(s) (&(struct so_Error_){s})
+
+// errors_New creates a new error with the given message string.
+// so_Error errors_New(so_String s)
+#define errors_New(s) (&(struct so_Error_){s.ptr})
 
 // so_panic aborts the program with the given message.
 void so_panic(const char* msg);
 
 // Defer.
 
-// Deferred function and its argument.
+// so_Deferred is a deferred function and its argument.
 struct so_Deferred {
     void (*fn)(void*);
     void* arg;
 };
 
-// Calls the deferred function with its argument.
+// so_defer_cleanup calls the deferred function with its argument.
 static inline void so_defer_cleanup(struct so_Deferred* ctx) {
     if (ctx->fn) ctx->fn(ctx->arg);
 }
 
-// Create a deferred function call for the current scope.
+// so_defer creates a deferred function call for the current scope.
 #define so_defer(fn, ptr)                                \
     struct so_Deferred SO_NAME(_defer_var_, __COUNTER__) \
         __attribute__((cleanup(so_defer_cleanup))) =     \
@@ -134,10 +133,10 @@ static inline void so_defer_cleanup(struct so_Deferred* ctx) {
 
 // Printing.
 
-// print writes the formatted string to stdout.
+// so_print writes the formatted string to stdout.
 // Returns the number of bytes written.
 int so_print(const char* format, ...);
 
-// println writes the formatted string to stdout with a newline.
+// so_println writes the formatted string to stdout with a newline.
 // Returns the number of bytes written.
 int so_println(const char* format, ...);

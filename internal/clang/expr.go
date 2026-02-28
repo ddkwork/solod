@@ -122,20 +122,6 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 		}
 	}
 
-	// errors.New("msg") → so_error("msg")
-	// Special case, because there're no builtins for creating errors in Go.
-	// The only way to create an error is stdlib call, but we want to emit it
-	// as a builtin so_error call.
-	if sel, ok := n.Fun.(*ast.SelectorExpr); ok {
-		if ident, ok := sel.X.(*ast.Ident); ok {
-			if pkgName, ok := g.types.Uses[ident].(*types.PkgName); ok && pkgName.Imported().Path() == "errors" && sel.Sel.Name == "New" {
-				arg := n.Args[0].(*ast.BasicLit)
-				fmt.Fprintf(w, "so_error(%s)", arg.Value)
-				return
-			}
-		}
-	}
-
 	// Regular function call.
 	g.emitFuncCall(n)
 }

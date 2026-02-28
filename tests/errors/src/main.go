@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"github.com/nalgeon/soan/errors"
 )
 
 var ErrOutOfTea = errors.New("no more tea available")
