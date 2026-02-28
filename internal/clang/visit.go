@@ -49,6 +49,12 @@ func (g *Generator) Visit(node ast.Node) ast.Visitor {
 	case *ast.ReturnStmt:
 		g.emitReturnStmt(n)
 		return nil
+	case *ast.BlockStmt:
+		// Bare block (scoping block inside a function body).
+		fmt.Fprintf(g.state.writer, "%s{\n", g.indent())
+		g.emitBlock(n)
+		fmt.Fprintf(g.state.writer, "%s}\n", g.indent())
+		return nil
 	}
 
 	return g
@@ -192,6 +198,29 @@ func (g *Generator) emitConstSpec(spec *ast.ValueSpec) {
 // emitVarSpec emits a single var specification (e.g. `var a int = 1`).
 func (g *Generator) emitVarSpec(spec *ast.ValueSpec) {
 	w := g.state.writer
+
+	// Local multi-variable declaration: emit all on one line.
+	if g.state.indent > 0 && len(spec.Names) > 1 {
+		typ := g.types.Defs[spec.Names[0]].Type()
+		cType := g.mapType(spec, typ)
+		fmt.Fprintf(w, "%s%s ", g.indent(), cType)
+		for i, name := range spec.Names {
+			if i > 0 {
+				fmt.Fprintf(w, ", ")
+			}
+			if len(spec.Values) > i {
+				fmt.Fprintf(w, "%s = ", name.Name)
+				g.emitExpr(spec.Values[i])
+			} else {
+				zeroVal := g.zeroValue(spec, typ)
+				fmt.Fprintf(w, "%s = %s", name.Name, zeroVal)
+			}
+		}
+		fmt.Fprintf(w, ";\n")
+		return
+	}
+
+	// Single variable or package-level declaration.
 	for i, name := range spec.Names {
 		typ := g.types.Defs[name].Type()
 		cType := g.mapType(spec, typ)

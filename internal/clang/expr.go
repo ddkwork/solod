@@ -65,6 +65,13 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 			return
 		}
 	}
+	// Go's &^ (AND NOT) has no C equivalent — emit & ~ instead.
+	if n.Op == token.AND_NOT {
+		g.emitExpr(n.X)
+		fmt.Fprintf(w, " & ~")
+		g.emitExpr(n.Y)
+		return
+	}
 	// Regular binary expression.
 	g.emitExpr(n.X)
 	fmt.Fprintf(w, " %s ", n.Op.String())

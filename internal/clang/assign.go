@@ -27,13 +27,25 @@ func (g *Generator) emitAssignStmt(stmt *ast.AssignStmt) {
 				return
 			}
 		}
-		// Regular define.
-		for i, lhs := range stmt.Lhs {
-			ident := lhs.(*ast.Ident)
+		// Regular define: group consecutive variables by type.
+		i := 0
+		for i < len(stmt.Lhs) {
+			ident := stmt.Lhs[i].(*ast.Ident)
 			typ := g.types.Defs[ident].Type()
 			cType := g.mapType(stmt, typ)
 			fmt.Fprintf(w, "%s%s %s = ", g.indent(), cType, ident.Name)
 			g.emitExpr(stmt.Rhs[i])
+			i++
+			for i < len(stmt.Lhs) {
+				nextIdent := stmt.Lhs[i].(*ast.Ident)
+				nextCType := g.mapType(stmt, g.types.Defs[nextIdent].Type())
+				if nextCType != cType {
+					break
+				}
+				fmt.Fprintf(w, ", %s = ", nextIdent.Name)
+				g.emitExpr(stmt.Rhs[i])
+				i++
+			}
 			fmt.Fprintf(w, ";\n")
 		}
 
@@ -61,7 +73,9 @@ func (g *Generator) emitAssignStmt(stmt *ast.AssignStmt) {
 			fmt.Fprintf(w, ";\n")
 		}
 
-	case token.ADD_ASSIGN, token.SUB_ASSIGN, token.MUL_ASSIGN, token.QUO_ASSIGN, token.REM_ASSIGN:
+	case token.ADD_ASSIGN, token.SUB_ASSIGN, token.MUL_ASSIGN, token.QUO_ASSIGN,
+		token.REM_ASSIGN, token.OR_ASSIGN, token.AND_ASSIGN, token.XOR_ASSIGN,
+		token.SHL_ASSIGN, token.SHR_ASSIGN:
 		w := g.state.writer
 		fmt.Fprintf(w, "%s", g.indent())
 		g.emitExpr(stmt.Lhs[0])
