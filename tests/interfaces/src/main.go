@@ -57,10 +57,6 @@ func lineAsRect(l Line) *Rect {
 	return r
 }
 
-type reader interface {
-	Read(p []byte) (n int, err error)
-}
-
 func main() {
 	r := Rect{width: 10, height: 5}
 	{
@@ -80,9 +76,5 @@ func main() {
 		_ = lineIsRect(l)
 		rptr := lineAsRect(l)
 		_ = rptr
-	}
-	{
-		var rdr reader
-		_ = rdr
 	}
 }

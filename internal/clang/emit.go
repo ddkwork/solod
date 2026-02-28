@@ -41,22 +41,6 @@ type State struct {
 	indent int
 	// Current receiver name (for -> access in methods).
 	recvName string
-	// Out-parameter names for current function (used by emitReturnStmt).
-	outParams []string
-	// Out-parameter args to append to current call
-	// (used by emitFuncCall/emitMethodCall).
-	outArgs  []string
-	nDiscard int // counter for discard variable names (_d1, _d2, ...)
-}
-
-func (s *State) enterFunc(decl FuncDecl) {
-	s.outParams = decl.outParams()
-	s.nDiscard = 0
-}
-
-func (s *State) exitFunc() {
-	s.outParams = nil
-	s.nDiscard = 0
 }
 
 // Generator is responsible for generating C code from Go ASTs.

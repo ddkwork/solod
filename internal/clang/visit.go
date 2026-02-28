@@ -385,14 +385,6 @@ func (g *Generator) emitReturnStmt(stmt *ast.ReturnStmt) {
 		fmt.Fprintf(w, "%sreturn;\n", g.indent())
 		return
 	}
-	// Assign extra return values to out-parameters.
-	if len(stmt.Results) > 1 && len(g.state.outParams) > 0 {
-		for i := 1; i < len(stmt.Results); i++ {
-			fmt.Fprintf(w, "%s*%s = ", g.indent(), g.state.outParams[i-1])
-			g.emitExpr(stmt.Results[i])
-			fmt.Fprintf(w, ";\n")
-		}
-	}
 	fmt.Fprintf(w, "%sreturn ", g.indent())
 	g.emitExpr(stmt.Results[0])
 	fmt.Fprintf(w, ";\n")

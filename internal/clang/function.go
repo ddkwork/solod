@@ -50,7 +50,6 @@ func (f *FuncDecl) name() string {
 
 // params returns the C parameter list.
 // For methods, prepends void* self.
-// For functions with multiple returns, appends out-parameters.
 func (f *FuncDecl) params() string {
 	var parts []string
 
@@ -70,88 +69,10 @@ func (f *FuncDecl) params() string {
 		}
 	}
 
-	// Append out-parameters for multiple return values.
-	if outNames := f.outParams(); len(outNames) > 0 {
-		outIdx := 0
-		first := true
-		for _, field := range f.typ.Results.List {
-			typ := f.gen.types.TypeOf(field.Type)
-			cType := f.gen.mapType(f.decl, typ)
-			count := len(field.Names)
-			if count == 0 {
-				count = 1
-			}
-			for j := 0; j < count; j++ {
-				if first {
-					first = false
-					continue
-				}
-				parts = append(parts, cType+"* "+outNames[outIdx])
-				outIdx++
-			}
-		}
-	}
-
 	if len(parts) == 0 {
 		return "void"
 	}
 	return strings.Join(parts, ", ")
-}
-
-// outParams returns the names for out-parameters (all return values beyond the first).
-// Named returns use their Go name; unnamed returns use _r1, _r2, etc.
-func (f *FuncDecl) outParams() []string {
-	if f.typ.Results == nil {
-		return nil
-	}
-
-	// Flatten all result values.
-	type nameInfo struct {
-		name    string
-		typExpr ast.Expr
-	}
-	var all []nameInfo
-	for _, field := range f.typ.Results.List {
-		if len(field.Names) > 0 {
-			for _, n := range field.Names {
-				all = append(all, nameInfo{n.Name, field.Type})
-			}
-		} else {
-			all = append(all, nameInfo{"", field.Type})
-		}
-	}
-	if len(all) <= 1 {
-		return nil
-	}
-
-	// Assign names for out-parameters, using the Go name if available,
-	// "err" for unnamed error returns, or _rN otherwise.
-	var names []string
-	for i, info := range all[1:] {
-		if info.name != "" {
-			names = append(names, info.name)
-		} else if ident, ok := info.typExpr.(*ast.Ident); ok && ident.Name == "error" {
-			names = append(names, "err")
-		} else {
-			names = append(names, fmt.Sprintf("_r%d", i+1))
-		}
-	}
-
-	return names
-}
-
-// firstNamedReturn returns the name and C type of the first return value,
-// if it is named. Otherwise returns empty strings.
-func (f *FuncDecl) firstNamedReturn() (name, cType string) {
-	if f.typ.Results == nil || len(f.typ.Results.List) == 0 {
-		return "", ""
-	}
-	first := f.typ.Results.List[0]
-	if len(first.Names) == 0 || first.Names[0].Name == "_" {
-		return "", ""
-	}
-	typ := f.gen.types.TypeOf(first.Type)
-	return first.Names[0].Name, f.gen.mapType(f.decl, typ)
 }
 
 // returnType returns the C return type.
@@ -197,15 +118,15 @@ func (g *Generator) emitFuncDecl(decl *ast.FuncDecl) {
 	}
 	w := g.state.writer
 	fn := newFuncDecl(g, decl)
-	fmt.Fprintf(w, "\n%s%s %s(%s) {\n", fn.spec, fn.returnType(), fn.name(), fn.params())
-	g.state.enterFunc(fn)
-	defer g.state.exitFunc()
-	g.state.indent++
-	if name, cType := fn.firstNamedReturn(); name != "" {
-		// The first return value is named, so we must declare it as a local variable.
-		typ := g.types.TypeOf(fn.typ.Results.List[0].Type)
-		fmt.Fprintf(w, "%s%s %s = %s;\n", g.indent(), cType, name, g.zeroValue(decl, typ))
+	sig := g.types.Defs[decl.Name].Type().(*types.Signature)
+	if sig.Results().Len() > 1 {
+		g.fail(decl, "multiple return values are not supported")
 	}
+	if sig.Results().Len() == 1 && sig.Results().At(0).Name() != "" {
+		g.fail(decl, "named return values are not supported")
+	}
+	fmt.Fprintf(w, "\n%s%s %s(%s) {\n", fn.spec, fn.returnType(), fn.name(), fn.params())
+	g.state.indent++
 	for _, stmt := range decl.Body.List {
 		ast.Walk(g, stmt)
 	}
@@ -287,13 +208,6 @@ func (g *Generator) emitFuncCall(call *ast.CallExpr) {
 		}
 	}
 
-	// Append out-parameter arguments for multi-return calls.
-	for i, addr := range g.state.outArgs {
-		if i > 0 || len(call.Args) > 0 {
-			fmt.Fprintf(w, ", ")
-		}
-		fmt.Fprintf(w, "%s", addr)
-	}
 	fmt.Fprintf(w, ")")
 }
 

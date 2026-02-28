@@ -66,9 +66,14 @@ func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 		}
 	}
 
+	sig := g.types.ObjectOf(decl.Name).Type().(*types.Signature)
+	if sig.Results().Len() > 1 {
+		g.fail(decl, "multiple return values are not supported")
+	}
+	if sig.Results().Len() == 1 && sig.Results().At(0).Name() != "" {
+		g.fail(decl, "named return values are not supported")
+	}
 	fmt.Fprintf(w, "\n%s%s %s(%s) {\n", fn.spec, fn.returnType(), fn.name(), fn.params())
-	g.state.outParams = fn.outParams()
-	defer func() { g.state.outParams = nil }()
 	g.state.indent++
 
 	if named {
@@ -76,12 +81,6 @@ func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 		fmt.Fprintf(w, "%s%s* %s = (%s*)self;\n", g.indent(), cStructType, recvName, cStructType)
 	} else {
 		fmt.Fprintf(w, "%s(void)self;\n", g.indent())
-	}
-
-	if name, cType := fn.firstNamedReturn(); name != "" {
-		// The first return value is named, so we must declare it as a local variable.
-		typ := g.types.TypeOf(fn.typ.Results.List[0].Type)
-		fmt.Fprintf(w, "%s%s %s = %s;\n", g.indent(), cType, name, g.zeroValue(decl, typ))
 	}
 
 	for _, stmt := range decl.Body.List {
@@ -167,10 +166,6 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 			fmt.Fprintf(w, ", ")
 			g.emitExpr(arg)
 		}
-		for _, addr := range g.state.outArgs {
-			fmt.Fprintf(w, ", ")
-			fmt.Fprintf(w, "%s", addr)
-		}
 		fmt.Fprintf(w, ")")
 		return
 	}
@@ -193,11 +188,6 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	for _, arg := range args {
 		fmt.Fprintf(w, ", ")
 		g.emitExpr(arg)
-	}
-	// Append out-parameter arguments for multi-return calls.
-	for _, addr := range g.state.outArgs {
-		fmt.Fprintf(w, ", ")
-		fmt.Fprintf(w, "%s", addr)
 	}
 	fmt.Fprintf(w, ")")
 }
