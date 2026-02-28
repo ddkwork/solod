@@ -55,7 +55,7 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 	// Basic types (e.g. int, bool, string).
 	basic := typ.Underlying().(*types.Basic)
 	switch basic.Kind() {
-	case types.Bool:
+	case types.Bool, types.UntypedBool:
 		return "bool"
 	case types.Float32:
 		return "float"
@@ -67,7 +67,7 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 		return "int8_t"
 	case types.Int16:
 		return "int16_t"
-	case types.Int32:
+	case types.Int32, types.UntypedRune:
 		return "int32_t"
 	case types.Int64:
 		return "int64_t"
@@ -83,7 +83,7 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 		return "uint64_t"
 	case types.Uintptr:
 		return "uintptr_t"
-	case types.String:
+	case types.String, types.UntypedString:
 		return "so_String"
 	default:
 		g.fail(node, "unsupported type: %s", typ)

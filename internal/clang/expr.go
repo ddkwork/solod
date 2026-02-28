@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // emitExpr dispatches expression generation to per-type methods.
@@ -42,7 +43,7 @@ func (g *Generator) emitExpr(expr ast.Expr) {
 // emitBasicLit emits a literal.
 func (g *Generator) emitBasicLit(n *ast.BasicLit) {
 	if n.Kind == token.STRING {
-		fmt.Fprintf(g.state.writer, "so_strlit(%s)", n.Value)
+		g.emitStringLit(n)
 		return
 	}
 	if n.Kind == token.CHAR {
@@ -53,7 +54,16 @@ func (g *Generator) emitBasicLit(n *ast.BasicLit) {
 		}
 		return
 	}
-	fmt.Fprintf(g.state.writer, "%s", n.Value)
+	g.emitNumericLit(n)
+}
+
+// emitNumericLit emits a numeric literal, converting Go-specific formats to C.
+func (g *Generator) emitNumericLit(n *ast.BasicLit) {
+	val := strings.ReplaceAll(n.Value, "_", "")
+	if n.Kind == token.INT && (strings.HasPrefix(val, "0o") || strings.HasPrefix(val, "0O")) {
+		val = "0" + val[2:]
+	}
+	fmt.Fprintf(g.state.writer, "%s", val)
 }
 
 // emitBinaryExpr emits a binary expression.
@@ -259,22 +269,4 @@ func isCompare(op token.Token) bool {
 		return true
 	}
 	return false
-}
-
-func stringCompareFunc(op token.Token) string {
-	switch op {
-	case token.EQL:
-		return "so_string_eq"
-	case token.NEQ:
-		return "so_string_ne"
-	case token.LSS:
-		return "so_string_lt"
-	case token.LEQ:
-		return "so_string_lte"
-	case token.GTR:
-		return "so_string_gt"
-	case token.GEQ:
-		return "so_string_gte"
-	}
-	panic("unreachable")
 }
