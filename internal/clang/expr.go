@@ -46,8 +46,11 @@ func (g *Generator) emitBasicLit(n *ast.BasicLit) {
 		return
 	}
 	if n.Kind == token.CHAR {
-		// All char literals are emitted as Unicode (e.g. 'a' → U'a', '本' → U'本').
-		fmt.Fprintf(g.state.writer, "U%s", n.Value)
+		if basic, ok := g.types.TypeOf(n).(*types.Basic); ok && basic.Kind() == types.Byte {
+			fmt.Fprintf(g.state.writer, "%s", n.Value)
+		} else {
+			fmt.Fprintf(g.state.writer, "U%s", n.Value)
+		}
 		return
 	}
 	fmt.Fprintf(g.state.writer, "%s", n.Value)

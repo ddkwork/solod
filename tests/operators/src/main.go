@@ -68,6 +68,15 @@ func main() {
 	}
 
 	{
+		// Byte comparison.
+		var b1, b2, b3 byte = 'a', 'b', 'c'
+		e1 := ((b1 < b2) && (b2 > b3)) || (b1 == b3)
+		_ = e1
+		e2 := ((b1 <= b2) && (b2 >= b3)) || (b1 != b3)
+		_ = e2
+	}
+
+	{
 		// Rune comparison.
 		r1, r2, r3 := 'a', 'b', '本'
 		e1 := ((r1 < r2) && (r2 > r3)) || (r1 == r3)

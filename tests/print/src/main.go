@@ -5,14 +5,15 @@ type person struct {
 }
 
 func main() {
-	var a int = 42
-	var b float64 = 3.14
-	var c bool = true
-	var d byte = 'x'
-	var e string = "hello"
+	var vInt int = 42
+	var vFloat float64 = 3.14
+	var vBool bool = true
+	var vByte byte = 'x'
+	var vRune rune = '本'
+	var vString string = "hello"
 	alice := person{name: "alice"}
-	var f = &alice
-	println(a, b, c, d, e, f)
+	var vPtr = &alice
+	println(vInt, vFloat, vBool, vByte, vRune, vString, vPtr)
 
 	// Complex types are not supported.
 	// arr := [3]int{1, 2, 3}

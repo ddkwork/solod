@@ -5,12 +5,13 @@ typedef struct person {
 } person;
 
 int main(void) {
-    so_int a = 42;
-    double b = 3.14;
-    bool c = true;
-    uint8_t d = U'x';
-    so_String e = so_strlit("hello");
+    so_int vInt = 42;
+    double vFloat = 3.14;
+    bool vBool = true;
+    uint8_t vByte = 'x';
+    int32_t vRune = U'本';
+    so_String vString = so_strlit("hello");
     person alice = {.name = so_strlit("alice")};
-    person* f = &alice;
-    so_println("%lld %f %d %u %s %p", a, b, c, d, e.ptr, f);
+    person* vPtr = &alice;
+    so_println("%lld %f %d %u %d %s %p", vInt, vFloat, vBool, vByte, vRune, vString.ptr, vPtr);
 }

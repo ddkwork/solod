@@ -50,6 +50,13 @@ int main(void) {
         (void)e2;
     }
     {
+        uint8_t b1 = 'a', b2 = 'b', b3 = 'c';
+        bool e1 = ((b1 < b2) && (b2 > b3)) || (b1 == b3);
+        (void)e1;
+        bool e2 = ((b1 <= b2) && (b2 >= b3)) || (b1 != b3);
+        (void)e2;
+    }
+    {
         int32_t r1 = U'a', r2 = U'b', r3 = U'本';
         bool e1 = ((r1 < r2) && (r2 > r3)) || (r1 == r3);
         (void)e1;
