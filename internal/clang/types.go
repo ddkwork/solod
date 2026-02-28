@@ -115,6 +115,11 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 		return "{0}"
 	}
 
+	// Error type.
+	if isErrorType(typ) {
+		return "NULL"
+	}
+
 	// Interfaces (e.g. error).
 	if iface, ok := typ.Underlying().(*types.Interface); ok {
 		if iface.Empty() {
