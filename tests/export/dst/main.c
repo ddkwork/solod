@@ -1,4 +1,5 @@
 #include "main.h"
+static bool someFunc(so_int x, so_int y);
 static const so_int someConst = 7;
 const so_int main_SomeConst = 7;
 static so_int someVar = 42;

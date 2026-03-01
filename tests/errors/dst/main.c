@@ -1,5 +1,6 @@
 #include "main.h"
 #include "errors/errors.h"
+static so_Error makeTea(so_int arg);
 so_Error main_ErrOutOfTea = errors_New(so_strlit("no more tea available"));
 
 static so_Error makeTea(so_int arg) {

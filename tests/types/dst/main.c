@@ -1,4 +1,5 @@
 #include "main.h"
+static main_Person newPerson(so_String name);
 
 static main_Person newPerson(so_String name) {
     main_Person p = {.name = name};

@@ -1,12 +1,12 @@
 #include "so.h"
 
-typedef struct {
+typedef struct main_Shape {
     void* self;
     so_int (*Area)(void* self);
     so_int (*Perim)(void* self, so_int n);
 } main_Shape;
 
-typedef struct {
+typedef struct main_Line {
     void* self;
     so_int (*Length)(void* self);
 } main_Line;

@@ -1,4 +1,5 @@
 #include "main.h"
+static so_int sum(so_Slice nums);
 
 static so_int sum(so_Slice nums) {
     so_int total = 0;

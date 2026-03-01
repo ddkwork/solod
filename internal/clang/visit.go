@@ -142,9 +142,7 @@ func (g *Generator) emitGenDecl(decl *ast.GenDecl) {
 	}
 	switch decl.Tok {
 	case token.IMPORT:
-		for _, spec := range decl.Specs {
-			g.emitImportSpec(spec.(*ast.ImportSpec))
-		}
+		// Imports are handled separately at [Generator.emitImpl].
 		return
 	case token.CONST:
 		for _, spec := range decl.Specs {

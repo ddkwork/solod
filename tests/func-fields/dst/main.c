@@ -1,4 +1,5 @@
 #include "main.h"
+static so_int freshness(main_Movie m);
 
 static so_int freshness(main_Movie m) {
     return m.year - 1970;

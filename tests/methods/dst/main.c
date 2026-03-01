@@ -1,4 +1,7 @@
 #include "main.h"
+typedef struct circle circle;
+static so_int main_Rect_perim(void* self, so_int n);
+static so_int circle_area(void* self);
 
 so_int main_Rect_Area(void* self) {
     main_Rect* r = (main_Rect*)self;

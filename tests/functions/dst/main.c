@@ -1,4 +1,6 @@
 #include "main.h"
+typedef so_int (*sum3Fn)(so_int, so_int, so_int);
+static so_int sum3(so_int a, so_int b, so_int c);
 
 typedef so_int (*sum3Fn)(so_int, so_int, so_int);
 

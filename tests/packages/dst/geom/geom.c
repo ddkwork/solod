@@ -1,4 +1,5 @@
 #include "geom.h"
+static double rectArea(double width, double height);
 const double geom_Pi = 3.14159;
 
 static double rectArea(double width, double height) {

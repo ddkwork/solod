@@ -1,4 +1,5 @@
 #include "main.h"
+typedef struct person person;
 
 typedef struct person {
     so_String name;

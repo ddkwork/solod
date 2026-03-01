@@ -1,4 +1,9 @@
 #include "main.h"
+static so_int calc(main_Shape s);
+static bool shapeIsRect(main_Shape s);
+static so_int shapeAsRect(main_Shape s);
+static bool lineIsRect(main_Line l);
+static main_Rect* lineAsRect(main_Line l);
 
 so_int main_Rect_Area(void* self) {
     main_Rect* r = (main_Rect*)self;

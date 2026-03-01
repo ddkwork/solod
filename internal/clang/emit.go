@@ -3,6 +3,7 @@ package clang
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"io"
 	"os"
@@ -27,6 +28,7 @@ func Emit(opts EmitOptions) error {
 	}
 	g := newGenerator(opts.Pkg)
 	g.collectExterns()
+	g.collectSymbols()
 	if err := g.emitHeader(opts.OutDir); err != nil {
 		return err
 	}
@@ -50,6 +52,7 @@ type Generator struct {
 	state    State
 	externs  map[string]bool // symbols provided by C headers
 	includes []string        // #include directives from comments
+	symbols  []symbol        // pre-collected top-level declarations
 	panicked bool            // true after first panic caught in Visit
 }
 
@@ -91,64 +94,27 @@ func (g *Generator) emitImpl(dir string) error {
 		fmt.Fprintf(cFile, "%s\n", inc)
 	}
 	g.state.writer = cFile
+	g.emitImports()
+	g.emitForwardDecls(cFile)
 	for _, file := range g.pkg.Syntax {
 		ast.Walk(g, file)
 	}
 	return nil
 }
 
-// collectExterns scans all files for extern symbols and #include directives.
-// Body-less functions and declarations annotated with //so:extern are treated
-// as external C symbols that should not be emitted.
-func (g *Generator) collectExterns() {
+// emitImports emits #include directives for imports.
+func (g *Generator) emitImports() {
 	for _, file := range g.pkg.Syntax {
-		// Collect // #include comments from the file.
-		for _, cg := range file.Comments {
-			for _, c := range cg.List {
-				text := strings.TrimPrefix(c.Text, "// ")
-				if strings.HasPrefix(text, "#include") {
-					g.includes = append(g.includes, text)
-				}
-			}
-		}
-
-		// Collect extern symbols from declarations.
 		for _, decl := range file.Decls {
-			switch d := decl.(type) {
-			case *ast.GenDecl:
-				if !hasExternDirective(d.Doc) {
-					continue
-				}
-				for _, spec := range d.Specs {
-					switch s := spec.(type) {
-					case *ast.TypeSpec:
-						g.externs[s.Name.Name] = true
-					case *ast.ValueSpec:
-						for _, name := range s.Names {
-							g.externs[name.Name] = true
-						}
-					}
-				}
-			case *ast.FuncDecl:
-				if d.Body == nil {
-					g.externs[d.Name.Name] = true
-				}
+			gd, ok := decl.(*ast.GenDecl)
+			if !ok || gd.Tok != token.IMPORT {
+				continue
+			}
+			for _, spec := range gd.Specs {
+				g.emitImportSpec(spec.(*ast.ImportSpec))
 			}
 		}
 	}
-}
-
-// hasExternDirective checks if a comment group contains the //so:extern directive.
-func hasExternDirective(doc *ast.CommentGroup) bool {
-	if doc == nil {
-		return false
-	}
-	for _, c := range doc.List {
-		if strings.TrimSpace(c.Text) == "//so:extern" {
-			return true
-		}
-	}
-	return false
 }
 
 // indent returns the current indentation string based on the indent level.

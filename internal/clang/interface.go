@@ -18,7 +18,8 @@ func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 			g.fail(spec, "multiple return values are not supported")
 		}
 	}
-	fmt.Fprintf(w, "\ntypedef struct {\n")
+	cName := g.symbolName(spec.Name.Name)
+	fmt.Fprintf(w, "\ntypedef struct %s {\n", cName)
 	fmt.Fprintf(w, "    void* self;\n")
 	for m := range iface.Methods() {
 		sig := m.Type().(*types.Signature)
@@ -33,7 +34,7 @@ func (g *Generator) emitInterfaceTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 		}
 		fmt.Fprintf(w, "    %s (*%s)(%s);\n", retType, m.Name(), params.String())
 	}
-	fmt.Fprintf(w, "} %s;\n", g.symbolName(spec.Name.Name))
+	fmt.Fprintf(w, "} %s;\n", cName)
 }
 
 // emitInterfaceLit emits a compound literal that wraps a concrete value as an interface.
