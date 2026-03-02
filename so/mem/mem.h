@@ -16,13 +16,13 @@
 
 // AllocSlice allocates a slice of type T with given length and capacity using allocator a.
 // Returns a slice of the allocated memory or an error if allocation fails.
-#define mem_AllocSlice(T, a, len, cap) ({                                       \
-    if ((len) > (cap)) so_panic("AllocSlice: length exceeds capacity");         \
-    so_Result _mem_res = (a).Alloc((a).self, sizeof(T) * (cap),                 \
-                                   alignof(so_typeof(T)));                      \
-    so_Slice _slice = {.ptr = _mem_res.val.as_ptr, .len = (len), .cap = (cap)}; \
-    so_Result _slice_res = {.val.as_slice = _slice, .err = _mem_res.err};       \
-    _slice_res;                                                                 \
+#define mem_AllocSlice(T, a, slen, scap) ({                                       \
+    if ((slen) > (scap)) so_panic("AllocSlice: length exceeds capacity");         \
+    so_Result _mem_res = (a).Alloc((a).self, sizeof(T) * (scap),                  \
+                                   alignof(so_typeof(T)));                        \
+    so_Slice _slice = {.ptr = _mem_res.val.as_ptr, .len = (slen), .cap = (scap)}; \
+    so_Result _slice_res = {.val.as_slice = _slice, .err = _mem_res.err};         \
+    _slice_res;                                                                   \
 })
 
 // DeallocSlice frees a slice previously allocated with AllocSlice.
