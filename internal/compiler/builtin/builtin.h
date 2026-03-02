@@ -8,6 +8,7 @@
 #define SO_CONCAT(a, b) a##b
 #define SO_NAME(a, b) SO_CONCAT(a, b)
 
+#define so_typeof __typeof__
 #define so_auto __auto_type
 #define so_byte uint8_t
 #define so_rune int32_t
