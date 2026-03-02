@@ -96,6 +96,22 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 // emitCallExpr emits a function call or type conversion.
 func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 	w := g.state.writer
+
+	// Generic function call with explicit type argument (e.g. fn[T](a, b)).
+	// Emit as: fn(T, a, b) - type argument becomes the first C argument.
+	if indexExpr, ok := n.Fun.(*ast.IndexExpr); ok {
+		if tv, ok := g.types.Types[indexExpr.Index]; ok && tv.IsType() {
+			g.emitExpr(indexExpr.X)
+			fmt.Fprintf(w, "(%s", g.mapType(n, tv.Type))
+			for _, arg := range n.Args {
+				fmt.Fprintf(w, ", ")
+				g.emitExpr(arg)
+			}
+			fmt.Fprintf(w, ")")
+			return
+		}
+	}
+
 	if tv, ok := g.types.Types[n.Fun]; ok && tv.IsType() {
 		// Convert value to an interface type (e.g. Shape(r)).
 		if isInterfaceType(tv.Type) {

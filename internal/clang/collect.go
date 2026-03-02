@@ -107,7 +107,7 @@ func (g *Generator) collectExterns() {
 					}
 				}
 			case *ast.FuncDecl:
-				if d.Body == nil {
+				if d.Body == nil || hasExternDirective(d.Doc) {
 					g.externs[d.Name.Name] = true
 				}
 			}
