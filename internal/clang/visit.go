@@ -149,7 +149,12 @@ func (g *Generator) emitGenDecl(decl *ast.GenDecl) {
 		}
 	case token.VAR:
 		for _, spec := range decl.Specs {
-			g.emitVarSpec(spec.(*ast.ValueSpec))
+			vs := spec.(*ast.ValueSpec)
+			if len(vs.Names) > 0 && g.embeds.vars[vs.Names[0].Name] {
+				// Do not emit variables that are used as markers for embedded files.
+				continue
+			}
+			g.emitVarSpec(vs)
 		}
 	case token.TYPE:
 		// Exported types are emitted in the header.

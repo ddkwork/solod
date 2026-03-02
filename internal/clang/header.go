@@ -26,6 +26,10 @@ func (g *Generator) emitImports(w io.Writer) {
 // emitImportSpec emits a #include directive for an import.
 func (g *Generator) emitImportSpec(w io.Writer, spec *ast.ImportSpec) {
 	path := strings.Trim(spec.Path.Value, `"`)
+	if path == "embed" {
+		// It's only a marker import for embedding files, not an actual dependency.
+		return
+	}
 	// Strip the imported package's own module prefix.
 	if imp, ok := g.pkg.Imports[path]; ok && imp.Module != nil {
 		path = strings.TrimPrefix(path, imp.Module.Path+"/")

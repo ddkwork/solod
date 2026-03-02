@@ -22,13 +22,17 @@ type EmitOptions struct {
 // and writes it to the specified output directory. Creates a single header
 // file with typedefs (.h) and a single implementation file (.c) for each package.
 func Emit(opts EmitOptions) error {
-	if err := os.MkdirAll(opts.OutDir, 0o755); err != nil {
+	var err error
+	if err = os.MkdirAll(opts.OutDir, 0o755); err != nil {
 		return fmt.Errorf("create output directory %s: %w", opts.OutDir, err)
 	}
 	g := newGenerator(opts.Pkg)
+	if g.embeds, err = collectEmbeds(opts.Pkg); err != nil {
+		return err
+	}
 	g.collectExterns()
 	g.collectSymbols()
-	if err := g.emitHeader(opts.OutDir); err != nil {
+	if err = g.emitHeader(opts.OutDir); err != nil {
 		return err
 	}
 	return g.emitImpl(opts.OutDir)
@@ -56,6 +60,7 @@ type Generator struct {
 	externs  map[string]bool // symbols provided by C headers
 	includes []string        // #include directives from comments
 	symbols  []symbol        // pre-collected top-level declarations
+	embeds   Embeds          // embedded C files from //go:embed
 	panicked bool            // true after first panic caught in Visit
 }
 
@@ -80,6 +85,7 @@ func (g *Generator) emitHeader(dir string) error {
 	fmt.Fprintf(hFile, "#pragma once\n")
 	fmt.Fprintf(hFile, "#include \"solod.h\"\n")
 	g.emitImports(hFile)
+	g.emitEmbeds(hFile, g.embeds.header)
 	g.emitHeaderDecls(hFile)
 	return nil
 }
@@ -98,12 +104,23 @@ func (g *Generator) emitImpl(dir string) error {
 	for _, inc := range g.includes {
 		fmt.Fprintf(cFile, "%s\n", inc)
 	}
+	g.emitEmbeds(cFile, g.embeds.impl)
 	g.state.writer = cFile
 	g.emitForwardDecls(cFile)
 	for _, file := range g.pkg.Syntax {
 		ast.Walk(g, file)
 	}
 	return nil
+}
+
+// emitEmbeds writes the content of embedded files, separated by blank lines.
+func (g *Generator) emitEmbeds(w io.Writer, files []embedFile) {
+	for _, ef := range files {
+		fmt.Fprintf(w, "\n%s\n", strings.TrimRight(ef.content, "\n"))
+	}
+	if len(files) > 0 {
+		fmt.Fprintf(w, "\n")
+	}
 }
 
 // indent returns the current indentation string based on the indent level.
