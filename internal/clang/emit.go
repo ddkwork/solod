@@ -60,7 +60,7 @@ type Generator struct {
 	types    *types.Info
 	state    State
 	externs  map[string]bool // symbols provided by C headers
-	includes []string        // #include directives from comments
+	includes []string        // included headers from //so:include
 	symbols  []symbol        // pre-collected top-level declarations
 	embeds   Embeds          // embedded C files from //so:embed
 	comments ast.CommentMap  // all comments across all files
@@ -107,7 +107,7 @@ func (g *Generator) emitImpl(dir string) error {
 	fmt.Fprintf(cFile, "#include \"%s.h\"\n", g.pkg.Name)
 	// Emit additional #include directives collected from comments.
 	for _, inc := range g.includes {
-		fmt.Fprintf(cFile, "%s\n", inc)
+		fmt.Fprintf(cFile, "#include %s\n", inc)
 	}
 
 	g.emitEmbeds(cFile, g.embeds.impl)

@@ -1,6 +1,6 @@
 package main
 
-// #include "person.ext.h"
+//so:include "person.ext.h"
 
 //so:extern
 type Account struct {

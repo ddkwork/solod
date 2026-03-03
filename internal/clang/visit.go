@@ -412,7 +412,7 @@ func (g *Generator) emitComments(w io.Writer, nodes ...ast.Node) bool {
 		for _, cg := range g.comments[node] {
 			for _, c := range cg.List {
 				text := strings.TrimSpace(c.Text)
-				if strings.HasPrefix(text, "//so:") || strings.HasPrefix(text, "// #include") {
+				if strings.HasPrefix(text, "//so:") {
 					continue
 				}
 				lines = append(lines, text)

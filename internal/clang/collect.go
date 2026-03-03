@@ -76,17 +76,16 @@ func (g *Generator) collectSymbols() {
 	}
 }
 
-// collectExterns scans all files for extern symbols and #include directives.
+// collectExterns scans all files for extern symbols and include directives.
 // Body-less functions and declarations annotated with //so:extern are treated
 // as external C symbols that should not be emitted.
 func (g *Generator) collectExterns() {
 	for _, file := range g.pkg.Syntax {
-		// Collect // #include comments from the file.
+		// Collect include directives from the file.
 		for _, cg := range file.Comments {
 			for _, c := range cg.List {
-				text := strings.TrimPrefix(c.Text, "// ")
-				if strings.HasPrefix(text, "#include") {
-					g.includes = append(g.includes, text)
+				if include, ok := strings.CutPrefix(c.Text, "//so:include"); ok {
+					g.includes = append(g.includes, strings.TrimSpace(include))
 				}
 			}
 		}
