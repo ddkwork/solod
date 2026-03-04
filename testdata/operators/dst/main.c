@@ -81,7 +81,7 @@ int main(void) {
     }
     {
         // String comparison.
-        so_String s1 = so_strlit("hello"), s2 = so_strlit("world"), s3 = so_strlit("hello");
+        so_String s1 = so_str("hello"), s2 = so_str("world"), s3 = so_str("hello");
         bool e1 = ((so_string_lt(s1, s2)) || (so_string_gt(s1, s3))) && ((so_string_eq(s1, s3)) || (so_string_ne(s2, s3)));
         (void)e1;
         bool e2 = ((so_string_lte(s1, s2)) && (so_string_gte(s1, s3))) || (so_string_ne(s1, s3));

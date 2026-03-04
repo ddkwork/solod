@@ -37,7 +37,7 @@ int main(void) {
     }
     {
         // Slice literals.
-        so_Slice strSlice = (so_Slice){(so_String[3]){so_strlit("a"), so_strlit("b"), so_strlit("c")}, 3, 3};
+        so_Slice strSlice = (so_Slice){(so_String[3]){so_str("a"), so_str("b"), so_str("c")}, 3, 3};
         // sLen == 3
         so_int sLen = so_len(strSlice);
         (void)sLen;

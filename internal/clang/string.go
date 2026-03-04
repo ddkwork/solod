@@ -30,10 +30,10 @@ func (g *Generator) emitStringLit(n *ast.BasicLit) {
 				b.WriteRune(ch)
 			}
 		}
-		fmt.Fprintf(w, "so_strlit(\"%s\")", b.String())
+		fmt.Fprintf(w, "so_str(\"%s\")", b.String())
 		return
 	}
-	fmt.Fprintf(w, "so_strlit(%s)", n.Value)
+	fmt.Fprintf(w, "so_str(%s)", n.Value)
 }
 
 func stringCompareFunc(op token.Token) string {

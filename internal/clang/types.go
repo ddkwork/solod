@@ -144,7 +144,7 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 	case types.Bool:
 		return "false"
 	case types.String:
-		return `so_strlit("")`
+		return `so_str("")`
 	case types.Int, types.Int8, types.Int16, types.Int32, types.Int64,
 		types.Uint, types.Uint8, types.Uint16, types.Uint32, types.Uint64, types.Uintptr,
 		types.Float32, types.Float64:

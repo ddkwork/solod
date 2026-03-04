@@ -58,15 +58,15 @@ int main(void) {
     }
     {
         // String literals.
-        const so_String s1 = so_strlit("abc");
+        const so_String s1 = so_str("abc");
         (void)s1;
-        const so_String s2 = so_strlit("abc\n\t\tdef");
+        const so_String s2 = so_str("abc\n\t\tdef");
         (void)s2;
-        const so_String s3 = so_strlit("\n");
+        const so_String s3 = so_str("\n");
         (void)s3;
-        const so_String s4 = so_strlit("日本語");
+        const so_String s4 = so_str("日本語");
         (void)s4;
-        const so_String s5 = so_strlit("\xff\u00FF");
+        const so_String s5 = so_str("\xff\u00FF");
         (void)s5;
     }
 }

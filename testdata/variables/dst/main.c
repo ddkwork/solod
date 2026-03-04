@@ -22,7 +22,7 @@ int main(void) {
         (void)vByte;
         int32_t vRune = U'本';
         (void)vRune;
-        so_String vString = so_strlit("hello");
+        so_String vString = so_str("hello");
         (void)vString;
         so_Slice vSlice = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
         (void)vSlice;
@@ -48,7 +48,7 @@ int main(void) {
         (void)vByte;
         int32_t vRune = U'本';
         (void)vRune;
-        so_String vString = so_strlit("hello");
+        so_String vString = so_str("hello");
         (void)vString;
         so_Slice vSlice = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
         (void)vSlice;
@@ -74,7 +74,7 @@ int main(void) {
         (void)vByte;
         int32_t vRune = U'本';
         (void)vRune;
-        so_String vString = so_strlit("hello");
+        so_String vString = so_str("hello");
         (void)vString;
         so_Slice vSlice = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
         (void)vSlice;
@@ -100,7 +100,7 @@ int main(void) {
         (void)vByte;
         int32_t vRune = 0;
         (void)vRune;
-        so_String vString = so_strlit("");
+        so_String vString = so_str("");
         (void)vString;
         so_Slice vSlice = {0};
         (void)vSlice;
@@ -120,7 +120,7 @@ int main(void) {
         uint8_t b1 = 'a', b2 = 'b';
         (void)b1;
         (void)b2;
-        so_String s1 = so_strlit("foo"), s2 = so_strlit("bar");
+        so_String s1 = so_str("foo"), s2 = so_str("bar");
         (void)s1;
         (void)s2;
         so_Slice a1 = (so_Slice){(so_int[2]){1, 2}, 2, 2}, a2 = (so_Slice){(so_int[2]){3, 4}, 2, 2};
@@ -139,7 +139,7 @@ int main(void) {
         (void)vFloat;
         (void)vBool;
         int32_t vByte = U'x', vRune = U'本';
-        so_String vString = so_strlit("hello");
+        so_String vString = so_str("hello");
         (void)vByte;
         (void)vRune;
         (void)vString;
@@ -157,7 +157,7 @@ int main(void) {
         (void)vFloat;
         (void)vBool;
         int32_t vByte = U'x', vRune = U'本';
-        so_String vString = so_strlit("hello");
+        so_String vString = so_str("hello");
         (void)vByte;
         (void)vRune;
         (void)vString;

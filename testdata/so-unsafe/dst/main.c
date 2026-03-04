@@ -51,15 +51,15 @@ int main(void) {
     // }
     {
         // String.
-        so_Slice b = so_string_bytes(so_strlit("hello"));
+        so_Slice b = so_string_bytes(so_str("hello"));
         so_String s = unsafe_String(&so_index(uint8_t, b, 0), so_len(b));
-        if (so_string_ne(s, so_strlit("hello"))) {
+        if (so_string_ne(s, so_str("hello"))) {
             so_panic("want s == 'hello'");
         }
     }
     {
         // StringData.
-        so_String s = so_strlit("hello");
+        so_String s = so_str("hello");
         uint8_t* b = unsafe_StringData(s);
         if (*b != 'h') {
             so_panic("want *b == 'h'");

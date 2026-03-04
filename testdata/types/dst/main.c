@@ -25,7 +25,7 @@ int main(void) {
     }
     {
         // Complex types.
-        main_Name n = so_strlit("Alice");
+        main_Name n = so_str("Alice");
         (void)n;
         main_IntArray arr = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
         (void)arr;
@@ -34,17 +34,17 @@ int main(void) {
     }
     {
         // Struct types.
-        main_Person bob = (main_Person){so_strlit("Bob"), 20};
+        main_Person bob = (main_Person){so_str("Bob"), 20};
         (void)bob;
-        main_Person alice = (main_Person){.name = so_strlit("Alice"), .age = 30};
+        main_Person alice = (main_Person){.name = so_str("Alice"), .age = 30};
         (void)alice;
-        main_Person fred = (main_Person){.name = so_strlit("Fred")};
+        main_Person fred = (main_Person){.name = so_str("Fred")};
         (void)fred;
-        main_Person* ann = &(main_Person){.name = so_strlit("Ann"), .age = 40};
-        *ann = newPerson(so_strlit("Jon"));
+        main_Person* ann = &(main_Person){.name = so_str("Ann"), .age = 40};
+        *ann = newPerson(so_str("Jon"));
         (void)ann;
         main_Person sean = {0};
-        sean.name = so_strlit("Sean");
+        sean.name = so_str("Sean");
         sean.age = 50;
         main_Person* sp = &sean;
         sp->age = 51;
@@ -53,7 +53,7 @@ int main(void) {
             so_String name;
             bool isGood;
         }){
-            .name = so_strlit("Rex"),
+            .name = so_str("Rex"),
             .isGood = true,
         };
         (void)dog;

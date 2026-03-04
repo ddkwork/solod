@@ -27,7 +27,7 @@ typedef struct {
 } so_String;
 
 // strlit creates a String from a string literal.
-#define so_strlit(s) ((so_String){s, sizeof(s) - 1})
+#define so_str(s) ((so_String){s, sizeof(s) - 1})
 
 // string_eq returns true if two strings are equal.
 #define so_string_eq(s1, s2) so_string_eq_impl(s1, s2)

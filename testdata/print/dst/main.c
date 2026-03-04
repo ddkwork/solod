@@ -15,8 +15,8 @@ int main(void) {
     bool vBool = true;
     uint8_t vByte = 'x';
     int32_t vRune = U'本';
-    so_String vString = so_strlit("hello");
-    person alice = (person){.name = so_strlit("alice")};
+    so_String vString = so_str("hello");
+    person alice = (person){.name = so_str("alice")};
     person* vPtr = &alice;
     so_println("%lld %f %d %u %d %s %p", vInt, vFloat, vBool, vByte, vRune, vString.ptr, vPtr);
 }

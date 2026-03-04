@@ -4,14 +4,14 @@
 
 // File-level constants.
 static const so_int fInt = 42;
-static const so_String fString = so_strlit("file");
+static const so_String fString = so_str("file");
 const main_HttpStatus main_StatusOK = 200;
 const main_HttpStatus main_StatusNotFound = 404;
 const main_HttpStatus main_StatusError = 500;
 static const main_HttpStatus statusSecret = 999;
-const main_ServerState main_StateIdle = so_strlit("idle");
-const main_ServerState main_StateConnected = so_strlit("connected");
-const main_ServerState main_StateError = so_strlit("error");
+const main_ServerState main_StateIdle = so_str("idle");
+const main_ServerState main_StateConnected = so_str("connected");
+const main_ServerState main_StateError = so_str("error");
 
 // Iota is not supported.
 // const (
@@ -26,7 +26,7 @@ int main(void) {
         (void)lInt;
         const double lFloat = 3e20 / lInt;
         (void)lFloat;
-        const so_String lString = so_strlit("local");
+        const so_String lString = so_str("local");
         (void)lString;
     }
     {

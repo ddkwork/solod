@@ -26,7 +26,7 @@ static so_Result returnRune(void) {
 }
 
 static so_Result returnString(void) {
-    return (so_Result){.val.as_string = so_strlit("hello"), .err = NULL};
+    return (so_Result){.val.as_string = so_str("hello"), .err = NULL};
 }
 
 static so_Result returnSlice(void) {
