@@ -20,5 +20,5 @@ func main() {
 	if *v != 42 {
 		panic("unexpected value")
 	}
-	freeObj[int](v)
+	freeObj(v)
 }

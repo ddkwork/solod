@@ -97,17 +97,20 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 	w := g.state.writer
 
-	// Generic function call with explicit type argument (e.g. fn[T](a, b)).
-	// Emit as: fn(T, a, b) - type argument becomes the first C argument.
+	// Generic function call with explicit type argument (e.g. fn[T](a) or pkg.Fn[T](a)).
 	if indexExpr, ok := n.Fun.(*ast.IndexExpr); ok {
-		if tv, ok := g.types.Types[indexExpr.Index]; ok && tv.IsType() {
-			g.emitExpr(indexExpr.X)
-			fmt.Fprintf(w, "(%s", g.mapType(n, tv.Type))
-			for _, arg := range n.Args {
-				fmt.Fprintf(w, ", ")
-				g.emitExpr(arg)
+		if ident := exprIdent(indexExpr.X); ident != nil {
+			if inst, ok := g.types.Instances[ident]; ok && inst.TypeArgs.Len() > 0 {
+				g.emitGenericCall(n, indexExpr.X, inst)
+				return
 			}
-			fmt.Fprintf(w, ")")
+		}
+	}
+
+	// Generic function call with inferred type argument (e.g. fn(a) where fn is generic).
+	if ident := exprIdent(n.Fun); ident != nil {
+		if inst, ok := g.types.Instances[ident]; ok && inst.TypeArgs.Len() > 0 {
+			g.emitGenericCall(n, n.Fun, inst)
 			return
 		}
 	}
@@ -149,6 +152,22 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 
 	// Regular function call.
 	g.emitFuncCall(n)
+}
+
+// emitGenericCall emits a generic function call as fn(T, a, b),
+// where type arguments are prepended to the regular arguments.
+func (g *Generator) emitGenericCall(n *ast.CallExpr, fun ast.Expr, inst types.Instance) {
+	w := g.state.writer
+	g.emitExpr(fun)
+	fmt.Fprintf(w, "(%s", g.mapType(n, inst.TypeArgs.At(0)))
+	for i := 1; i < inst.TypeArgs.Len(); i++ {
+		fmt.Fprintf(w, ", %s", g.mapType(n, inst.TypeArgs.At(i)))
+	}
+	for _, arg := range n.Args {
+		fmt.Fprintf(w, ", ")
+		g.emitExpr(arg)
+	}
+	fmt.Fprintf(w, ")")
 }
 
 // emitSliceCast emits a string-to-slice conversion ([]byte(s) or []rune(s)).
@@ -320,4 +339,16 @@ func isCompare(op token.Token) bool {
 		return true
 	}
 	return false
+}
+
+// exprIdent returns the leaf *ast.Ident of an expression
+// (the ident itself, or the Sel of a SelectorExpr).
+func exprIdent(expr ast.Expr) *ast.Ident {
+	switch e := expr.(type) {
+	case *ast.Ident:
+		return e
+	case *ast.SelectorExpr:
+		return e.Sel
+	}
+	return nil
 }
