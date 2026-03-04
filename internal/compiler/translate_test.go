@@ -11,7 +11,7 @@ import (
 )
 
 func TestTranslate(t *testing.T) {
-	testDirs, err := filepath.Glob("../../tests/*")
+	testDirs, err := filepath.Glob("../../testdata/*")
 	be.Err(t, err, nil)
 
 	for _, testDir := range testDirs {

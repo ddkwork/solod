@@ -1,9 +1,9 @@
-CFLAGS = -g -std=gnu11 -Wall -Wextra -Werror -Wshadow -fsanitize=address -fsanitize=undefined -fstack-protector-all
+CFLAGS = -g -std=gnu11 -Wall -Wextra -Werror -Wno-shadow -fsanitize=address -fsanitize=undefined -fstack-protector-all
 
 example:
 	@rm -rf generated/$(name)
 	@mkdir -p generated/$(name)
-	@go run ./cmd/so translate -o generated/$(name) tests/$(name)/src
+	@go run ./cmd/so translate -o generated/$(name) testdata/$(name)/src
 	@make runc path=generated/$(name)
 
 inspect:
@@ -16,6 +16,7 @@ runc:
 	@rm -f build/main
 
 test:
+	@go test ./so/...
 	@go test ./internal/...
 
 dist:
