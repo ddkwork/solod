@@ -4,6 +4,7 @@
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -177,7 +178,12 @@ typedef struct so_Error_* so_Error;
 #define errors_New(s) (&(struct so_Error_){s})
 
 // panic aborts the program with the given message.
-void so_panic(const char* msg);
+#define so_panic(msg)                                     \
+    do {                                                  \
+        fprintf(stderr, "panic: %s\n  %s:%d (func %s)\n", \
+                msg, __FILE__, __LINE__, __func__);       \
+        exit(1);                                          \
+    } while (0)
 
 // --- Result type ---
 

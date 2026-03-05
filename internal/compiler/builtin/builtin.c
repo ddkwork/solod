@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include "builtin.h"
 
-// panic aborts the program with the given message.
-void so_panic(const char* msg) {
-    fprintf(stderr, "panic: %s\n", msg);
-    exit(1);
-}
-
 // utf8_decode decodes one UTF-8 rune from string s at byte offset i.
 // Stores the byte width in *w.
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
