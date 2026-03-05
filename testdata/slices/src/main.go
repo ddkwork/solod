@@ -1,13 +1,12 @@
 package main
 
-func copyBuf(buf []byte) (int64, error) {
-	n1, _ := copyImpl(buf)
-	n2, _ := copyImpl([]byte{})
-	return n1 + n2, nil
+func lenInt64(buf []byte) (int64, error) {
+	n, _ := lenInt64Impl(buf)
+	return n, nil
 }
 
-func copyImpl(buf []byte) (int64, error) {
-	return int64(10 + len(buf)), nil
+func lenInt64Impl(buf []byte) (int64, error) {
+	return int64(len(buf)), nil
 }
 
 func main() {
@@ -59,9 +58,13 @@ func main() {
 	{
 		// Pass and return slices.
 		var buf [4]byte
-		n, _ := copyBuf(buf[:])
-		if n != 24 {
-			panic("want 24")
+		n, _ := lenInt64(buf[:])
+		if n != 4 {
+			panic("want 4")
+		}
+		n, _ = lenInt64([]byte{1, 2, 3})
+		if n != 3 {
+			panic("want 3")
 		}
 	}
 

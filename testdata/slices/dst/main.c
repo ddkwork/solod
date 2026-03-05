@@ -1,21 +1,19 @@
 #include "main.h"
 
 // -- Forward declarations (functions and methods) --
-static so_Result copyBuf(so_Slice buf);
-static so_Result copyImpl(so_Slice buf);
+static so_Result lenInt64(so_Slice buf);
+static so_Result lenInt64Impl(so_Slice buf);
 
 // -- Implementation --
 
-static so_Result copyBuf(so_Slice buf) {
-    so_Result _res1 = copyImpl(buf);
-    int64_t n1 = _res1.val.as_int;
-    so_Result _res2 = copyImpl((so_Slice){(uint8_t[0]){}, 0, 0});
-    int64_t n2 = _res2.val.as_int;
-    return (so_Result){.val.as_int = n1 + n2, .err = NULL};
+static so_Result lenInt64(so_Slice buf) {
+    so_Result _res1 = lenInt64Impl(buf);
+    int64_t n = _res1.val.as_int;
+    return (so_Result){.val.as_int = n, .err = NULL};
 }
 
-static so_Result copyImpl(so_Slice buf) {
-    return (so_Result){.val.as_int = (int64_t)10 + so_len(buf), .err = NULL};
+static so_Result lenInt64Impl(so_Slice buf) {
+    return (so_Result){.val.as_int = (int64_t)so_len(buf), .err = NULL};
 }
 
 int main(void) {
@@ -58,10 +56,15 @@ int main(void) {
     {
         // Pass and return slices.
         so_Slice buf = (so_Slice){(uint8_t[4]){0}, 4, 4};
-        so_Result _res1 = copyBuf(so_slice(uint8_t, buf, 0, buf.len));
+        so_Result _res1 = lenInt64(so_slice(uint8_t, buf, 0, buf.len));
         int64_t n = _res1.val.as_int;
-        if (n != 24) {
-            so_panic("want 24");
+        if (n != 4) {
+            so_panic("want 4");
+        }
+        so_Result _res2 = lenInt64((so_Slice){(uint8_t[3]){1, 2, 3}, 3, 3});
+        n = _res2.val.as_int;
+        if (n != 3) {
+            so_panic("want 3");
         }
     }
     {
