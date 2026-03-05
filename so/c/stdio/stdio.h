@@ -15,7 +15,9 @@
 #define stdio_Fopen(path, mode) fopen(path.ptr, mode.ptr)
 #define stdio_Fclose(stream) fclose(stream)
 #define stdio_Fflush(stream) fflush(stream)
+
 #define stdio_Fseek(stream, offset, whence) fseek(stream, offset, whence)
+#define stdio_Ftell(stream) ftell(stream)
 
 #define stdio_Fgetc(stream) fgetc(stream)
 #define stdio_Fputc(ch, stream) fputc(ch, stream)

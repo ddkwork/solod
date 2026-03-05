@@ -105,6 +105,20 @@ func Fseek(stream *File, offset int, whence int) int {
 	return 0
 }
 
+// Ftell returns the current value of the file position indicator for the stream.
+//
+// If the stream is open in binary mode, the value returned is the number of bytes
+// from the beginning of the file to the current position.
+//
+// If the stream is open in text mode, the value returned is an unspecified
+// non-negative value that can be passed to Fseek with a whence of [SeekSet]
+// to return to the same position.
+//
+// Returns the current file position on success, and -1L on error.
+//
+//so:extern
+func Ftell(stream *File) int { _ = stream; return 0 }
+
 // Fgetc reads the next character from the input stream.
 //
 // On success, returns the obtained character as an unsigned char

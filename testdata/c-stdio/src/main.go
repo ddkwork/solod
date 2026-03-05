@@ -36,6 +36,11 @@ func main() {
 		stdio.Fgets(&buf[0], 64, f)
 		stdio.Fread(&buf[0], 1, 64, f)
 
+		pos := stdio.Ftell(f)
+		if pos < 0 {
+			panic("ftell error")
+		}
+
 		if stdio.Feof(f) {
 			panic("unexpected EOF")
 		}

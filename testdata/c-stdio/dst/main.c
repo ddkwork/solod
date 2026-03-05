@@ -30,6 +30,10 @@ int main(void) {
         stdio_Fseek(f, 0, 0);
         stdio_Fgets(&so_index(uint8_t, buf, 0), 64, f);
         stdio_Fread(&so_index(uint8_t, buf, 0), 1, 64, f);
+        so_int pos = stdio_Ftell(f);
+        if (pos < 0) {
+            so_panic("ftell error");
+        }
         if (stdio_Feof(f)) {
             so_panic("unexpected EOF");
         }
