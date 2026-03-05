@@ -169,12 +169,12 @@ static inline so_String so_string_max(so_String a, so_String b) {
 // Error is a pointer to an error message string, or NULL for no error.
 // Errors are immutable and compared by pointer equality.
 struct so_Error_ {
-    so_String msg;
+    const char* msg;
 };
 typedef struct so_Error_* so_Error;
 
 // errors_New creates a new error with the given message string.
-// so_Error errors_New(so_String s)
+// so_Error errors_New(const char* s)
 #define errors_New(s) (&(struct so_Error_){s})
 
 // panic aborts the program with the given message.
@@ -236,6 +236,6 @@ int so_println(const char* format, ...);
 #define unsafe_Alignof(x) alignof(so_typeof(x))
 #define unsafe_Sizeof(x) sizeof(x)
 #define unsafe_String(ptr, len) ((so_String){(const char*)(ptr), (size_t)(len)})
-#define unsafe_StringData(s) ((char*)(s).ptr)
+#define unsafe_StringData(s) ((uint8_t*)(s).ptr)
 #define unsafe_Slice(ptr, len) ((so_Slice){(void*)(ptr), (size_t)(len), (size_t)(len)})
 #define unsafe_SliceData(s) ((void*)(s).ptr)

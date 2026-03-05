@@ -7,4 +7,4 @@
 #endif
 
 #define assert_Assert(cond) assert(cond)
-#define assert_Assertf(cond, msg) assert((cond) && (msg).ptr)
+#define assert_Assertf(cond, msg) assert((cond) && msg)

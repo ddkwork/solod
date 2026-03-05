@@ -55,8 +55,8 @@ func main() {
 		stdio.Printf("hello %d\n", 42)
 		stdio.Fprintf(stdio.Stdout, "value: %d\n", 100)
 
-		buf := make([]byte, 64)
-		stdio.Snprintf(buf, 64, "count: %d", 10)
+		var buf [64]byte
+		stdio.Snprintf(&buf[0], 64, "count: %d", 10)
 	}
 	{
 		// Formatted input.

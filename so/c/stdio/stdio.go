@@ -225,7 +225,7 @@ func Fprintf(stream *File, format string, args ...any) int {
 // On failure, returns a negative value.
 //
 //so:extern
-func Snprintf(buf []byte, size int, format string, args ...any) int {
+func Snprintf(buf *byte, size int, format string, args ...any) int {
 	_, _, _ = buf, size, format
 	return 0
 }

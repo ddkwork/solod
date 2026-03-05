@@ -194,12 +194,11 @@ func (g *Generator) emitFuncCall(call *ast.CallExpr) {
 	}
 	fmt.Fprintf(w, "(")
 
-	if g.isExternCall(call) && sig != nil && sig.Variadic() {
-		// Extern C variadic call: decay all args to C-compatible types.
-		// C's variadic mechanism (...) passes raw values on the stack without
-		// type metadata, so So wrapper types (so_String, so_Slice) must be
-		// unwrapped to their underlying C representations.
-		g.emitCVariadicArgs(call)
+	if g.isExternCall(call) {
+		// Extern C call: decay all args to C-compatible types.
+		// So wrapper types (so_String, so_Slice) must be unwrapped to their
+		// underlying C representations for C function macros.
+		g.emitCArgs(call)
 	} else if sig != nil && sig.Variadic() && !call.Ellipsis.IsValid() {
 		// Variadic call with individual args: pack trailing args into a slice literal.
 		g.emitFixedArgs(call, sig)
@@ -269,8 +268,8 @@ func (g *Generator) emitVariadicArgs(call *ast.CallExpr, sig *types.Signature) {
 	fmt.Fprintf(w, "}, %d, %d}", count, count)
 }
 
-// emitCVariadicArgs emits arguments for an extern C variadic function call.
-func (g *Generator) emitCVariadicArgs(call *ast.CallExpr) {
+// emitCArgs emits arguments for an extern C function call.
+func (g *Generator) emitCArgs(call *ast.CallExpr) {
 	w := g.state.writer
 	for i, arg := range call.Args {
 		if i > 0 {

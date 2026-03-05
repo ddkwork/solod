@@ -12,7 +12,7 @@
 #define stdio_Stdout stdout
 #define stdio_Stderr stderr
 
-#define stdio_Fopen(path, mode) fopen(path.ptr, mode.ptr)
+#define stdio_Fopen(path, mode) fopen(path, mode)
 #define stdio_Fclose(stream) fclose(stream)
 #define stdio_Fflush(stream) fflush(stream)
 
@@ -23,7 +23,7 @@
 #define stdio_Fputc(ch, stream) fputc(ch, stream)
 
 #define stdio_Fgets(s, n, stream) fgets((char*)s, n, stream)
-#define stdio_Fputs(s, stream) fputs(s.ptr, stream)
+#define stdio_Fputs(s, stream) fputs(s, stream)
 
 #define stdio_Fread(ptr, size, count, stream) fread(ptr, size, count, stream)
 #define stdio_Fwrite(ptr, size, count, stream) fwrite(ptr, size, count, stream)
@@ -33,7 +33,7 @@
 
 #define stdio_Printf(format, ...) printf(format, ##__VA_ARGS__)
 #define stdio_Fprintf(stream, format, ...) fprintf(stream, format, ##__VA_ARGS__)
-#define stdio_Snprintf(buf, size, format, ...) snprintf(buf, size, format, ##__VA_ARGS__)
+#define stdio_Snprintf(buf, size, format, ...) snprintf((char*)buf, size, format, ##__VA_ARGS__)
 
 #define stdio_Scanf(format, ...) scanf(format, ##__VA_ARGS__)
 #define stdio_Fscanf(stream, format, ...) fscanf(stream, format, ##__VA_ARGS__)

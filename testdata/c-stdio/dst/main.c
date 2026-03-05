@@ -5,11 +5,11 @@
 int main(void) {
     {
         // Output stream.
-        stdio_File* f = stdio_Fopen(so_str("/tmp/test.txt"), so_str("w"));
+        stdio_File* f = stdio_Fopen("/tmp/test.txt", "w");
         if (f == NULL) {
             so_panic("failed to open file");
         }
-        stdio_Fputs(so_str("hello"), f);
+        stdio_Fputs("hello", f);
         stdio_Fputc(10, f);
         stdio_Fflush(f);
         so_Slice buf = (so_Slice){(uint8_t[64]){0}, 64, 64};
@@ -18,7 +18,7 @@ int main(void) {
     }
     {
         // Input stream.
-        stdio_File* f = stdio_Fopen(so_str("/tmp/test.txt"), so_str("r"));
+        stdio_File* f = stdio_Fopen("/tmp/test.txt", "r");
         if (f == NULL) {
             so_panic("failed to open file");
         }
@@ -46,8 +46,8 @@ int main(void) {
         // Formatted output.
         stdio_Printf("hello %d\n", 42);
         stdio_Fprintf(stdio_Stdout, "value: %d\n", 100);
-        so_Slice buf = so_make_slice(uint8_t, 64, 64);
-        stdio_Snprintf(buf.ptr, 64, "count: %d", 10);
+        so_Slice buf = (so_Slice){(uint8_t[64]){0}, 64, 64};
+        stdio_Snprintf(&so_index(uint8_t, buf, 0), 64, "count: %d", 10);
     }
     {
         // Formatted input.

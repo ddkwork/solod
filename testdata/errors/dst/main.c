@@ -4,7 +4,7 @@
 static so_Error makeTea(so_int arg);
 
 // -- Implementation --
-so_Error main_ErrOutOfTea = errors_New(so_str("no more tea available"));
+so_Error main_ErrOutOfTea = errors_New("no more tea available");
 
 static so_Error makeTea(so_int arg) {
     if (arg == 42) {
