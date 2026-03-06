@@ -80,6 +80,24 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 			return
 		}
 	}
+
+	// Array comparisons: emit so_array_eq/ne calls.
+	if n.Op == token.EQL || n.Op == token.NEQ {
+		if arr, ok := g.types.TypeOf(n.X).Underlying().(*types.Array); ok {
+			if n.Op == token.EQL {
+				fmt.Fprintf(w, "so_array_eq(")
+			} else {
+				fmt.Fprintf(w, "so_array_ne(")
+			}
+			g.emitArrayCmpOperand(n.X, arr)
+			fmt.Fprintf(w, ", ")
+			g.emitArrayCmpOperand(n.Y, arr)
+			elemType := g.mapType(n, arr.Elem())
+			fmt.Fprintf(w, ", %d * sizeof(%s))", arr.Len(), elemType)
+			return
+		}
+	}
+
 	// Go's &^ (AND NOT) has no C equivalent — emit & ~ instead.
 	if n.Op == token.AND_NOT {
 		g.emitExpr(n.X)
@@ -87,6 +105,7 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 		g.emitExpr(n.Y)
 		return
 	}
+
 	// Regular binary expression.
 	g.emitExpr(n.X)
 	fmt.Fprintf(w, " %s ", n.Op.String())
@@ -333,6 +352,10 @@ func (g *Generator) needsVoidParens(expr ast.Expr) bool {
 	if isCompare(bin.Op) {
 		// String comparisons are emitted as function calls and don't need wrapping.
 		if basic, ok := g.types.TypeOf(bin.X).Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+			return false
+		}
+		// Array comparisons are emitted as function calls and don't need wrapping.
+		if _, ok := g.types.TypeOf(bin.X).Underlying().(*types.Array); ok {
 			return false
 		}
 	}

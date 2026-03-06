@@ -67,6 +67,18 @@ static inline bool so_string_gt_impl(so_String s1, so_String s2) {
 // Returns the decoded rune, or 0xFFFD for invalid UTF-8.
 so_rune so_utf8_decode(so_String s, so_int i, int* w);
 
+// --- Arrays ---
+
+// array_eq returns true if two arrays are equal.
+#define so_array_eq(a, b, size) (memcmp((a), (b), (size)) == 0)
+
+// array_ne returns true if two arrays are not equal.
+#define so_array_ne(a, b, size) (memcmp((a), (b), (size)) != 0)
+
+// array_slice creates a slice from a C array.
+// 'size' is the total array size (known at compile time).
+#define so_array_slice(T, arr, from, to, size) ((so_Slice){(T*)(arr) + (from), (to) - (from), (size) - (from)})
+
 // --- Slice type ---
 
 // Slice is a pointer to array of elements plus a length.
@@ -83,10 +95,6 @@ typedef struct {
 // slice creates a slice from another slice
 // from index 'from' (inclusive) to index 'to' (exclusive).
 #define so_slice(T, s, from, to) ((so_Slice){(T*)(s).ptr + (from), (to) - (from), (s).cap - (from)})
-
-// array_slice creates a slice from a C array.
-// 'size' is the total array size (known at compile time).
-#define so_array_slice(T, arr, from, to, size) ((so_Slice){(T*)(arr) + (from), (to) - (from), (size) - (from)})
 
 // string_bytes wraps a string's raw bytes as a byte slice.
 #define so_string_bytes(s) ((so_Slice){(void*)(s).ptr, (s).len, (s).len})

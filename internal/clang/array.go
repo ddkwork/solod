@@ -26,6 +26,21 @@ func (g *Generator) emitArrayLit(n *ast.CompositeLit) {
 	fmt.Fprintf(w, "}")
 }
 
+// emitArrayCmpOperand emits an array comparison operand.
+// Composite literals need a C compound literal prefix (e.g. (so_int[3]){...})
+// wrapped in extra parentheses so commas inside braces don't split macro args.
+func (g *Generator) emitArrayCmpOperand(expr ast.Expr, arr *types.Array) {
+	w := g.state.writer
+	if _, isLit := expr.(*ast.CompositeLit); isLit {
+		elemType := g.mapType(expr, arr.Elem())
+		fmt.Fprintf(w, "((%s[%d])", elemType, arr.Len())
+		g.emitExpr(expr)
+		fmt.Fprintf(w, ")")
+		return
+	}
+	g.emitExpr(expr)
+}
+
 // emitSliceLit emits a slice literal as a so_Slice compound literal.
 // Example: []int{1, 2, 3, 4} → {(so_int[4]){1, 2, 3, 4}, 4, 4}
 func (g *Generator) emitSliceLit(n *ast.CompositeLit) {

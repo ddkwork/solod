@@ -46,15 +46,18 @@ int main(void) {
         if (3 != 3) {
             so_panic("want len(a) == 3");
         }
-        // var b = [3]int{1, 2, 3}
-        // if a != b {
-        // 	panic("want a == b")
-        // }
-        // var c = [3]int{3, 2, 1}
-        // if a == c {
-        // 	panic("want a != c")
-        // }
         (void)a;
+        so_int b[3] = {1, 2, 3};
+        if (so_array_ne(b, a, 3 * sizeof(so_int))) {
+            so_panic("want b == a");
+        }
+        so_int c[3] = {3, 2, 1};
+        if (so_array_eq(c, a, 3 * sizeof(so_int))) {
+            so_panic("want c != a");
+        }
+        if (so_array_ne(c, ((so_int[3]){3, 2, 1}), 3 * sizeof(so_int))) {
+            so_panic("want c == {3, 2, 1}");
+        }
     }
     {
         // Arrays decay to pointers when passed to functions.

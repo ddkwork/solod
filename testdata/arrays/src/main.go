@@ -45,14 +45,17 @@ func main() {
 			panic("want len(a) == 3")
 		}
 		_ = a
-		// var b = [3]int{1, 2, 3}
-		// if a != b {
-		// 	panic("want a == b")
-		// }
-		// var c = [3]int{3, 2, 1}
-		// if a == c {
-		// 	panic("want a != c")
-		// }
+		var b = [3]int{1, 2, 3}
+		if b != a {
+			panic("want b == a")
+		}
+		var c = [3]int{3, 2, 1}
+		if c == a {
+			panic("want c != a")
+		}
+		if c != [3]int{3, 2, 1} {
+			panic("want c == {3, 2, 1}")
+		}
 	}
 	{
 		// Arrays decay to pointers when passed to functions.
