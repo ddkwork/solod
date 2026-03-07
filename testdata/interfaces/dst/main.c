@@ -8,6 +8,7 @@ static main_Rect shapeAsRect(main_Shape s);
 static main_Shape rectAsShape(main_Rect* r);
 static bool lineIsRect(main_Line l);
 static main_Rect* lineAsRect(main_Line l);
+static bool shapeCheckAssign(main_Shape s);
 
 // -- Implementation --
 
@@ -66,6 +67,12 @@ static main_Rect* lineAsRect(main_Line l) {
     return r;
 }
 
+static bool shapeCheckAssign(main_Shape s) {
+    bool ok = false;
+    ok = (s.Area == main_Rect_Area);
+    return ok;
+}
+
 int main(void) {
     main_Rect r = (main_Rect){.width = 10, .height = 5};
     {
@@ -81,6 +88,7 @@ int main(void) {
         // also works
         calcShape((main_Shape){.self = &r, .Area = main_Rect_Area, .Perim = main_Rect_Perim});
         (void)shapeIsRect(s);
+        (void)shapeCheckAssign(s);
         main_Rect rval = shapeAsRect(s);
         (void)rval;
     }

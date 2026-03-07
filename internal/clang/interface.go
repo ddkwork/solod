@@ -3,6 +3,7 @@ package clang
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"io"
 	"strings"
@@ -78,7 +79,11 @@ func (g *Generator) emitTypeAssertion(w io.Writer, stmt *ast.AssignStmt, ta *ast
 	cConcrete := g.symbolName(concreteNamed.Obj().Name())
 
 	okIdent := stmt.Lhs[1].(*ast.Ident)
-	fmt.Fprintf(w, "%sbool %s = (", g.indent(), okIdent.Name)
+	if stmt.Tok == token.DEFINE {
+		fmt.Fprintf(w, "%sbool %s = (", g.indent(), okIdent.Name)
+	} else {
+		fmt.Fprintf(w, "%s%s = (", g.indent(), okIdent.Name)
+	}
 	g.emitExpr(ta.X)
 	fmt.Fprintf(w, ".%s == %s_%s);\n", firstMethod, cConcrete, firstMethod)
 }

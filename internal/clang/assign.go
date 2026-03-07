@@ -120,6 +120,13 @@ func (g *Generator) emitDefine(stmt *ast.AssignStmt) {
 // emitAssign emits a regular assignment (=).
 func (g *Generator) emitAssign(stmt *ast.AssignStmt) {
 	w := g.state.writer
+	// Detect: _, ok = s.(Rect)
+	if len(stmt.Lhs) == 2 && len(stmt.Rhs) == 1 {
+		if ta, ok := stmt.Rhs[0].(*ast.TypeAssertExpr); ok {
+			g.emitTypeAssertion(w, stmt, ta)
+			return
+		}
+	}
 	// Multi-return destructuring: x, y = f()
 	if len(stmt.Lhs) > 1 && len(stmt.Rhs) == 1 {
 		if call, ok := stmt.Rhs[0].(*ast.CallExpr); ok {

@@ -65,6 +65,12 @@ func lineAsRect(l Line) *Rect {
 	return r
 }
 
+func shapeCheckAssign(s Shape) bool {
+	var ok bool
+	_, ok = s.(Rect)
+	return ok
+}
+
 func main() {
 	r := Rect{width: 10, height: 5}
 	{
@@ -80,6 +86,7 @@ func main() {
 		calcShape(r)        // also works
 
 		_ = shapeIsRect(s)
+		_ = shapeCheckAssign(s)
 		rval := shapeAsRect(s)
 		_ = rval
 	}
