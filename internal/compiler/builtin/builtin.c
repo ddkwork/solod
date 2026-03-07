@@ -57,6 +57,32 @@ so_Slice so_string_runes_impl(so_String s, int32_t* buf) {
     return (so_Slice){buf, n, n};
 }
 
+// runes_string_impl encodes runes into a UTF-8 buffer and returns a string.
+so_String so_runes_string_impl(so_Slice rs, char* buf) {
+    size_t pos = 0;
+    int32_t* runes = (int32_t*)rs.ptr;
+    for (size_t i = 0; i < rs.len; i++) {
+        int32_t r = runes[i];
+        if (r < 0x80) {
+            buf[pos++] = (char)r;
+        } else if (r < 0x800) {
+            buf[pos++] = (char)(0xC0 | (r >> 6));
+            buf[pos++] = (char)(0x80 | (r & 0x3F));
+        } else if (r < 0x10000) {
+            buf[pos++] = (char)(0xE0 | (r >> 12));
+            buf[pos++] = (char)(0x80 | ((r >> 6) & 0x3F));
+            buf[pos++] = (char)(0x80 | (r & 0x3F));
+        } else {
+            buf[pos++] = (char)(0xF0 | (r >> 18));
+            buf[pos++] = (char)(0x80 | ((r >> 12) & 0x3F));
+            buf[pos++] = (char)(0x80 | ((r >> 6) & 0x3F));
+            buf[pos++] = (char)(0x80 | (r & 0x3F));
+        }
+    }
+    buf[pos] = '\0';
+    return (so_String){buf, pos};
+}
+
 // print writes the formatted string to stdout.
 // Returns the number of bytes written.
 int so_print(const char* format, ...) {

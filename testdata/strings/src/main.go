@@ -54,16 +54,23 @@ func main() {
 	// }
 
 	{
-		// String conversion.
-		s := "1世3"
-		bs := []byte(s)
+		// String conversion to byte and rune slices, and vice versa.
+		s1 := "1世3"
+		bs := []byte(s1)
 		if bs[0] != '1' {
 			panic("unexpected byte")
 		}
-		rs := []rune(s)
+		rs := []rune(s1)
 		if rs[1] != '世' {
 			panic("unexpected rune")
 		}
+		s2 := string(bs)
+		if s2 != s1 {
+			panic("want s2 == s1")
+		}
+		s3 := string(rs)
+		if s3 != s1 {
+			panic("want s3 == s1")
+		}
 	}
-
 }

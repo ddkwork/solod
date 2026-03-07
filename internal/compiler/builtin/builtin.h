@@ -108,6 +108,22 @@ typedef struct {
 })
 so_Slice so_string_runes_impl(so_String s, int32_t* buf);
 
+// bytes_string copies a byte slice into a null-terminated string.
+#define so_bytes_string(bs) ({                \
+    char* _buf = alloca((bs).len + 1);        \
+    memcpy(_buf, (bs).ptr, (bs).len);         \
+    _buf[(bs).len] = '\0';                    \
+    (so_String){_buf, (bs).len};              \
+})
+
+// runes_string encodes a rune slice into a UTF-8 string.
+// Allocates memory on the stack until the calling function returns.
+#define so_runes_string(rs) ({             \
+    char* _buf = alloca((rs).len * 4 + 1); \
+    so_runes_string_impl((rs), _buf);      \
+})
+so_String so_runes_string_impl(so_Slice rs, char* buf);
+
 // append appends elements to a slice without resizing.
 // Returns the new slice with updated length.
 // Panics if the new length exceeds the capacity.

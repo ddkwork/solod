@@ -160,6 +160,14 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 				return
 			}
 		}
+		// Slice-to-string conversion (string(bs) or string(rs)).
+		if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+			argType := g.types.TypeOf(n.Args[0])
+			if sl, ok := argType.Underlying().(*types.Slice); ok {
+				g.emitStringCast(n, sl)
+				return
+			}
+		}
 		// Regular type conversion (e.g. int(3.14)).
 		cType := g.mapType(n, tv.Type)
 		fmt.Fprintf(w, "(%s)", cType)
@@ -210,6 +218,24 @@ func (g *Generator) emitSliceCast(call *ast.CallExpr, sl *types.Slice) {
 		fmt.Fprintf(w, ", so_len(")
 		g.emitExpr(call.Args[0])
 		fmt.Fprintf(w, "))")
+	}
+}
+
+// emitStringCast emits a slice-to-string conversion (string(bs) or string(rs)).
+func (g *Generator) emitStringCast(call *ast.CallExpr, sl *types.Slice) {
+	w := g.state.writer
+	elem := sl.Elem().(*types.Basic)
+	switch elem.Kind() {
+	case types.Byte:
+		fmt.Fprintf(w, "so_bytes_string(")
+		g.emitExpr(call.Args[0])
+		fmt.Fprintf(w, ")")
+	case types.Int32:
+		fmt.Fprintf(w, "so_runes_string(")
+		g.emitExpr(call.Args[0])
+		fmt.Fprintf(w, ")")
+	default:
+		g.fail(call, "unsupported slice-to-string conversion: %s", elem)
 	}
 }
 

@@ -58,15 +58,23 @@ int main(void) {
     // 	}
     // }
     {
-        // String conversion.
-        so_String s = so_str("1世3");
-        so_Slice bs = so_string_bytes(s);
+        // String conversion to byte and rune slices, and vice versa.
+        so_String s1 = so_str("1世3");
+        so_Slice bs = so_string_bytes(s1);
         if (so_at(uint8_t, bs, 0) != '1') {
             so_panic("unexpected byte");
         }
-        so_Slice rs = so_string_runes(s, so_len(s));
+        so_Slice rs = so_string_runes(s1, so_len(s1));
         if (so_at(int32_t, rs, 1) != U'世') {
             so_panic("unexpected rune");
+        }
+        so_String s2 = so_bytes_string(bs);
+        if (so_string_ne(s2, s1)) {
+            so_panic("want s2 == s1");
+        }
+        so_String s3 = so_runes_string(rs);
+        if (so_string_ne(s3, s1)) {
+            so_panic("want s3 == s1");
         }
     }
 }
