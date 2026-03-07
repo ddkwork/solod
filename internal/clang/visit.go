@@ -287,7 +287,7 @@ func (g *Generator) emitVarSpec(spec *ast.ValueSpec) {
 				specifier = "static "
 			}
 		}
-		cName := g.symbolName(name.Name)
+		cName := g.declSymbolName(name.Name)
 		if len(spec.Values) > i {
 			// Has explicit initializer.
 			fmt.Fprintf(w, "%s%s%s = ", g.indent(), specifier, ct.Decl(cName))
@@ -320,14 +320,14 @@ func (g *Generator) emitTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 			}
 		}
 		ct := g.mapCType(spec, resolved)
-		cName := g.symbolName(spec.Name.Name)
+		cName := g.declSymbolName(spec.Name.Name)
 		fmt.Fprintf(w, "%stypedef %s;\n", g.indent(), ct.Decl(cName))
 
 	case *ast.InterfaceType:
 		iface := g.types.Defs[spec.Name].Type().Underlying().(*types.Interface)
 		if iface.Empty() {
 			cType := g.mapType(spec, iface)
-			cName := g.symbolName(spec.Name.Name)
+			cName := g.declSymbolName(spec.Name.Name)
 			fmt.Fprintf(w, "%stypedef %s %s;\n", g.indent(), cType, cName)
 		} else {
 			g.emitInterfaceTypeSpec(w, spec)

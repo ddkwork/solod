@@ -75,7 +75,7 @@ func (g *Generator) emitFuncTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 		params = append(params, g.mapType(spec, parVar.Type()))
 	}
 
-	name := g.symbolName(spec.Name.Name)
+	name := g.declSymbolName(spec.Name.Name)
 	fmt.Fprintf(w, "%stypedef %s (*%s)(%s);\n", g.indent(), retType, name, strings.Join(params, ", "))
 }
 

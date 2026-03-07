@@ -11,7 +11,7 @@ import (
 // emitStructTypeSpec emits a typedef struct for a struct type declaration.
 func (g *Generator) emitStructTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 	st := spec.Type.(*ast.StructType)
-	cName := g.symbolName(spec.Name.Name)
+	cName := g.declSymbolName(spec.Name.Name)
 	fmt.Fprintf(w, "%stypedef struct %s {\n", g.indent(), cName)
 	g.state.indent++
 	for _, field := range st.Fields.List {

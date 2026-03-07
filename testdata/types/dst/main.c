@@ -63,11 +63,11 @@ int main(void) {
     }
     {
         // Named struct type inside a function.
-        typedef struct main_Point {
+        typedef struct Point {
             so_int x;
             so_int y;
-        } main_Point;
-        main_Point p = (main_Point){1, 2};
+        } Point;
+        Point p = (Point){1, 2};
         (void)p;
     }
 }

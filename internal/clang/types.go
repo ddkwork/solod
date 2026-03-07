@@ -76,7 +76,10 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 			// This is a named type from another package.
 			return obj.Pkg().Name() + "_" + obj.Name()
 		}
-		return g.symbolName(obj.Name())
+		if obj.Parent() == g.pkg.Types.Scope() {
+			return g.symbolName(obj.Name())
+		}
+		return obj.Name()
 
 	case *types.Pointer:
 		elem := t.Elem()
@@ -199,6 +202,15 @@ func (g *Generator) zeroValue(node ast.Node, typ types.Type) string {
 		g.fail(node, "unsupported type for zero value: %s", typ)
 		panic("unreachable")
 	}
+}
+
+// declSymbolName returns the C name for a declaration that could be
+// either package-level or function-local.
+func (g *Generator) declSymbolName(name string) string {
+	if g.state.indent == 0 {
+		return g.symbolName(name)
+	}
+	return name
 }
 
 // symbolName returns the C symbol name for a Go identifier.
