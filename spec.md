@@ -711,6 +711,8 @@ f := Fopen("/tmp/test.txt", "w")
 // not Fopen(so_str("/tmp/test.txt"), so_str("w"))
 ```
 
+The `so/c` package includes helpers for converting C pointers back to So string and slice types: `c.String(ptr)` and `c.Bytes(ptr, n)`.
+
 ## Embeds
 
 Embed C files directly into the generated output using `//so:embed`:
