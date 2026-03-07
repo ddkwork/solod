@@ -219,7 +219,7 @@ func (g *Generator) emitCArg(arg ast.Expr) {
 	w := g.state.writer
 	if lit, ok := arg.(*ast.BasicLit); ok && lit.Kind == token.STRING {
 		fmt.Fprintf(w, "%s", rawStringValue(lit))
-	} else if basic, ok := g.types.TypeOf(arg).Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+	} else if g.hasStringType(arg) {
 		g.emitExpr(arg)
 		fmt.Fprintf(w, ".ptr")
 	} else if _, ok := g.types.TypeOf(arg).Underlying().(*types.Slice); ok {

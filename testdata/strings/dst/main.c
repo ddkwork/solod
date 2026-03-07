@@ -3,30 +3,42 @@
 // -- Implementation --
 
 int main(void) {
-    so_String str = so_str("Hi 世界!");
-    // Loop over bytes.
-    for (so_int i = 0; i < so_len(str); i++) {
-        uint8_t chr = so_at(uint8_t, str, i);
-        so_println("%s %" PRId64 " %s %u", "i =", i, "chr =", chr);
+    {
+        // String literals.
+        so_String s = so_str("Hello, 世界!");
+        if (so_len(s) != 7 + 3 + 3 + 1) {
+            so_panic("want len(s) == 14");
+        }
     }
-    // Loop over runes.
-    for (so_int i = 0; i < so_len(str);) {
-        int _iw = 0;
-        so_rune r = so_utf8_decode(str, i, &_iw);
-        so_println("%s %" PRId64 " %s %d", "i =", i, "r =", r);
-        i += _iw;
+    {
+        // Loop over string bytes.
+        so_String str = so_str("Hi 世界!");
+        for (so_int i = 0; i < so_len(str); i++) {
+            uint8_t chr = so_at(uint8_t, str, i);
+            so_println("%s %" PRId64 " %s %u", "i =", i, "chr =", chr);
+        }
     }
-    for (so_int i = 0; i < so_len(str);) {
-        int _iw = 0;
-        so_utf8_decode(str, i, &_iw);
-        so_println("%s %" PRId64, "i =", i);
-        i += _iw;
-    }
-    for (so_int _ = 0; _ < so_len(str);) {
-        int __w = 0;
-        so_rune r = so_utf8_decode(str, _, &__w);
-        so_println("%s %d", "r =", r);
-        _ += __w;
+    {
+        // Loop over string runes.
+        so_String str = so_str("Hi 世界!");
+        for (so_int i = 0; i < so_len(str);) {
+            int _iw = 0;
+            so_rune r = so_utf8_decode(str, i, &_iw);
+            so_println("%s %" PRId64 " %s %d", "i =", i, "r =", r);
+            i += _iw;
+        }
+        for (so_int i = 0; i < so_len(str);) {
+            int _iw = 0;
+            so_utf8_decode(str, i, &_iw);
+            so_println("%s %" PRId64, "i =", i);
+            i += _iw;
+        }
+        for (so_int _ = 0; _ < so_len(str);) {
+            int __w = 0;
+            so_rune r = so_utf8_decode(str, _, &__w);
+            so_println("%s %d", "r =", r);
+            _ += __w;
+        }
     }
     {
         // Compare strings.
@@ -36,6 +48,15 @@ int main(void) {
             so_println("%s", "ok");
         }
     }
+    // {
+    // 	// String addition is not supported.
+    // 	s1 := "Hello, "
+    // 	s2 := "世界!"
+    // 	s3 := s1 + s2
+    // 	if s3 != "Hello, 世界!" {
+    // 		panic("want s3 == Hello, 世界!")
+    // 	}
+    // }
     {
         // String conversion.
         so_String s = so_str("1世3");

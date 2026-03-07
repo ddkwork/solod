@@ -4,12 +4,20 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strings"
 )
 
 // emitStringLit emits a string literal, handling both interpreted and raw strings.
 func (g *Generator) emitStringLit(n *ast.BasicLit) {
 	fmt.Fprintf(g.state.writer, "so_str(%s)", rawStringValue(n))
+}
+
+// hasStringType reports whether the given expression has string type.
+func (g *Generator) hasStringType(expr ast.Expr) bool {
+	typ := g.types.TypeOf(expr)
+	basic, ok := typ.Underlying().(*types.Basic)
+	return ok && basic.Kind() == types.String
 }
 
 // rawStringValue returns the C string literal for a Go string literal,

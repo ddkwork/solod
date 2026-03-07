@@ -1,23 +1,37 @@
 package main
 
 func main() {
-	str := "Hi 世界!"
-
-	// Loop over bytes.
-	for i := 0; i < len(str); i++ {
-		chr := str[i]
-		println("i =", i, "chr =", chr)
+	{
+		// String literals.
+		s := "Hello, 世界!"
+		if len(s) != 7+3+3+1 {
+			panic("want len(s) == 14")
+		}
 	}
 
-	// Loop over runes.
-	for i, r := range str {
-		println("i =", i, "r =", r)
+	{
+		// Loop over string bytes.
+		str := "Hi 世界!"
+
+		for i := 0; i < len(str); i++ {
+			chr := str[i]
+			println("i =", i, "chr =", chr)
+		}
 	}
-	for i := range str {
-		println("i =", i)
-	}
-	for _, r := range str {
-		println("r =", r)
+
+	{
+		// Loop over string runes.
+		str := "Hi 世界!"
+		for i, r := range str {
+			println("i =", i, "r =", r)
+		}
+		for i := range str {
+			println("i =", i)
+		}
+		for _, r := range str {
+			println("r =", r)
+		}
+
 	}
 
 	{
@@ -28,6 +42,16 @@ func main() {
 			println("ok")
 		}
 	}
+
+	// {
+	// 	// String addition is not supported.
+	// 	s1 := "Hello, "
+	// 	s2 := "世界!"
+	// 	s3 := s1 + s2
+	// 	if s3 != "Hello, 世界!" {
+	// 		panic("want s3 == Hello, 世界!")
+	// 	}
+	// }
 
 	{
 		// String conversion.

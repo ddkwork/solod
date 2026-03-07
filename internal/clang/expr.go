@@ -71,13 +71,20 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 	w := g.state.writer
 	// String comparisons: emit so_string_eq/ne/lt/gt/lte/gte calls.
 	if isCompare(n.Op) {
-		if basic, ok := g.types.TypeOf(n.X).Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+		if g.hasStringType(n.X) {
 			fmt.Fprintf(w, "%s(", stringCompareFunc(n.Op))
 			g.emitExpr(n.X)
 			fmt.Fprintf(w, ", ")
 			g.emitExpr(n.Y)
 			fmt.Fprintf(w, ")")
 			return
+		}
+	}
+
+	// String addition is not supported.
+	if n.Op == token.ADD || n.Op == token.ADD_ASSIGN {
+		if g.hasStringType(n.X) {
+			g.fail(n, "string addition is not supported")
 		}
 	}
 
@@ -148,8 +155,7 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 		}
 		// String-to-slice conversion ([]byte(s) or []rune(s)).
 		if sl, ok := tv.Type.Underlying().(*types.Slice); ok {
-			basic, ok := g.types.TypeOf(n.Args[0]).Underlying().(*types.Basic)
-			if ok && basic.Kind() == types.String {
+			if g.hasStringType(n.Args[0]) {
 				g.emitSliceCast(n, sl)
 				return
 			}
@@ -351,7 +357,7 @@ func (g *Generator) needsVoidParens(expr ast.Expr) bool {
 	}
 	if isCompare(bin.Op) {
 		// String comparisons are emitted as function calls and don't need wrapping.
-		if basic, ok := g.types.TypeOf(bin.X).Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+		if g.hasStringType(bin.X) {
 			return false
 		}
 		// Array comparisons are emitted as function calls and don't need wrapping.
