@@ -49,6 +49,9 @@ int main(void) {
         main_Person* sp = &sean;
         sp->age = 51;
         (void)sean;
+    }
+    {
+        // Anonymous struct type.
         so_auto dog = (struct {
             so_String name;
             bool isGood;
@@ -57,5 +60,14 @@ int main(void) {
             .isGood = true,
         };
         (void)dog;
+    }
+    {
+        // Named struct type inside a function.
+        typedef struct main_Point {
+            so_int x;
+            so_int y;
+        } main_Point;
+        main_Point p = (main_Point){1, 2};
+        (void)p;
     }
 }

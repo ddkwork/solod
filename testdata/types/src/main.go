@@ -77,7 +77,9 @@ func main() {
 		sp := &sean
 		sp.age = 51
 		_ = sean
-
+	}
+	{
+		// Anonymous struct type.
 		dog := struct {
 			name   string
 			isGood bool
@@ -86,5 +88,13 @@ func main() {
 			true,
 		}
 		_ = dog
+	}
+	{
+		// Named struct type inside a function.
+		type Point struct {
+			x, y int
+		}
+		p := Point{1, 2}
+		_ = p
 	}
 }

@@ -12,7 +12,7 @@ import (
 func (g *Generator) emitStructTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 	st := spec.Type.(*ast.StructType)
 	cName := g.symbolName(spec.Name.Name)
-	fmt.Fprintf(w, "typedef struct %s {\n", cName)
+	fmt.Fprintf(w, "%stypedef struct %s {\n", g.indent(), cName)
 	g.state.indent++
 	for _, field := range st.Fields.List {
 		typ := g.types.TypeOf(field.Type)
@@ -27,7 +27,7 @@ func (g *Generator) emitStructTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 		}
 	}
 	g.state.indent--
-	fmt.Fprintf(w, "} %s;\n", cName)
+	fmt.Fprintf(w, "%s} %s;\n", g.indent(), cName)
 }
 
 // emitFuncPtrField emits a function pointer field in a struct typedef.

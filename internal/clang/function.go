@@ -76,7 +76,7 @@ func (g *Generator) emitFuncTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 	}
 
 	name := g.symbolName(spec.Name.Name)
-	fmt.Fprintf(w, "typedef %s (*%s)(%s);\n", retType, name, strings.Join(params, ", "))
+	fmt.Fprintf(w, "%stypedef %s (*%s)(%s);\n", g.indent(), retType, name, strings.Join(params, ", "))
 }
 
 // emitFuncDecl emits a function declaration.

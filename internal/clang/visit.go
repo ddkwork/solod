@@ -182,16 +182,16 @@ func (g *Generator) emitGenDecl(decl *ast.GenDecl) {
 			g.emitVarSpec(vs)
 		}
 	case token.TYPE:
-		// Exported types are emitted in the header.
-		// Unexported types are emitted here in the .c file.
+		// Inside a function body, always emit locally.
+		// At top level, only emit unexported types (exported ones go in the header).
 		for _, spec := range decl.Specs {
 			ts := spec.(*ast.TypeSpec)
-			if !ast.IsExported(ts.Name.Name) {
+			if g.state.indent > 0 || !ast.IsExported(ts.Name.Name) {
 				// The CommentMap might attach the doc comment to either decl
 				// or type spec, depending on whether it's a standalone or
 				// grouped declaration, so check both.
 				hasDocs := g.emitComments(g.state.writer, decl, ts)
-				if !hasDocs && isBlockTypeSpec(ts) {
+				if !hasDocs && g.state.indent == 0 && isBlockTypeSpec(ts) {
 					fmt.Fprintln(g.state.writer)
 				}
 				g.emitTypeSpec(g.state.writer, ts)
@@ -321,14 +321,14 @@ func (g *Generator) emitTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 		}
 		ct := g.mapCType(spec, resolved)
 		cName := g.symbolName(spec.Name.Name)
-		fmt.Fprintf(w, "typedef %s;\n", ct.Decl(cName))
+		fmt.Fprintf(w, "%stypedef %s;\n", g.indent(), ct.Decl(cName))
 
 	case *ast.InterfaceType:
 		iface := g.types.Defs[spec.Name].Type().Underlying().(*types.Interface)
 		if iface.Empty() {
 			cType := g.mapType(spec, iface)
 			cName := g.symbolName(spec.Name.Name)
-			fmt.Fprintf(w, "typedef %s %s;\n", cType, cName)
+			fmt.Fprintf(w, "%stypedef %s %s;\n", g.indent(), cType, cName)
 		} else {
 			g.emitInterfaceTypeSpec(w, spec)
 		}
