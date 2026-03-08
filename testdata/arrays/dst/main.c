@@ -167,4 +167,19 @@ int main(void) {
             so_panic("want sum == 6");
         }
     }
+    {
+        // Array comparisons.
+        so_int a[3] = {1, 2, 3};
+        so_int b[3] = {0};
+        b[0] = 1;
+        b[1] = 2;
+        b[2] = 3;
+        if (so_array_ne(a, b, 3 * sizeof(so_int))) {
+            so_panic("want a == b");
+        }
+        so_int c[3] = {3, 2, 1};
+        if (so_array_eq(a, c, 3 * sizeof(so_int))) {
+            so_panic("want a != c");
+        }
+    }
 }

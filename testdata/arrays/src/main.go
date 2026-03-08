@@ -167,4 +167,19 @@ func main() {
 			panic("want sum == 6")
 		}
 	}
+	{
+		// Array comparisons.
+		a := [3]int{1, 2, 3}
+		var b [3]int
+		b[0] = 1
+		b[1] = 2
+		b[2] = 3
+		if a != b {
+			panic("want a == b")
+		}
+		c := [3]int{3, 2, 1}
+		if a == c {
+			panic("want a != c")
+		}
+	}
 }

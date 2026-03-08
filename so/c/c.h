@@ -1,13 +1,15 @@
 #include <string.h>
+#include "so/builtin/builtin.h"
 
-#define c_Bytes(ptr, n) ({   \
-    void* _p = (void*)(ptr); \
-    _p ? unsafe_Slice(_p, n) : (so_Slice){NULL, 0, 0}; \
-})
+static inline so_Slice c_Bytes(void* ptr, size_t n) {
+    return ptr ? unsafe_Slice(ptr, n) : (so_Slice){NULL, 0, 0};
+}
 
-#define c_String(ptr) ({            \
-    const char* _p = (const char*)(ptr); \
-    _p ? unsafe_String(_p, strlen(_p)) : (so_String){NULL, 0}; \
-})
+static inline so_String c_String(void* ptr) {
+    char* s = (char*)(ptr);
+    return ptr ? unsafe_String(s, strlen(s)) : (so_String){NULL, 0};
+}
 
-#define c_CharPtr(ptr) ((char*)(ptr))
+static inline char* c_CharPtr(void* ptr) {
+    return (char*)ptr;
+}
