@@ -58,6 +58,9 @@ func main() {
 
 	{
 		// Slice literals.
+		empty := []int{}
+		_ = empty
+
 		strSlice := []string{"a", "b", "c"}
 		sLen := len(strSlice) // sLen == 3
 		_ = sLen
