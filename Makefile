@@ -16,8 +16,6 @@ else ifeq ($(compiler), docker)
     RUN_CMD = $(GCC_DOCKER) ./build/main
 endif
 
-# --- Targets ---
-
 inspect:
 	go run ./cmd/inspect -- $(path)
 
@@ -56,6 +54,12 @@ run-case:
 	@cp testdata/$(name)/dst/*.ext.[ch] generated/$(name)/ 2>/dev/null || true
 	@go run ./cmd/so translate -o generated/$(name) testdata/$(name)/src
 	@make run-c path=generated/$(name)
+
+run-example:
+	@mkdir -p example/$(name)/generated
+	@rm -rf example/$(name)/generated/*
+	@go run ./cmd/so translate -o example/$(name)/generated example/$(name)
+	@rm -rf example/$(name)/generated/so
 
 run-c:
 	@mkdir -p build
