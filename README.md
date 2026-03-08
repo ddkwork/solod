@@ -194,6 +194,10 @@ _How does So handle memory?_
 
 Everything is stack-allocated by default. There's no garbage collector or reference counting. The standard library provides explicit heap allocation when you need it.
 
+_Is it safe?_
+
+Currently, So has few safeguards other than the default Go type checking. It will panic on out-of-bounds array access, but it won't stop you from returning a dangling pointer or forgetting to free allocated memory.
+
 _Can I use So code from C (and vice versa)?_
 
 Yes. So compiles to plain C, therefore calling So from C is just calling C from C. Calling C from So is equally straightforward — see the [spec](doc/spec.md#c-interop) for details.

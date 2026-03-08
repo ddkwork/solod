@@ -90,7 +90,11 @@ typedef struct {
 
 // slice creates a slice from another slice
 // from index 'from' (inclusive) to index 'to' (exclusive).
-#define so_slice(T, s, from, to) ((so_Slice){(T*)(s).ptr + (from), (to) - (from), (s).cap - (from)})
+#define so_slice(T, s, from, to) ({                                    \
+    if ((size_t)(to) > (s).len || (size_t)(from) > (size_t)(to))       \
+        so_panic("slice bounds out of range");                         \
+    (so_Slice){(T*)(s).ptr + (from), (to) - (from), (s).cap - (from)}; \
+})
 
 // string_bytes wraps a string's raw bytes as a byte slice.
 #define so_string_bytes(s) ((so_Slice){(void*)(s).ptr, (s).len, (s).len})
@@ -110,11 +114,11 @@ so_Slice so_string_runes_impl(so_String s, int32_t* buf);
 
 // bytes_string copies a byte slice into a null-terminated string.
 // Allocates memory on the stack until the calling function returns.
-#define so_bytes_string(bs) ({                \
-    char* _buf = alloca((bs).len + 1);        \
-    memcpy(_buf, (bs).ptr, (bs).len);         \
-    _buf[(bs).len] = '\0';                    \
-    (so_String){_buf, (bs).len};              \
+#define so_bytes_string(bs) ({         \
+    char* _buf = alloca((bs).len + 1); \
+    memcpy(_buf, (bs).ptr, (bs).len);  \
+    _buf[(bs).len] = '\0';             \
+    (so_String){_buf, (bs).len};       \
 })
 
 // runes_string encodes a rune slice into a UTF-8 string.
@@ -159,8 +163,13 @@ static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) 
 }
 #define so_copy(T, dst, src) so_copy_impl(dst, src, sizeof(T))
 
-// index returns a reference to the element at index i in a slice or string.
-#define so_at(T, s, i) (((T*)(s).ptr)[i])
+// at returns a reference to the element at index i in a slice or string.
+#define so_at(T, s, i) (*so_at_ptr(T, s, i))
+#define so_at_ptr(T, s, i) ({            \
+    if ((size_t)(i) >= (s).len)          \
+        so_panic("index out of bounds"); \
+    (T*)(s).ptr + (i);                   \
+})
 
 // len returns the length of a slice or string.
 #define so_len(s) ((so_int)(s).len)
