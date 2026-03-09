@@ -393,6 +393,8 @@ func CopyN(dst Writer, src Reader, n int64) (int64, error) {
 // A successful Copy returns err == nil, not err == EOF.
 // Because Copy is defined to read from src until EOF, it does
 // not treat an EOF from Read as an error to be reported.
+//
+// Copy allocates a buffer on the stack to hold data during the copy.
 func Copy(dst Writer, src Reader) (int64, error) {
 	return copyBuffer(dst, src, []byte{})
 }
@@ -408,15 +410,14 @@ func CopyBuffer(dst Writer, src Reader, buf []byte) (int64, error) {
 }
 
 // copyBuffer is the actual implementation of Copy and CopyBuffer.
-// if buf is nil, one is allocated.
+// if buf has zero length, one is allocated on the stack.
 func copyBuffer(dst Writer, src Reader, buf []byte) (int64, error) {
 	var written int64
 	var err error
-	var allocated bool
 
 	// Allocate a buffer if the caller did not provide one.
 	if len(buf) == 0 {
-		size := 32 * 1024
+		size := 8 * 1024 // 8 KiB
 		_, ok := src.(*LimitedReader)
 		l := src.(*LimitedReader)
 		if ok && int64(size) > l.N {
@@ -426,8 +427,7 @@ func copyBuffer(dst Writer, src Reader, buf []byte) (int64, error) {
 				size = int(l.N)
 			}
 		}
-		buf = mem.NewSlice[byte](size, size)
-		allocated = true
+		buf = mem.Alloca(size)
 	}
 
 	// Copy data from src to dst until EOF or an error.
@@ -457,10 +457,6 @@ func copyBuffer(dst Writer, src Reader, buf []byte) (int64, error) {
 			}
 			break
 		}
-	}
-
-	if allocated {
-		mem.FreeSlice(buf)
 	}
 	return written, err
 }

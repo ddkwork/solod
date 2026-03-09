@@ -46,3 +46,18 @@
 
 // FreeSlice frees a slice previously allocated with NewSlice.
 #define mem_FreeSlice(T, s) mem_DeallocSlice(T, mem_System, s)
+
+// MaxAllocaSize is the maximum size that can be allocated with Alloca.
+// Set to 64 KiB by default.
+#ifndef mem_MaxAllocaSize
+#define mem_MaxAllocaSize (64 << 10)
+#endif
+
+// Alloca allocates a block of memory of the given size on the stack.
+// The memory is automatically freed when the function that called Alloca returns.
+// Panics if the requested size exceeds [MaxAllocaSize].
+#define mem_Alloca(size) ({                           \
+    if ((size) > mem_MaxAllocaSize)                   \
+        so_panic("mem: alloca size exceeds allowed"); \
+    so_make_slice(uint8_t, (size), (size));           \
+})
