@@ -3,6 +3,7 @@
 // -- Forward declarations (types) --
 typedef so_int array[3];
 typedef struct box box;
+typedef struct arange arange;
 
 // -- Forward declarations (functions and methods) --
 static void change(so_int a[3]);
@@ -22,6 +23,12 @@ static void change(so_int a[3]) {
 static box newBox(void) {
     return (box){.nums = {11, 22, 33}};
 }
+
+typedef struct arange {
+    uint8_t lo;
+    uint8_t hi;
+} arange;
+static arange aranges[16] = {[0] = (arange){0x10, 0x20}, [1] = (arange){0x30, 0x40}, [2] = (arange){0x50, 0x60}};
 
 int main(void) {
     {

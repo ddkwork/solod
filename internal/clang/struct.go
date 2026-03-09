@@ -134,7 +134,12 @@ func (g *Generator) emitAnonStructLit(n *ast.CompositeLit, st *ast.StructType) {
 // emitStructLit emits a struct literal (e.g. Point{1, 2} or Point{x: 1, y: 2}).
 func (g *Generator) emitStructLit(n *ast.CompositeLit) {
 	w := g.state.writer
-	typ := g.types.TypeOf(n.Type)
+	var typ types.Type
+	if n.Type != nil {
+		typ = g.types.TypeOf(n.Type)
+	} else {
+		typ = g.types.TypeOf(n)
+	}
 	cType := g.mapType(n, typ)
 	fmt.Fprintf(w, "(%s){", cType)
 	for i, elt := range n.Elts {

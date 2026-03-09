@@ -16,6 +16,17 @@ func newBox() box {
 	}
 }
 
+type arange struct {
+	lo uint8
+	hi uint8
+}
+
+var aranges = [16]arange{
+	0: {0x10, 0x20},
+	1: {0x30, 0x40},
+	2: {0x50, 0x60},
+}
+
 func main() {
 	{
 		// Array literals.
