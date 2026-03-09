@@ -369,6 +369,11 @@ func (g *Generator) emitUnaryExpr(n *ast.UnaryExpr) {
 			return
 		}
 	}
+	if n.Op == token.XOR {
+		fmt.Fprintf(w, "~")
+		g.emitExpr(n.X)
+		return
+	}
 	fmt.Fprintf(w, "%s", n.Op.String())
 	g.emitExpr(n.X)
 }

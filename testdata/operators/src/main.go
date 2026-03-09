@@ -50,7 +50,8 @@ func main() {
 		b4 &= 0b1100
 		b4 ^= 0b1100
 		// b4 &^= 0b1010 // not supported
-		_ = b4
+		b5 := ^b4
+		_ = b5
 	}
 
 	{

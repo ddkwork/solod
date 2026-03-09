@@ -49,7 +49,8 @@ int main(void) {
         b4 &= 0b1100;
         b4 ^= 0b1100;
         // b4 &^= 0b1010 // not supported
-        (void)b4;
+        so_int b5 = ~b4;
+        (void)b5;
     }
     {
         // Logical operations.
