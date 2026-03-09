@@ -193,4 +193,5 @@ func main() {
 			panic("want a != c")
 		}
 	}
+	_ = aranges
 }

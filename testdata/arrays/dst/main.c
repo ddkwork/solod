@@ -189,4 +189,5 @@ int main(void) {
             so_panic("want a != c");
         }
     }
+    (void)aranges;
 }

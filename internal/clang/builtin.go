@@ -3,6 +3,7 @@ package clang
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -212,7 +213,20 @@ func (g *Generator) emitPrintCall(call *ast.CallExpr, name string) {
 	fmt.Fprintf(w, "so_%s(%s", name, format)
 	for _, arg := range call.Args {
 		fmt.Fprintf(w, ", ")
-		g.emitCArg(arg)
+		if g.hasStringType(arg) {
+			if lit, ok := arg.(*ast.BasicLit); ok && lit.Kind == token.STRING {
+				// String literal: emit as a simple C string.
+				fmt.Fprintf(w, "%s", rawStringValue(lit))
+			} else {
+				// String expression: emit expr.len, expr.ptr
+				g.emitExpr(arg)
+				fmt.Fprintf(w, ".len, ")
+				g.emitExpr(arg)
+				fmt.Fprintf(w, ".ptr")
+			}
+		} else {
+			g.emitCArg(arg)
+		}
 	}
 	fmt.Fprintf(w, ")")
 }
@@ -224,7 +238,12 @@ func (g *Generator) buildFormatString(call *ast.CallExpr) string {
 	var format strings.Builder
 	inStr := false
 	for i, arg := range call.Args {
-		spec, macro := g.formatSpec(call, g.types.TypeOf(arg))
+		typ := g.types.TypeOf(arg)
+		spec, macro := g.formatSpec(arg, typ)
+		if spec == "" {
+			g.fail(call, "unsupported type for print/println: %s", typ)
+			panic("unreachable")
+		}
 		if !inStr {
 			if format.Len() > 0 {
 				format.WriteByte(' ')
@@ -251,7 +270,7 @@ func (g *Generator) buildFormatString(call *ast.CallExpr) string {
 // formatSpec returns the C printf format specifier and optional macro name
 // for a Go type. When macro is non-empty (e.g. "PRId64"), the specifier
 // ends with "%" and the macro must follow outside the string literal.
-func (g *Generator) formatSpec(node ast.Node, typ types.Type) (spec, macro string) {
+func (g *Generator) formatSpec(arg ast.Expr, typ types.Type) (spec, macro string) {
 	if _, ok := typ.(*types.Pointer); ok {
 		return "%p", ""
 	}
@@ -263,8 +282,7 @@ func (g *Generator) formatSpec(node ast.Node, typ types.Type) (spec, macro strin
 	}
 	basic, ok := typ.Underlying().(*types.Basic)
 	if !ok {
-		g.fail(node, "unsupported type for print: %s", typ)
-		panic("unreachable")
+		return "", ""
 	}
 	switch basic.Kind() {
 	case types.Bool:
@@ -282,9 +300,11 @@ func (g *Generator) formatSpec(node ast.Node, typ types.Type) (spec, macro strin
 	case types.Uint, types.Uint64, types.Uintptr:
 		return "%", "PRIu64"
 	case types.String, types.UntypedString:
-		return "%s", ""
+		if lit, ok := arg.(*ast.BasicLit); ok && lit.Kind == token.STRING {
+			return "%s", ""
+		}
+		return "%.*s", ""
 	default:
-		g.fail(node, "unsupported type for print: %s", typ)
-		panic("unreachable")
+		return "", ""
 	}
 }

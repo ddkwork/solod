@@ -34,6 +34,26 @@ int main(void) {
         (void)n;
     }
     {
+        // Slicing a string.
+        so_String str = so_str("hello");
+        so_String s1 = so_string_slice(str, 0, str.len);
+        if (so_string_ne(s1, so_str("hello"))) {
+            so_panic("want s1 == hello");
+        }
+        so_String s2 = so_string_slice(str, 2, str.len);
+        if (so_string_ne(s2, so_str("llo"))) {
+            so_panic("want s2 == llo");
+        }
+        so_String s3 = so_string_slice(str, 0, 3);
+        if (so_string_ne(s3, so_str("hel"))) {
+            so_panic("want s3 == hel");
+        }
+        so_String s4 = so_string_slice(str, 1, 4);
+        if (so_string_ne(s4, so_str("ell"))) {
+            so_panic("want s4 == ell");
+        }
+    }
+    {
         // Slicing a slice.
         so_Slice nums = (so_Slice){(so_int[5]){1, 2, 3, 4, 5}, 5, 5};
         so_Slice s1 = so_slice(so_int, nums, 0, nums.len);

@@ -79,7 +79,6 @@ so_String so_runes_string_impl(so_Slice rs, char* buf) {
             buf[pos++] = (char)(0x80 | (r & 0x3F));
         }
     }
-    buf[pos] = '\0';
     return (so_String){buf, pos};
 }
 

@@ -106,6 +106,28 @@ func (g *Generator) emitSliceExpr(n *ast.SliceExpr) {
 		}
 		fmt.Fprintf(w, ", %d)", t.Len())
 
+	case *types.Basic:
+		if t.Kind() != types.String {
+			g.fail(n, "unsupported slice expression on basic type: %s", t)
+			break
+		}
+		fmt.Fprintf(w, "so_string_slice(")
+		g.emitExpr(n.X)
+		fmt.Fprintf(w, ", ")
+		if n.Low != nil {
+			g.emitExpr(n.Low)
+		} else {
+			fmt.Fprintf(w, "0")
+		}
+		fmt.Fprintf(w, ", ")
+		if n.High != nil {
+			g.emitExpr(n.High)
+		} else {
+			g.emitExpr(n.X)
+			fmt.Fprintf(w, ".len")
+		}
+		fmt.Fprintf(w, ")")
+
 	case *types.Slice:
 		elemType := g.mapType(n, t.Elem())
 		fmt.Fprintf(w, "so_slice(%s, ", elemType)

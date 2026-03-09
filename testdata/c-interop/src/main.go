@@ -51,7 +51,8 @@ func main() {
 		var buf [64]byte
 		strcat(c.CharPtr(&buf[0]), "Hello, ")
 		strcat(c.CharPtr(&buf[0]), "world!")
-		println(c.String(&buf[0]))
+		s := c.String(&buf[0])
+		println(s)
 	}
 	{
 		// Returning (char*) strings from C functions.

@@ -32,6 +32,30 @@ func main() {
 	}
 
 	{
+		// Slicing a string.
+		str := "hello"
+		s1 := str[:]
+		if s1 != "hello" {
+			panic("want s1 == hello")
+		}
+
+		s2 := str[2:]
+		if s2 != "llo" {
+			panic("want s2 == llo")
+		}
+
+		s3 := str[:3]
+		if s3 != "hel" {
+			panic("want s3 == hel")
+		}
+
+		s4 := str[1:4]
+		if s4 != "ell" {
+			panic("want s4 == ell")
+		}
+	}
+
+	{
 		// Slicing a slice.
 		nums := []int{1, 2, 3, 4, 5}
 

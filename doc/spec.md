@@ -135,6 +135,16 @@ for i, r := range str {
 }
 ```
 
+Slicing a string returns a new string (zero-copy):
+
+```go
+s := "hello"
+s1 := s[:]    // "hello"
+s2 := s[2:]   // "llo"
+s3 := s[:3]   // "hel"
+s4 := s[1:4]  // "ell"
+```
+
 String comparison uses dedicated functions (`so_string_eq`, etc.) instead of C operators:
 
 ```go

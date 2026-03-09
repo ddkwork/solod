@@ -42,13 +42,14 @@ int main(void) {
         uint8_t buf[64] = {0};
         strcat(c_CharPtr(&buf[0]), "Hello, ");
         strcat(c_CharPtr(&buf[0]), "world!");
-        so_println("%s", c_String(&buf[0]).ptr);
+        so_String s = c_String(&buf[0]);
+        so_println("%.*s", s.len, s.ptr);
     }
     {
         // Returning (char*) strings from C functions.
         uint8_t buf[64] = {0};
         strcat(c_CharPtr(&buf[0]), "Hello, ");
         so_String s = c_String(strcat(c_CharPtr(&buf[0]), "world!"));
-        so_println("%s", s.ptr);
+        so_println("%.*s", s.len, s.ptr);
     }
 }

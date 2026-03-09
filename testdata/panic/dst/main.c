@@ -14,7 +14,7 @@ static void panicLiteral(void) {
 
 static void panicString(void) {
     so_String msg = so_str("runtime error");
-    so_panic(msg.ptr);
+    so_panic(so_cstr(msg));
 }
 
 static void panicError(void) {
