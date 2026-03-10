@@ -59,7 +59,7 @@ int main(void) {
     }
     {
         // Strftime.
-        uint8_t buf[64] = {0};
+        so_byte buf[64] = {0};
         time_TimeT ts = 0;
         ts = 0;
         time_Tm tm = time_Gmtime(&ts);

@@ -95,7 +95,7 @@ vAnyPtr := any(vPtr)
 vNil := any(nil)
 ```
 
-`byte` is translated to `uint8_t`, and `rune` to `int32_t`.
+`byte` is translated to `so_byte` (`uint8_t`), `rune` to `so_rune` (`int32_t`), and `int` to `so_int` (`int64_t`).
 
 `any` is not treated as an interface. Instead, it's translated to `void*`. This makes handling pointers much easier and removes the need for `unsafe.Pointer`.
 

@@ -52,7 +52,7 @@ int main(void) {
     {
         // String.
         so_Slice b = so_string_bytes(so_str("hello"));
-        so_String s = unsafe_String(&so_at(uint8_t, b, 0), so_len(b));
+        so_String s = unsafe_String(&so_at(so_byte, b, 0), so_len(b));
         if (so_string_ne(s, so_str("hello"))) {
             so_panic("want s == 'hello'");
         }
@@ -60,7 +60,7 @@ int main(void) {
     {
         // StringData.
         so_String s = so_str("hello");
-        uint8_t* b = unsafe_StringData(s);
+        so_byte* b = unsafe_StringData(s);
         if (*b != 'h') {
             so_panic("want *b == 'h'");
         }

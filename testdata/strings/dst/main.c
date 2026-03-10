@@ -14,7 +14,7 @@ int main(void) {
         // Loop over string bytes.
         so_String str = so_str("Hi 世界!");
         for (so_int i = 0; i < so_len(str); i++) {
-            uint8_t chr = so_at(uint8_t, str, i);
+            so_byte chr = so_at(so_byte, str, i);
             so_println("%s %" PRId64 " %s %u", "i =", i, "chr =", chr);
         }
     }
@@ -72,11 +72,11 @@ int main(void) {
         // String conversion to byte and rune slices, and vice versa.
         so_String s1 = so_str("1世3");
         so_Slice bs = so_string_bytes(s1);
-        if (so_at(uint8_t, bs, 0) != '1') {
+        if (so_at(so_byte, bs, 0) != '1') {
             so_panic("unexpected byte");
         }
         so_Slice rs = so_string_runes(s1, so_len(s1));
-        if (so_at(int32_t, rs, 1) != U'世') {
+        if (so_at(so_rune, rs, 1) != U'世') {
             so_panic("unexpected rune");
         }
         so_String s2 = so_bytes_string(bs);

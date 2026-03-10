@@ -40,7 +40,7 @@ int main(void) {
     }
     {
         // Environment.
-        uint8_t* env = stdlib_Getenv("PATH");
+        so_byte* env = stdlib_Getenv("PATH");
         if (env == NULL) {
             so_panic("PATH not set");
         }

@@ -12,7 +12,7 @@ int main(void) {
         stdio_Fputs("hello", f);
         stdio_Fputc(10, f);
         stdio_Fflush(f);
-        uint8_t buf[64] = {0};
+        so_byte buf[64] = {0};
         stdio_Fwrite(&buf[0], 1, 64, f);
         stdio_Fclose(f);
     }
@@ -26,7 +26,7 @@ int main(void) {
         if (ch == stdio_EOF) {
             so_panic("unexpected EOF");
         }
-        uint8_t buf[64] = {0};
+        so_byte buf[64] = {0};
         stdio_Fseek(f, 0, 0);
         stdio_Fgets(&buf[0], 64, f);
         stdio_Fread(&buf[0], 1, 64, f);
@@ -46,12 +46,12 @@ int main(void) {
         // Formatted output.
         stdio_Printf("hello %d\n", 42);
         stdio_Fprintf(stdio_Stdout, "value: %d\n", 100);
-        uint8_t buf[64] = {0};
+        so_byte buf[64] = {0};
         stdio_Snprintf(&buf[0], 64, "count: %d", 10);
     }
     {
         // Formatted input.
-        int32_t n = 0;
+        so_rune n = 0;
         stdio_Sscanf("42", "%d", &n);
     }
 }

@@ -12,7 +12,7 @@ typedef so_int main_AliasedID;
 
 // also int
 typedef so_int main_AlsoID;
-typedef int32_t main_Rune;
+typedef so_rune main_Rune;
 
 // Complex types.
 typedef so_String main_Name;

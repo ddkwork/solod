@@ -45,15 +45,15 @@ int main(void) {
     // }
     {
         // Rune literals.
-        const int32_t r1 = U'a';
+        const so_rune r1 = U'a';
         (void)r1;
-        const int32_t r2 = U'ä';
+        const so_rune r2 = U'ä';
         (void)r2;
-        const int32_t r3 = U'本';
+        const so_rune r3 = U'本';
         (void)r3;
-        const int32_t r4 = U'\xff';
+        const so_rune r4 = U'\xff';
         (void)r4;
-        const int32_t r5 = U'\u12e4';
+        const so_rune r5 = U'\u12e4';
         (void)r5;
     }
     {
@@ -77,8 +77,8 @@ int main(void) {
         const so_int n2 = (so_int)(x & 7);
         (void)n2;
         const so_int mask2 = 0b00011111;
-        uint8_t p0 = 'x';
-        int32_t r = (int32_t)(p0 & mask2);
+        so_byte p0 = 'x';
+        so_rune r = (so_rune)(p0 & mask2);
         (void)r;
     }
 }

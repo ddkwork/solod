@@ -18,9 +18,9 @@ int main(void) {
         (void)vFloat;
         bool vBool = true;
         (void)vBool;
-        uint8_t vByte = 'x';
+        so_byte vByte = 'x';
         (void)vByte;
-        int32_t vRune = U'本';
+        so_rune vRune = U'本';
         (void)vRune;
         so_String vString = so_str("hello");
         (void)vString;
@@ -44,9 +44,9 @@ int main(void) {
         (void)vFloat;
         bool vBool = true;
         (void)vBool;
-        int32_t vByte = U'x';
+        so_rune vByte = U'x';
         (void)vByte;
-        int32_t vRune = U'本';
+        so_rune vRune = U'本';
         (void)vRune;
         so_String vString = so_str("hello");
         (void)vString;
@@ -70,9 +70,9 @@ int main(void) {
         (void)vFloat;
         bool vBool = true;
         (void)vBool;
-        int32_t vByte = U'x';
+        so_rune vByte = U'x';
         (void)vByte;
-        int32_t vRune = U'本';
+        so_rune vRune = U'本';
         (void)vRune;
         so_String vString = so_str("hello");
         (void)vString;
@@ -96,9 +96,9 @@ int main(void) {
         (void)vFloat;
         bool vBool = false;
         (void)vBool;
-        uint8_t vByte = 0;
+        so_byte vByte = 0;
         (void)vByte;
-        int32_t vRune = 0;
+        so_rune vRune = 0;
         (void)vRune;
         so_String vString = so_str("");
         (void)vString;
@@ -117,7 +117,7 @@ int main(void) {
         (void)a;
         (void)b;
         (void)c;
-        uint8_t b1 = 'a', b2 = 'b';
+        so_byte b1 = 'a', b2 = 'b';
         (void)b1;
         (void)b2;
         so_String s1 = so_str("foo"), s2 = so_str("bar");
@@ -138,7 +138,7 @@ int main(void) {
         (void)vInt;
         (void)vFloat;
         (void)vBool;
-        int32_t vByte = U'x', vRune = U'本';
+        so_rune vByte = U'x', vRune = U'本';
         so_String vString = so_str("hello");
         (void)vByte;
         (void)vRune;
@@ -156,7 +156,7 @@ int main(void) {
         (void)vInt;
         (void)vFloat;
         (void)vBool;
-        int32_t vByte = U'x', vRune = U'本';
+        so_rune vByte = U'x', vRune = U'本';
         so_String vString = so_str("hello");
         (void)vByte;
         (void)vRune;

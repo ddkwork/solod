@@ -25,8 +25,8 @@ static box newBox(void) {
 }
 
 typedef struct arange {
-    uint8_t lo;
-    uint8_t hi;
+    so_byte lo;
+    so_byte hi;
 } arange;
 static arange aranges[16] = {[0] = (arange){0x10, 0x20}, [1] = (arange){0x30, 0x40}, [2] = (arange){0x50, 0x60}};
 
@@ -132,16 +132,16 @@ int main(void) {
     }
     {
         // Multi-dimensional arrays.
-        int32_t twoD[2][3] = {0};
+        so_rune twoD[2][3] = {0};
         for (so_int i = 0; i < 2; i++) {
             for (so_int j = 0; j < 3; j++) {
-                twoD[i][j] = (int32_t)(i * 10 + j + 1);
+                twoD[i][j] = (so_rune)(i * 10 + j + 1);
             }
         }
         if (twoD[0][0] != 1 || twoD[1][2] != 13) {
             so_panic("want twoD == {{1, 2, 3}, {11, 12, 13}}");
         }
-        memcpy(twoD, (int32_t[2][3]){{1, 2, 3}, {11, 12, 13}}, sizeof(twoD));
+        memcpy(twoD, (so_rune[2][3]){{1, 2, 3}, {11, 12, 13}}, sizeof(twoD));
         if (twoD[0][0] != 1 || twoD[1][2] != 13) {
             so_panic("want twoD == {{1, 2, 3}, {11, 12, 13}}");
         }

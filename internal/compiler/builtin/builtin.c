@@ -47,7 +47,7 @@ so_rune so_utf8_decode(so_String s, so_int i, int* w) {
 }
 
 // string_runes_impl decodes UTF-8 string bytes into a rune buffer.
-so_Slice so_string_runes_impl(so_String s, int32_t* buf) {
+so_Slice so_string_runes_impl(so_String s, so_rune* buf) {
     size_t n = 0;
     for (so_int i = 0; i < (so_int)s.len;) {
         int w = 0;
@@ -60,9 +60,9 @@ so_Slice so_string_runes_impl(so_String s, int32_t* buf) {
 // runes_string_impl encodes runes into a UTF-8 buffer and returns a string.
 so_String so_runes_string_impl(so_Slice rs, char* buf) {
     size_t pos = 0;
-    int32_t* runes = (int32_t*)rs.ptr;
+    so_rune* runes = (so_rune*)rs.ptr;
     for (size_t i = 0; i < rs.len; i++) {
-        int32_t r = runes[i];
+        so_rune r = runes[i];
         if (r < 0x80) {
             buf[pos++] = (char)r;
         } else if (r < 0x800) {

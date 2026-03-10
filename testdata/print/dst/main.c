@@ -13,8 +13,8 @@ int main(void) {
     so_int vInt = 42;
     double vFloat = 3.14;
     bool vBool = true;
-    uint8_t vByte = 'x';
-    int32_t vRune = U'本';
+    so_byte vByte = 'x';
+    so_rune vRune = U'本';
     so_String vString = so_str("hello");
     person alice = (person){.name = so_str("alice")};
     person* vPtr = &alice;

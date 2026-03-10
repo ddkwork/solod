@@ -97,13 +97,13 @@ int main(void) {
     }
     {
         // Pass and return slices.
-        uint8_t buf[4] = {0};
-        so_Result _res1 = lenInt64(so_array_slice(uint8_t, buf, 0, 4, 4));
+        so_byte buf[4] = {0};
+        so_Result _res1 = lenInt64(so_array_slice(so_byte, buf, 0, 4, 4));
         int64_t n = _res1.val.as_int;
         if (n != 4) {
             so_panic("want 4");
         }
-        so_Result _res2 = lenInt64((so_Slice){(uint8_t[3]){1, 2, 3}, 3, 3});
+        so_Result _res2 = lenInt64((so_Slice){(so_byte[3]){1, 2, 3}, 3, 3});
         n = _res2.val.as_int;
         if (n != 3) {
             so_panic("want 3");

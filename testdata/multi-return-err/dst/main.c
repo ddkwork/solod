@@ -93,7 +93,7 @@ int main(void) {
         so_Error err = NULL;
         (void)err;
         so_Result _res7 = returnRune();
-        int32_t run = _res7.val.as_rune;
+        so_rune run = _res7.val.as_rune;
         err = _res7.err;
         (void)run;
         so_Result _res8 = returnString();

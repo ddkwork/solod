@@ -162,10 +162,10 @@ typedef struct {
 // string_runes decodes a string's UTF-8 bytes into a rune slice.
 // Allocates memory on the stack until the calling function returns.
 #define so_string_runes(s, maxlen) ({                      \
-    int32_t* _buf = so_alloca((maxlen) * sizeof(int32_t)); \
+    so_rune* _buf = so_alloca((maxlen) * sizeof(so_rune)); \
     so_string_runes_impl((s), _buf);                       \
 })
-so_Slice so_string_runes_impl(so_String s, int32_t* buf);
+so_Slice so_string_runes_impl(so_String s, so_rune* buf);
 
 // bytes_string copies a byte slice into a string.
 // Allocates memory on the stack until the calling function returns.
@@ -287,8 +287,8 @@ typedef struct so_Error_* so_Error;
 // in case of multiple return values.
 typedef union {
     bool as_bool;
-    uint8_t as_byte;
-    int32_t as_rune;
+    so_byte as_byte;
+    so_rune as_rune;
     so_int as_int;
     double as_double;
     so_String as_string;
@@ -340,8 +340,8 @@ int so_println(const char* format, ...);
 static inline so_String unsafe_String(void* ptr, size_t len) {
     return (so_String){(const char*)ptr, len};
 }
-static inline uint8_t* unsafe_StringData(so_String s) {
-    return (uint8_t*)s.ptr;
+static inline so_byte* unsafe_StringData(so_String s) {
+    return (so_byte*)s.ptr;
 }
 static inline so_Slice unsafe_Slice(void* ptr, size_t len) {
     return (so_Slice){ptr, len, len};

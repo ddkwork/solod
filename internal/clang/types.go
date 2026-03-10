@@ -124,13 +124,13 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 	case types.Int16:
 		return "int16_t"
 	case types.Int32, types.UntypedRune:
-		return "int32_t"
+		return "so_rune"
 	case types.Int64:
 		return "int64_t"
 	case types.Uint:
 		return "uint64_t"
 	case types.Uint8:
-		return "uint8_t"
+		return "so_byte"
 	case types.Uint16:
 		return "uint16_t"
 	case types.Uint32:

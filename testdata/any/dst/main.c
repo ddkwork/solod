@@ -5,7 +5,7 @@ typedef struct point point;
 
 // -- Forward declarations (functions and methods) --
 static void acceptAny(void* v);
-static void acceptByte(uint8_t* v);
+static void acceptByte(so_byte* v);
 static void acceptPoint(point* v);
 
 // -- Implementation --
@@ -19,7 +19,7 @@ static void acceptAny(void* v) {
     (void)v;
 }
 
-static void acceptByte(uint8_t* v) {
+static void acceptByte(so_byte* v) {
     (void)v;
 }
 
@@ -39,7 +39,7 @@ int main(void) {
         so_int n = 42;
         acceptAny(&n);
         acceptAny(&n);
-        acceptByte((uint8_t*)&n);
+        acceptByte((so_byte*)&n);
     }
     {
         // Integer pointer.
@@ -47,14 +47,14 @@ int main(void) {
         so_int* n = &nval;
         acceptAny(n);
         acceptAny(n);
-        acceptByte((uint8_t*)n);
+        acceptByte((so_byte*)n);
     }
     {
         // String value.
         so_String s = so_str("hello");
         acceptAny(&s);
         acceptAny(&s);
-        acceptByte((uint8_t*)&s);
+        acceptByte((so_byte*)&s);
     }
     {
         // String pointer.
@@ -62,14 +62,14 @@ int main(void) {
         so_String* s = &sval;
         acceptAny(s);
         acceptAny(s);
-        acceptByte((uint8_t*)s);
+        acceptByte((so_byte*)s);
     }
     {
         // Slice value.
         so_Slice s = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
         acceptAny(&s);
         acceptAny(&s);
-        acceptByte((uint8_t*)&s);
+        acceptByte((so_byte*)&s);
     }
     {
         // Slice pointer.
@@ -77,7 +77,7 @@ int main(void) {
         so_Slice* s = &sval;
         acceptAny(s);
         acceptAny(s);
-        acceptByte((uint8_t*)s);
+        acceptByte((so_byte*)s);
     }
     {
         // Struct value.
@@ -98,7 +98,7 @@ int main(void) {
         // Any casts.
         so_int n = 42;
         void* a = &n;
-        uint8_t* b = (uint8_t*)a;
+        so_byte* b = (so_byte*)a;
         if (*b != 42) {
             so_panic("want *b == 42");
         }
