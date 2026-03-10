@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Source: https://github.com/golang/go/blob/go1.26.1/src/io/io_test.go
-
 package io_test
 
 import (
