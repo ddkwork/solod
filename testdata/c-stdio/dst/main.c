@@ -51,7 +51,7 @@ int main(void) {
     }
     {
         // Formatted input.
-        so_rune n = 0;
+        int32_t n = 0;
         stdio_Sscanf("42", "%d", &n);
     }
 }
