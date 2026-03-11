@@ -206,9 +206,14 @@ func (g *Generator) emitGenericCall(n *ast.CallExpr, fun ast.Expr, inst types.In
 	for i := 1; i < inst.TypeArgs.Len(); i++ {
 		fmt.Fprintf(w, ", %s", g.mapType(n, inst.TypeArgs.At(i)))
 	}
-	for _, arg := range n.Args {
+	sig, _ := inst.Type.(*types.Signature)
+	for i, arg := range n.Args {
 		fmt.Fprintf(w, ", ")
-		g.emitExpr(arg)
+		if sig != nil && i < sig.Params().Len() {
+			g.emitExprAsType(n, arg, sig.Params().At(i).Type())
+		} else {
+			g.emitExpr(arg)
+		}
 	}
 	fmt.Fprintf(w, ")")
 }

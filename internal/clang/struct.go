@@ -161,6 +161,7 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	w := g.state.writer
 	selection := g.types.Selections[sel]
 	recv := selection.Recv()
+	sig := selection.Type().(*types.Signature)
 
 	// Get the struct type name.
 	var named *types.Named
@@ -176,9 +177,9 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 		fmt.Fprintf(w, ".%s(", sel.Sel.Name)
 		g.emitExpr(sel.X)
 		fmt.Fprintf(w, ".self")
-		for _, arg := range args {
+		for i, arg := range args {
 			fmt.Fprintf(w, ", ")
-			g.emitExpr(arg)
+			g.emitExprAsType(sel, arg, sig.Params().At(i).Type())
 		}
 		fmt.Fprintf(w, ")")
 		return
@@ -199,9 +200,9 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	}
 
 	// Pass method arguments.
-	for _, arg := range args {
+	for i, arg := range args {
 		fmt.Fprintf(w, ", ")
-		g.emitExpr(arg)
+		g.emitExprAsType(sel, arg, sig.Params().At(i).Type())
 	}
 	fmt.Fprintf(w, ")")
 }

@@ -176,17 +176,7 @@ func (g *Generator) emitFixedArgs(call *ast.CallExpr, sig *types.Signature) {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
-		if isInterfaceType(sig.Params().At(i).Type()) &&
-			!isInterfaceType(g.types.TypeOf(call.Args[i])) {
-			paramType := sig.Params().At(i).Type()
-			if iface, ok := paramType.Underlying().(*types.Interface); ok && iface.Empty() {
-				g.emitAnyValue(call, call.Args[i])
-			} else {
-				g.emitInterfaceLit(paramType, call.Args[i])
-			}
-		} else {
-			g.emitExpr(call.Args[i])
-		}
+		g.emitExprAsType(call, call.Args[i], sig.Params().At(i).Type())
 	}
 }
 
@@ -205,11 +195,12 @@ func (g *Generator) emitVariadicArgs(call *ast.CallExpr, sig *types.Signature) {
 	count := len(variadicArgs)
 
 	fmt.Fprintf(w, "(so_Slice){(%s[%d]){", elemType, count)
+	targetType := variadicParam.Type().(*types.Slice).Elem()
 	for i, arg := range variadicArgs {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
-		g.emitExpr(arg)
+		g.emitExprAsType(call, arg, targetType)
 	}
 	fmt.Fprintf(w, "}, %d, %d}", count, count)
 }
