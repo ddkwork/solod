@@ -210,8 +210,3 @@ func isInterfaceType(t types.Type) bool {
 	_, ok := t.Underlying().(*types.Interface)
 	return ok
 }
-
-func isNilType(t types.Type) bool {
-	basic, ok := t.(*types.Basic)
-	return ok && basic.Kind() == types.UntypedNil
-}

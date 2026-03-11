@@ -362,6 +362,8 @@ Function literals (anonymous functions / closures) are not supported. Use named 
 
 Exported functions (capitalized) become public C symbols prefixed with the package name (`package_Func`). Unexported functions are `static`.
 
+Exported functions must only use exported types in their signatures (parameters and return types).
+
 ## Multiple return values
 
 So supports two-value multiple returns in two patterns: `(T, error)` and `(T1, T2)`.

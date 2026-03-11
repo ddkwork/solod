@@ -234,10 +234,29 @@ func (g *Generator) symbolName(name string) string {
 	return name
 }
 
+// isUnexportedType reports whether a type is unexported for the current package.
+func (g *Generator) isUnexportedType(typ types.Type) bool {
+	named, ok := typ.(*types.Named)
+	if !ok {
+		return false
+	}
+	obj := named.Obj()
+	if obj.Pkg() != g.pkg.Types {
+		return false
+	}
+	return !ast.IsExported(obj.Name())
+}
+
 // isErrorType checks if a type is the built-in error interface.
 func isErrorType(typ types.Type) bool {
 	if named, ok := typ.(*types.Named); ok {
 		return named.Obj().Name() == "error" && named.Obj().Parent() == types.Universe
 	}
 	return false
+}
+
+// isNilType checks if a type is the untyped nil.
+func isNilType(t types.Type) bool {
+	basic, ok := t.(*types.Basic)
+	return ok && basic.Kind() == types.UntypedNil
 }

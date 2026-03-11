@@ -246,6 +246,23 @@ func (g *Generator) emitCArg(arg ast.Expr) {
 	}
 }
 
+// hasUnexportedTypes reports whether a function declaration
+// references any unexported types from the current package.
+func (g *Generator) hasUnexportedTypes(decl *ast.FuncDecl) bool {
+	sig := g.funcSig(decl)
+	for p := range sig.Params().Variables() {
+		if g.isUnexportedType(p.Type()) {
+			return true
+		}
+	}
+	for r := range sig.Results().Variables() {
+		if g.isUnexportedType(r.Type()) {
+			return true
+		}
+	}
+	return false
+}
+
 // funcSig returns the types.Signature for a function or method declaration.
 func (g *Generator) funcSig(decl *ast.FuncDecl) *types.Signature {
 	if decl.Recv != nil {

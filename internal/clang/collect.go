@@ -29,6 +29,7 @@ type symbol struct {
 // into an ordered list. This list drives both header emission (exported
 // symbols) and forward declarations in the .c file (unexported symbols).
 func (g *Generator) collectSymbols() {
+	// Collect top-level types and functions and their export status.
 	for _, file := range g.pkg.Syntax {
 		for _, decl := range file.Decls {
 			switch d := decl.(type) {
@@ -72,6 +73,17 @@ func (g *Generator) collectSymbols() {
 					funcDecl: d,
 				})
 			}
+		}
+	}
+
+	// Validate that exported functions don't use unexported types.
+	for _, sym := range g.symbols {
+		if !sym.exported || sym.kind == symbolType {
+			continue
+		}
+		decl := sym.funcDecl
+		if g.hasUnexportedTypes(decl) {
+			g.fail(decl.Name, "exported function %s uses unexported types", decl.Name.Name)
 		}
 	}
 }
