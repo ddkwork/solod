@@ -30,8 +30,7 @@
 package io
 
 import (
-	_ "embed"
-
+	"github.com/nalgeon/solod/so"
 	"github.com/nalgeon/solod/so/errors"
 	"github.com/nalgeon/solod/so/mem"
 )
@@ -42,12 +41,6 @@ const (
 	SeekCurrent = 1 // seek relative to the current offset
 	SeekEnd     = 2 // seek relative to the end
 )
-
-//so:extern
-var maxInt64 = int64(1<<63 - 1)
-
-//so:embed io.h
-var io_h string
 
 // ErrShortWrite means that a write accepted fewer bytes than requested
 // but failed to return an explicit error.
@@ -506,12 +499,12 @@ func (l *LimitedReader) Read(p []byte) (int, error) {
 // starting at offset off and stops with EOF after n bytes.
 func NewSectionReader(r ReaderAt, off int64, n int64) SectionReader {
 	var remaining int64
-	if off <= maxInt64-n {
+	if off <= so.MaxInt64-n {
 		remaining = n + off
 	} else {
 		// Overflow, with no way to return error.
 		// Assume we can read up to an offset of 1<<63 - 1.
-		remaining = maxInt64
+		remaining = so.MaxInt64
 	}
 	return SectionReader{r, off, off, remaining, n}
 }
