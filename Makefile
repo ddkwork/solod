@@ -1,4 +1,5 @@
-CFLAGS ?= -g -std=gnu11 -Wall -Wextra -Werror -Wno-shadow -fsanitize=address -fsanitize=undefined -fstack-protector-all -lm
+CFLAGS ?= -g -std=gnu11 -Wall -Wextra -Werror -Wno-shadow -fsanitize=address -fsanitize=undefined -fstack-protector-all -fno-omit-frame-pointer
+LDLIBS ?= -lm
 
 CLANG       = clang
 GCC_NATIVE  = gcc-15
@@ -11,8 +12,10 @@ ifeq ($(compiler), clang)
     CC = $(CLANG)
 else ifeq ($(compiler), gcc)
     CC = $(GCC_NATIVE)
+	CFLAGS += -fanalyzer -D_FORTIFY_SOURCE=2
 else ifeq ($(compiler), docker)
     CC = $(GCC_DOCKER) gcc
+	CFLAGS += -fanalyzer -D_FORTIFY_SOURCE=2
     RUN_CMD = $(GCC_DOCKER) ./build/main
 endif
 
@@ -66,6 +69,6 @@ run-example:
 
 run-c:
 	@mkdir -p build
-	@$(CC) $(CFLAGS) -I$(path) -o build/main $(shell find $(path) -name "*.c")
+	@$(CC) -O1 $(CFLAGS) -I$(path) -o build/main $(shell find $(path) -name "*.c") $(LDLIBS)
 	@$(RUN_CMD)
 	@rm -f build/main
