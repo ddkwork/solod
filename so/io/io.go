@@ -24,8 +24,6 @@
 //   - TeeReader is an exported type, and NewTeeReader is its constructor.
 //   - WriteString doesn't use WriterTo.
 //
-// CAUTION: This package is under development, do not use yet.
-//
 // [io]: https://github.com/golang/go/blob/go1.26.1/src/io/io.go
 package io
 
