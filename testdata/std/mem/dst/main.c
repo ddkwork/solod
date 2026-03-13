@@ -69,5 +69,12 @@ int main(void) {
         }
         mem_FreeSlice(so_int, (mem_Allocator){0}, slice);
     }
+    {
+        // Free with nil or an empty slice.
+        main_Point* p = NULL;
+        mem_Free(main_Point, (mem_Allocator){0}, p);
+        so_Slice empty = {0};
+        mem_FreeSlice(so_int, (mem_Allocator){0}, empty);
+    }
     withDefer();
 }

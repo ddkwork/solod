@@ -68,5 +68,12 @@ func main() {
 		}
 		mem.FreeSlice(nil, slice)
 	}
+	{
+		// Free with nil or an empty slice.
+		var p *Point
+		mem.Free(nil, p)
+		var empty []int
+		mem.FreeSlice(nil, empty)
+	}
 	withDefer()
 }
