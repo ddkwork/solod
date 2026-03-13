@@ -147,22 +147,24 @@ typedef struct {
 
 // slice creates a slice from another slice
 // from index 'from' (inclusive) to index 'to' (exclusive).
-#define so_slice(T, s, from, to) ({                                \
-    size_t _from = (size_t)(from);                                 \
-    size_t _to = (size_t)(to);                                     \
-    if (_to > (s).len || _from > _to)                              \
-        so_panic("slice bounds out of range");                     \
-    (so_Slice){(T*)(s).ptr + _from, _to - _from, (s).cap - _from}; \
+#define so_slice(T, s, from, to) ({                              \
+    so_Slice _s = (s);                                           \
+    size_t _from = (size_t)(from);                               \
+    size_t _to = (size_t)(to);                                   \
+    if (_to > _s.cap || _from > _to)                             \
+        so_panic("slice bounds out of range");                   \
+    (so_Slice){(T*)_s.ptr + _from, _to - _from, _s.cap - _from}; \
 })
 
 // slice3 creates a slice from another slice with an explicit capacity.
-#define so_slice3(T, s, from, to, max) ({                       \
-    size_t _from = (size_t)(from);                              \
-    size_t _to = (size_t)(to);                                  \
-    size_t _max = (size_t)(max);                                \
-    if (_max > (s).cap || _to > _max || _from > _to)            \
-        so_panic("slice bounds out of range");                  \
-    (so_Slice){(T*)(s).ptr + _from, _to - _from, _max - _from}; \
+#define so_slice3(T, s, from, to, max) ({                      \
+    so_Slice _s = (s);                                         \
+    size_t _from = (size_t)(from);                             \
+    size_t _to = (size_t)(to);                                 \
+    size_t _max = (size_t)(max);                               \
+    if (_max > _s.cap || _to > _max || _from > _to)            \
+        so_panic("slice bounds out of range");                 \
+    (so_Slice){(T*)_s.ptr + _from, _to - _from, _max - _from}; \
 })
 
 // string_bytes copies a string's bytes into a byte slice.
