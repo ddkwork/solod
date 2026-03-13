@@ -186,6 +186,26 @@ so_Slice so_string_runes_impl(so_String s, so_rune* buf);
 })
 so_String so_runes_string_impl(so_Slice rs, char* buf);
 
+// utf8_encode encodes a single rune into buf (up to 4 bytes).
+// Returns the number of bytes written.
+size_t so_utf8_encode(so_rune r, char* buf);
+
+// byte_string creates a string from a single byte.
+// Allocates memory on the stack until the calling function returns.
+#define so_byte_string(b) ({   \
+    char* _buf = so_alloca(1); \
+    _buf[0] = (char)(b);       \
+    (so_String){_buf, 1};      \
+})
+
+// rune_string creates a UTF-8 string from a single rune.
+// Allocates memory on the stack until the calling function returns.
+#define so_rune_string(r) ({                         \
+    char* _buf = so_alloca(4);                       \
+    size_t _n = so_utf8_encode((so_rune)(r), _buf);  \
+    (so_String){_buf, _n};                           \
+})
+
 // append appends elements to a slice without resizing.
 // Returns the new slice with updated length.
 // Panics if the new length exceeds the capacity.

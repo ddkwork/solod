@@ -87,5 +87,13 @@ int main(void) {
         if (so_string_ne(s3, s1)) {
             so_panic("want s3 == s1");
         }
+        so_byte b = 'A';
+        if (so_string_ne(so_byte_string(b), so_str("A"))) {
+            so_panic("want string(b) == A");
+        }
+        so_rune r = U'世';
+        if (so_string_ne(so_rune_string(r), so_str("世"))) {
+            so_panic("want string(r) == 世");
+        }
     }
 }

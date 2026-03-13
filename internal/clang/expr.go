@@ -175,12 +175,26 @@ func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 				return
 			}
 		}
-		// Slice-to-string conversion (string(bs) or string(rs)).
+		// Slice/byte/rune-to-string conversion.
 		if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.String {
 			argType := g.types.TypeOf(n.Args[0])
 			if sl, ok := argType.Underlying().(*types.Slice); ok {
 				g.emitStringCast(n, sl)
 				return
+			}
+			if argBasic, ok := argType.Underlying().(*types.Basic); ok {
+				switch argBasic.Kind() {
+				case types.Byte:
+					fmt.Fprintf(w, "so_byte_string(")
+					g.emitExpr(n.Args[0])
+					fmt.Fprintf(w, ")")
+					return
+				case types.Int32:
+					fmt.Fprintf(w, "so_rune_string(")
+					g.emitExpr(n.Args[0])
+					fmt.Fprintf(w, ")")
+					return
+				}
 			}
 		}
 		// Regular type conversion (e.g. int(3.14)).

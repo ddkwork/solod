@@ -76,5 +76,13 @@ func main() {
 		if s3 != s1 {
 			panic("want s3 == s1")
 		}
+		var b byte = 'A'
+		if string(b) != "A" {
+			panic("want string(b) == A")
+		}
+		var r rune = '世'
+		if string(r) != "世" {
+			panic("want string(r) == 世")
+		}
 	}
 }

@@ -57,27 +57,37 @@ so_Slice so_string_runes_impl(so_String s, so_rune* buf) {
     return (so_Slice){buf, n, n};
 }
 
+// utf8_encode encodes a single rune into buf (up to 4 bytes).
+// Returns the number of bytes written.
+size_t so_utf8_encode(so_rune r, char* buf) {
+    if (r < 0x80) {
+        buf[0] = (char)r;
+        return 1;
+    }
+    if (r < 0x800) {
+        buf[0] = (char)(0xC0 | (r >> 6));
+        buf[1] = (char)(0x80 | (r & 0x3F));
+        return 2;
+    }
+    if (r < 0x10000) {
+        buf[0] = (char)(0xE0 | (r >> 12));
+        buf[1] = (char)(0x80 | ((r >> 6) & 0x3F));
+        buf[2] = (char)(0x80 | (r & 0x3F));
+        return 3;
+    }
+    buf[0] = (char)(0xF0 | (r >> 18));
+    buf[1] = (char)(0x80 | ((r >> 12) & 0x3F));
+    buf[2] = (char)(0x80 | ((r >> 6) & 0x3F));
+    buf[3] = (char)(0x80 | (r & 0x3F));
+    return 4;
+}
+
 // runes_string_impl encodes runes into a UTF-8 buffer and returns a string.
 so_String so_runes_string_impl(so_Slice rs, char* buf) {
     size_t pos = 0;
     so_rune* runes = (so_rune*)rs.ptr;
     for (size_t i = 0; i < rs.len; i++) {
-        so_rune r = runes[i];
-        if (r < 0x80) {
-            buf[pos++] = (char)r;
-        } else if (r < 0x800) {
-            buf[pos++] = (char)(0xC0 | (r >> 6));
-            buf[pos++] = (char)(0x80 | (r & 0x3F));
-        } else if (r < 0x10000) {
-            buf[pos++] = (char)(0xE0 | (r >> 12));
-            buf[pos++] = (char)(0x80 | ((r >> 6) & 0x3F));
-            buf[pos++] = (char)(0x80 | (r & 0x3F));
-        } else {
-            buf[pos++] = (char)(0xF0 | (r >> 18));
-            buf[pos++] = (char)(0x80 | ((r >> 12) & 0x3F));
-            buf[pos++] = (char)(0x80 | ((r >> 6) & 0x3F));
-            buf[pos++] = (char)(0x80 | (r & 0x3F));
-        }
+        pos += so_utf8_encode(runes[i], buf + pos);
     }
     return (so_String){buf, pos};
 }

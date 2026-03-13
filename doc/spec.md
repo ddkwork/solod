@@ -164,6 +164,15 @@ bs := []byte(s)  // byte slice
 rs := []rune(s)  // rune slice
 ```
 
+Converting a byte or rune to a string:
+
+```go
+var b byte = 'A'
+s1 := string(b)  // "A"
+var r rune = '世'
+s2 := string(r)  // "世" (UTF-8 encoded)
+```
+
 String concatenation with `+` is supported for string literals (but not for variables).
 
 ## Arrays
