@@ -3,8 +3,11 @@
 So provides low-level packages that wrap the libc API (`so/c/*`) and a growing set of high-level packages. For full API details, see the [package documentation](https://pkg.go.dev/github.com/nalgeon/solod/so).
 
 [so/errors](#soerrors) •
+[so/io](#soio) •
+[so/math/bits](#somathbits) •
 [so/mem](#somem) •
 [so/slices](#soslices) •
+[so/unicode](#sounicode) •
 [so/unicode/utf8](#sounicodeutf8) •
 [so/c](#soc) •
 [so/c/assert](#socassert) •
@@ -22,6 +25,10 @@ Error creation from text messages.
 - `New(text string) error` - create a new error with the given message.
 
 To avoid heap allocations, `New` can only be used at the package level.
+
+## [so/io](https://pkg.go.dev/github.com/nalgeon/solod/so/io)
+
+Basic interfaces to I/O primitives. Offers an API similar to Go's `io` package, but with fewer features.
 
 ## [so/math/bits](https://pkg.go.dev/github.com/nalgeon/solod/so/math/bits)
 

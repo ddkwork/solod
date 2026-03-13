@@ -212,7 +212,7 @@ Not for production at the moment.
 
 _Where's the standard library?_
 
-Currently, there are mostly low-level packages that wrap the libc API, like `so/c/stdlib`, `so/c/stdio`, and `so/c/cstring`. Check out the [stdlib](doc/stdlib.md) document for a quick overview, or see the full [package documentation](https://pkg.go.dev/github.com/nalgeon/solod/so) for more details.
+There are low-level packages that wrap the libc API (`so/c/stdlib`, `so/c/stdio`, `so/c/cstring`), and a growing set of high-level packages (`bytes`, `mem`, `slices`). Check out the [stdlib](doc/stdlib.md) document for a quick overview, or see the full [package documentation](https://pkg.go.dev/github.com/nalgeon/solod/so) for more details.
 
 A high-level standard library similar to Go's stdlib is also planned.
 
