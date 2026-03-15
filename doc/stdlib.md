@@ -94,6 +94,33 @@ Operations on slices.
 - `Append` - append elements to a heap slice, growing if needed.
 - `Extend` - append another slice to a heap slice, growing if needed.
 
+## [so/strings](https://pkg.go.dev/github.com/nalgeon/solod/so/strings)
+
+String operations. Offers an API similar to Go's `strings` package, but with fewer features.
+
+Functions:
+
+- `Clone` returns a fresh copy of a string.
+- `Compare` compares two strings lexicographically.
+- `Contains` and `ContainsFunc` report whether a substring is within a string.
+- `Count` counts the number of non-overlapping instances of a substring in a string.
+- `Cut` slices a string around a separator.
+- `Fields` and `FieldsFunc` split a string around whitespace or a predicate.
+- `HasPrefix` and `HasSuffix` report whether a string begins/ends with a prefix/suffix.
+- `Index` and `IndexFunc` search for a substring within a string.
+- `Join` concatenates string slices with a separator.
+- `Repeat` returns a string consisting of count copies of a string.
+- `Replace` and `ReplaceAll` replace occurrences of a substring within a string.
+- `Split` and `SplitN` split a string into substrings.
+- `ToLower` and `ToUpper` return a copy with all letters lowercased/uppercased.
+- `Trim`, `TrimFunc` and `TrimSpace` trim characters from a string.
+- `TrimPrefix` and `TrimSuffix` trim a prefix/suffix from a string.
+
+Types:
+
+- `Builder` efficiently builds a string, minimizing memory copying.
+- `Reader` reads data from a string.
+
 ## [so/unicode](https://pkg.go.dev/github.com/nalgeon/solod/so/unicode)
 
 Data and functions to test certain properties of Unicode code points. Offers an API similar to Go's `unicode` package, but with fewer Unicode features (no support for graphic characters, punctuation, symbols, etc.).
