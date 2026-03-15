@@ -40,18 +40,6 @@ func main() {
 		}
 	}
 	{
-		// CopyBuffer.
-		r := reader{b: []byte("hello world")}
-		w := writer{b: make([]byte, 0, 11)}
-		buf := make([]byte, 4)
-		if _, err := io.CopyBuffer(&w, &r, buf); err != nil {
-			panic("CopyBuffer failed")
-		}
-		if string(w.b) != "hello world" {
-			panic("CopyBuffer failed")
-		}
-	}
-	{
 		// CopyN.
 		r := reader{b: []byte("hello world")}
 		w := writer{b: make([]byte, 0, 5)}
@@ -63,15 +51,16 @@ func main() {
 		}
 	}
 	{
-		// ReadAtLeast.
+		// ReadAll.
 		r := reader{b: []byte("hello world")}
-		buf := make([]byte, 5)
-		if _, err := io.ReadAtLeast(&r, buf, 5); err != nil {
-			panic("ReadAtLeast failed")
+		buf, err := io.ReadAll(nil, &r)
+		if err != nil {
+			panic("ReadAll failed")
 		}
-		if string(buf) != "hello" {
-			panic("ReadAtLeast failed")
+		if string(buf) != "hello world" {
+			panic("ReadAll failed")
 		}
+		mem.FreeSlice(nil, buf)
 	}
 	{
 		// ReadFull.
@@ -106,30 +95,5 @@ func main() {
 		if string(buf) != "hello" {
 			panic("LimitReader failed")
 		}
-	}
-	{
-		// TeeReader.
-		r := reader{b: []byte("hello world")}
-		w := writer{b: make([]byte, 0, 11)}
-		tr := io.NewTeeReader(&r, &w)
-		buf := make([]byte, 11)
-		if _, err := io.ReadFull(&tr, buf); err != nil {
-			panic("TeeReader failed")
-		}
-		if string(buf) != "hello world" || string(w.b) != "hello world" {
-			panic("TeeReader failed")
-		}
-	}
-	{
-		// ReadAll.
-		r := reader{b: []byte("hello world")}
-		buf, err := io.ReadAll(nil, &r)
-		if err != nil {
-			panic("ReadAll failed")
-		}
-		if string(buf) != "hello world" {
-			panic("ReadAll failed")
-		}
-		mem.FreeSlice(nil, buf)
 	}
 }

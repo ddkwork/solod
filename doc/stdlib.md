@@ -60,13 +60,14 @@ Basic interfaces to I/O primitives. Offers an API similar to Go's `io` package, 
 
 Functions:
 
-- `Copy`, `CopyBuffer` and `CopyN` copy data from a reader to a writer.
-- `ReadAll`, `ReadFull` and `ReadAtLeast` read data from a reader.
+- `Copy` and `CopyN` copy data from a reader to a writer.
+- `ReadAll` and `ReadFull` read data from a reader.
 
 Types:
 
-- `Reader` and `Writer` are basic concepts for anything that reads or writes bytes.
-- `LimitReader` and `TeeReader` implement specialized readers.
+- `Reader`, `Writer`, and `Closer` are basic concepts for anything that does I/O.
+- `LimitedReader` and `SectionReader` implement specialized readerss.
+- `Discard` is a no-op writer.
 
 ## [so/math/bits](https://pkg.go.dev/github.com/nalgeon/solod/so/math/bits)
 

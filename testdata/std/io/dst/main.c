@@ -51,28 +51,12 @@ int main(void) {
         }
     }
     {
-        // CopyBuffer.
-        reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
-        writer w = (writer){.b = so_make_slice(so_byte, 0, 11)};
-        so_Slice buf = so_make_slice(so_byte, 4, 4);
-        {
-            so_Result _res2 = io_CopyBuffer((io_Writer){.self = &w, .Write = writer_Write}, (io_Reader){.self = &r, .Read = reader_Read}, buf);
-            so_Error err = _res2.err;
-            if (err != NULL) {
-                so_panic("CopyBuffer failed");
-            }
-        }
-        if (so_string_ne(so_bytes_string(w.b), so_str("hello world"))) {
-            so_panic("CopyBuffer failed");
-        }
-    }
-    {
         // CopyN.
         reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
         writer w = (writer){.b = so_make_slice(so_byte, 0, 5)};
         {
-            so_Result _res3 = io_CopyN((io_Writer){.self = &w, .Write = writer_Write}, (io_Reader){.self = &r, .Read = reader_Read}, 5);
-            so_Error err = _res3.err;
+            so_Result _res2 = io_CopyN((io_Writer){.self = &w, .Write = writer_Write}, (io_Reader){.self = &r, .Read = reader_Read}, 5);
+            so_Error err = _res2.err;
             if (err != NULL) {
                 so_panic("CopyN failed");
             }
@@ -82,27 +66,26 @@ int main(void) {
         }
     }
     {
-        // ReadAtLeast.
+        // ReadAll.
         reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
-        so_Slice buf = so_make_slice(so_byte, 5, 5);
-        {
-            so_Result _res4 = io_ReadAtLeast((io_Reader){.self = &r, .Read = reader_Read}, buf, 5);
-            so_Error err = _res4.err;
-            if (err != NULL) {
-                so_panic("ReadAtLeast failed");
-            }
+        so_Result _res3 = io_ReadAll((mem_Allocator){0}, (io_Reader){.self = &r, .Read = reader_Read});
+        so_Slice buf = _res3.val.as_slice;
+        so_Error err = _res3.err;
+        if (err != NULL) {
+            so_panic("ReadAll failed");
         }
-        if (so_string_ne(so_bytes_string(buf), so_str("hello"))) {
-            so_panic("ReadAtLeast failed");
+        if (so_string_ne(so_bytes_string(buf), so_str("hello world"))) {
+            so_panic("ReadAll failed");
         }
+        mem_FreeSlice(so_byte, (mem_Allocator){0}, buf);
     }
     {
         // ReadFull.
         reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
         so_Slice buf = so_make_slice(so_byte, 11, 11);
         {
-            so_Result _res5 = io_ReadFull((io_Reader){.self = &r, .Read = reader_Read}, buf);
-            so_Error err = _res5.err;
+            so_Result _res4 = io_ReadFull((io_Reader){.self = &r, .Read = reader_Read}, buf);
+            so_Error err = _res4.err;
             if (err != NULL) {
                 so_panic("ReadFull failed");
             }
@@ -114,9 +97,9 @@ int main(void) {
     {
         // WriteString.
         writer w = (writer){.b = so_make_slice(so_byte, 0, 11)};
-        so_Result _res6 = io_WriteString((io_Writer){.self = &w, .Write = writer_Write}, so_str("hello world"));
-        so_int n = _res6.val.as_int;
-        so_Error err = _res6.err;
+        so_Result _res5 = io_WriteString((io_Writer){.self = &w, .Write = writer_Write}, so_str("hello world"));
+        so_int n = _res5.val.as_int;
+        so_Error err = _res5.err;
         if (err != NULL) {
             so_panic("WriteString failed");
         }
@@ -130,8 +113,8 @@ int main(void) {
         io_LimitedReader lr = io_LimitReader((io_Reader){.self = &r, .Read = reader_Read}, 5);
         so_Slice buf = so_make_slice(so_byte, 5, 5);
         {
-            so_Result _res7 = io_LimitedReader_Read(&lr, buf);
-            so_Error err = _res7.err;
+            so_Result _res6 = io_LimitedReader_Read(&lr, buf);
+            so_Error err = _res6.err;
             if (err != NULL) {
                 so_panic("LimitReader failed");
             }
@@ -139,36 +122,5 @@ int main(void) {
         if (so_string_ne(so_bytes_string(buf), so_str("hello"))) {
             so_panic("LimitReader failed");
         }
-    }
-    {
-        // TeeReader.
-        reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
-        writer w = (writer){.b = so_make_slice(so_byte, 0, 11)};
-        io_TeeReader tr = io_NewTeeReader((io_Reader){.self = &r, .Read = reader_Read}, (io_Writer){.self = &w, .Write = writer_Write});
-        so_Slice buf = so_make_slice(so_byte, 11, 11);
-        {
-            so_Result _res8 = io_ReadFull((io_Reader){.self = &tr, .Read = io_TeeReader_Read}, buf);
-            so_Error err = _res8.err;
-            if (err != NULL) {
-                so_panic("TeeReader failed");
-            }
-        }
-        if (so_string_ne(so_bytes_string(buf), so_str("hello world")) || so_string_ne(so_bytes_string(w.b), so_str("hello world"))) {
-            so_panic("TeeReader failed");
-        }
-    }
-    {
-        // ReadAll.
-        reader r = (reader){.b = so_string_bytes(so_str("hello world"))};
-        so_Result _res9 = io_ReadAll((mem_Allocator){0}, (io_Reader){.self = &r, .Read = reader_Read});
-        so_Slice buf = _res9.val.as_slice;
-        so_Error err = _res9.err;
-        if (err != NULL) {
-            so_panic("ReadAll failed");
-        }
-        if (so_string_ne(so_bytes_string(buf), so_str("hello world"))) {
-            so_panic("ReadAll failed");
-        }
-        mem_FreeSlice(so_byte, (mem_Allocator){0}, buf);
     }
 }
