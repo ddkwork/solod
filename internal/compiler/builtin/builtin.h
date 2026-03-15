@@ -48,12 +48,12 @@ typedef struct {
 #define so_str(s) ((so_String){s, sizeof(s) - 1})
 
 // cstr returns a null-terminated C string copy on the stack.
-#define so_cstr(s) ({                   \
-    so_String _s = (s);                 \
-    char* _buf = so_alloca(_s.len + 1); \
-    memcpy(_buf, _s.ptr, _s.len);       \
-    _buf[_s.len] = '\0';                \
-    _buf;                               \
+#define so_cstr(s) ({                             \
+    so_String _s = (s);                           \
+    char* _buf = so_alloca(_s.len + 1);           \
+    if (_s.len > 0) memcpy(_buf, _s.ptr, _s.len); \
+    _buf[_s.len] = '\0';                          \
+    _buf;                                         \
 })
 
 // string_slice creates a substring [from, to).
@@ -232,13 +232,15 @@ size_t so_utf8_encode(so_rune r, char* buf);
 // extend appends all elements from a source slice to a destination slice.
 // Returns the new slice with updated length.
 // Panics if the new length exceeds the capacity.
-#define so_extend(T, dst, src) ({                                            \
-    so_Slice _dst = (dst);                                                   \
-    so_Slice _src = (src);                                                   \
-    if (_dst.len + _src.len > _dst.cap) so_panic("extend: out of capacity"); \
-    memcpy((T*)_dst.ptr + _dst.len, _src.ptr, _src.len * sizeof(T));         \
-    _dst.len += _src.len;                                                    \
-    _dst;                                                                    \
+#define so_extend(T, dst, src) ({                             \
+    so_Slice _dst = (dst);                                    \
+    so_Slice _src = (src);                                    \
+    if (_dst.len + _src.len > _dst.cap)                       \
+        so_panic("extend: out of capacity");                  \
+    if (_src.len > 0) memcpy((T*)_dst.ptr + _dst.len,         \
+                             _src.ptr, _src.len * sizeof(T)); \
+    _dst.len += _src.len;                                     \
+    _dst;                                                     \
 })
 
 // copy copies elements from src to dst. Returns the number of elements copied
@@ -246,7 +248,7 @@ size_t so_utf8_encode(so_rune r, char* buf);
 #define so_copy(T, dst, src) so_copy_impl(dst, src, sizeof(T))
 static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) {
     size_t n = dst.len < src.len ? dst.len : src.len;
-    memmove(dst.ptr, src.ptr, n * elem_size);
+    if (n > 0) memmove(dst.ptr, src.ptr, n * elem_size);
     return (so_int)n;
 }
 
@@ -254,7 +256,7 @@ static inline so_int so_copy_impl(so_Slice dst, so_Slice src, size_t elem_size) 
 // of bytes copied (which is the minimum of dst.len and src.len).
 static inline so_int so_copy_string(so_Slice dst, so_String src) {
     size_t n = dst.len < src.len ? dst.len : src.len;
-    memmove(dst.ptr, src.ptr, n);
+    if (n > 0) memmove(dst.ptr, src.ptr, n);
     return (so_int)n;
 }
 
