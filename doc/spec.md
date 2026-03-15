@@ -889,3 +889,8 @@ _ = geom.Pi
 double a = geom_RectArea(5, 10);
 (void)geom_Pi;
 ```
+
+There's no automatic order for declarations within a package. You need to declare constants, variables, and types in the order that C expects:
+
+- If a function F uses a constant C or a variable V, you must declare V and C before F.
+- If type B refers to type A, you must declare A before B.
