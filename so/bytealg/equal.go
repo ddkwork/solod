@@ -4,7 +4,7 @@
 
 package bytealg
 
-import "github.com/nalgeon/solod/so/c/cstring"
+//so:include <string.h>
 
 // Equal reports whether a and b
 // are the same length and contain the same bytes.
@@ -14,5 +14,8 @@ import "github.com/nalgeon/solod/so/c/cstring"
 // It is provided here for convenience,
 // because some packages cannot depend on bytes.
 func Equal(a, b []byte) bool {
-	return len(a) == len(b) && cstring.Memcmp(&a[0], &b[0], uintptr(len(a))) == 0
+	return len(a) == len(b) && memcmp(&a[0], &b[0], uintptr(len(a))) == 0
 }
+
+//so:extern
+func memcmp(a any, b any, n uintptr) int { _, _, _ = a, b, n; return 0 }
