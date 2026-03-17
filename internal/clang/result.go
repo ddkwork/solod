@@ -133,7 +133,7 @@ func (g *Generator) multiReturnFields(node ast.Node, sig *types.Signature) multi
 // findResultType looks up the {TypeName}Result type in the package scope.
 func (g *Generator) findResultType(node ast.Node, named *types.Named) string {
 	resultName := named.Obj().Name() + "Result"
-	obj := g.pkg.Types.Scope().Lookup(resultName)
+	obj := named.Obj().Pkg().Scope().Lookup(resultName)
 	if obj == nil {
 		g.fail(node, "returning struct %s requires a %s type declaration", named.Obj().Name(), resultName)
 	}
