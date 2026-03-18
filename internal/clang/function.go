@@ -40,10 +40,22 @@ func (g *Generator) emitFuncProto(w io.Writer, decl *ast.FuncDecl) *types.Signat
 		name = g.symbolName(recvTypeName(decl.Recv.List[0])) + "_" + decl.Name.Name
 	}
 
-	// Parameters: methods prepend void* self.
+	// Parameters: methods prepend receiver
+	// (void* self for pointer, T name for value).
 	var parts []string
 	if decl.Recv != nil {
-		parts = append(parts, "void* self")
+		recv := decl.Recv.List[0]
+		if _, ok := recv.Type.(*ast.Ident); ok {
+			// Value receiver: pass struct by value.
+			cStructType := g.symbolName(recvTypeName(recv))
+			recvName := "self"
+			if len(recv.Names) > 0 {
+				recvName = recv.Names[0].Name
+			}
+			parts = append(parts, cStructType+" "+recvName)
+		} else {
+			parts = append(parts, "void* self")
+		}
 	}
 	if decl.Type.Params != nil {
 		for _, field := range decl.Type.Params.List {

@@ -567,7 +567,7 @@ p2 := new(point{1, 2})  // *point with values
 
 ## Methods
 
-Methods are defined on struct types with pointer receivers:
+Methods are defined on struct types with pointer or value receivers:
 
 ```go
 type Rect struct {
@@ -578,19 +578,25 @@ func (r *Rect) Area() int {
     return r.width * r.height
 }
 
-func (r *Rect) perim(n int) int {
-    return n * (2*r.width + 2*r.height)
+func (r Rect) resize(x int) Rect {
+    r.height *= x
+    r.width *= x
+    return r
 }
 ```
+
+Pointer receivers pass `void* self` in C and cast to the struct pointer. Value receivers pass the struct by value, so modifications operate on a copy.
 
 Calling methods on values and pointers:
 
 ```go
 r := Rect{width: 10, height: 5}
-r.Area()    // called on value (address taken automatically)
+r.Area()      // called on value (address taken automatically)
+r.resize(2)   // called on value (passed by value)
 
 rp := &r
-rp.Area()   // called on pointer
+rp.Area()     // called on pointer
+rp.resize(2)  // called on pointer (dereferenced automatically)
 ```
 
 Methods on primitive/named types are not supported.
@@ -610,12 +616,11 @@ type Shape interface {
 
 In C, an interface is a struct with a `void* self` pointer and function pointers for each method (less efficient than using a static method table, but simpler; this might change in the future).
 
-Converting a concrete type to an interface:
+Interface methods must use pointer receivers, since the vtable uses `void* self` function pointers. Converting a concrete type to an interface requires passing a pointer:
 
 ```go
-s := Shape(r)
-var s2 Shape = r
-var s3 Shape = &r
+s := Shape(&r)
+var s2 Shape = &r
 ```
 
 Passing a concrete type to functions that accept interfaces:
@@ -625,33 +630,18 @@ func calcShape(s Shape) int {
     return s.Perim(2) + s.Area()
 }
 
-calcShape(r)        // implicit conversion
-calcShape(Shape(r)) // explicit conversion
+calcShape(&r)         // implicit conversion
+calcShape(Shape(&r))  // explicit conversion
 ```
 
 Type assertions:
 
 ```go
-_, ok := s.(Rect)     // comma-ok pattern (checks without panic)
-r := s.(Rect)         // direct assertion
-
-_, ok := l.(*Rect)    // pointer type assertion
-r := l.(*Rect)
+_, ok := s.(*Rect)    // comma-ok pattern (checks without panic)
+r := s.(*Rect)        // direct assertion
 
 // But not both; this is not supported.
-// r, ok := l.(*Rect)
-```
-
-Value receivers and pointer receivers are both supported. Pointer receiver interfaces require passing a pointer:
-
-```go
-type Line interface {
-    Length() int
-}
-
-func (r *Rect) Length() int { ... }
-
-l := Line(&r) // must pass pointer
+// r, ok := s.(*Rect)
 ```
 
 Empty interfaces (`interface{}` and `any`) are translated to `void*`.

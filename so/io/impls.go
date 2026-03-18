@@ -14,13 +14,13 @@ type DiscardWriter struct{}
 
 // Discard is a [Writer] on which all Write calls
 // succeed without doing anything.
-var Discard Writer = DiscardWriter{}
+var Discard Writer = &DiscardWriter{}
 
-func (DiscardWriter) Write(p []byte) (int, error) {
+func (*DiscardWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (DiscardWriter) WriteString(s string) (int, error) {
+func (*DiscardWriter) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
@@ -60,11 +60,11 @@ func NewNopCloser(r Reader) NopCloser {
 	return NopCloser{r}
 }
 
-func (n NopCloser) Read(p []byte) (int, error) {
+func (n *NopCloser) Read(p []byte) (int, error) {
 	return n.r.Read(p)
 }
 
-func (NopCloser) Close() error { return nil }
+func (*NopCloser) Close() error { return nil }
 
 // NewSectionReader returns a [SectionReader] that reads from r
 // starting at offset off and stops with EOF after n bytes.

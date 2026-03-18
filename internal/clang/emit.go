@@ -64,8 +64,6 @@ type State struct {
 
 	// Current indentation level (number of tabs).
 	indent int
-	// Current receiver name (for -> access in methods).
-	recvName string
 	// Current function's signature (for multi-return).
 	funcSig *types.Signature
 	// Deferred generic calls to emit before returns, panics, and function end.

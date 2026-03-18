@@ -344,15 +344,8 @@ func (g *Generator) emitSelectorExpr(n *ast.SelectorExpr) {
 	xType := g.types.TypeOf(n.X)
 	g.emitExpr(n.X)
 
-	// Value receivers (T x) are passed as (void* self) and coverted to (T* x),
-	// so need to use "->" instead of "." for field access.
 	_, isPtr := xType.Underlying().(*types.Pointer)
-	isValueRecv := false
-	if ident, ok := n.X.(*ast.Ident); ok && ident.Name == g.state.recvName {
-		isValueRecv = g.state.recvName != ""
-	}
-	// Pointers and value receivers use "->", regular values use ".".
-	if isPtr || isValueRecv {
+	if isPtr {
 		fmt.Fprintf(w, "->%s", n.Sel.Name)
 	} else {
 		fmt.Fprintf(w, ".%s", n.Sel.Name)

@@ -45,7 +45,8 @@ func (g *Generator) emitFuncPtrField(w io.Writer, node ast.Node, fieldName strin
 	fmt.Fprintf(w, "%s%s (*%s)(%s);\n", g.indent(), retType, fieldName, strings.Join(params, ", "))
 }
 
-// emitMethodDecl emits a method as a C function with void* self parameter.
+// emitMethodDecl emits a method as a C function.
+// Pointer receivers use void* self with a cast; value receivers pass the struct by value.
 func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 	w := g.state.writer
 	sig := g.funcSig(decl)
@@ -54,16 +55,8 @@ func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 	// Init emission state.
 	recv := decl.Recv.List[0]
 	cStructType := g.symbolName(recvTypeName(recv))
-	named := len(recv.Names) > 0 // does the receiver have a name?
-
-	if named {
-		// For value receivers, track the name so emitSelectorExpr uses ->
-		// (all receivers become pointers in C via void* self cast).
-		if _, ok := recv.Type.(*ast.Ident); ok {
-			g.state.recvName = recv.Names[0].Name
-			defer func() { g.state.recvName = "" }()
-		}
-	}
+	named := len(recv.Names) > 0
+	_, isValueRecv := recv.Type.(*ast.Ident)
 
 	g.state.funcSig = sig
 	g.state.tempCount = 0
@@ -76,12 +69,21 @@ func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 	fmt.Fprintln(w, " {")
 	g.state.indent++
 
-	// Emit receiver variable from self parameter.
-	if named {
-		recvName := recv.Names[0].Name
-		fmt.Fprintf(w, "%s%s* %s = (%s*)self;\n", g.indent(), cStructType, recvName, cStructType)
+	// Emit receiver preamble.
+	if isValueRecv {
+		// Value receivers are passed by value - no cast needed.
+		// Unnamed value receivers need (void)self to suppress unused warnings.
+		if !named {
+			fmt.Fprintf(w, "%s(void)self;\n", g.indent())
+		}
 	} else {
-		fmt.Fprintf(w, "%s(void)self;\n", g.indent())
+		// Pointer receivers: cast void* self to the concrete type.
+		if named {
+			recvName := recv.Names[0].Name
+			fmt.Fprintf(w, "%s%s* %s = (%s*)self;\n", g.indent(), cStructType, recvName, cStructType)
+		} else {
+			fmt.Fprintf(w, "%s(void)self;\n", g.indent())
+		}
 	}
 
 	// Emit method body, handling deferred calls if needed.
@@ -190,13 +192,28 @@ func (g *Generator) emitMethodCall(sel *ast.SelectorExpr, args []ast.Expr) {
 	cName := cStructType + "_" + sel.Sel.Name
 	fmt.Fprintf(w, "%s(", cName)
 
-	// Pass receiver: add & if it's a value, pass directly if already a pointer.
+	// Pass receiver based on method's declared receiver type and call-site type.
+	declSig := selection.Obj().Type().(*types.Signature)
+	_, isMethodPtrRecv := declSig.Recv().Type().(*types.Pointer)
 	xType := g.types.TypeOf(sel.X)
-	if _, ok := xType.Underlying().(*types.Pointer); ok {
-		g.emitExpr(sel.X)
+	_, isCallSitePtr := xType.Underlying().(*types.Pointer)
+
+	if isMethodPtrRecv {
+		// Pointer receiver: pass address of value, or pointer directly.
+		if isCallSitePtr {
+			g.emitExpr(sel.X)
+		} else {
+			fmt.Fprintf(w, "&")
+			g.emitExpr(sel.X)
+		}
 	} else {
-		fmt.Fprintf(w, "&")
-		g.emitExpr(sel.X)
+		// Value receiver: pass value directly, or dereference pointer.
+		if isCallSitePtr {
+			fmt.Fprintf(w, "*")
+			g.emitExpr(sel.X)
+		} else {
+			g.emitExpr(sel.X)
+		}
 	}
 
 	// Pass method arguments.
