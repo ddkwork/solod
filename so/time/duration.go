@@ -41,7 +41,7 @@ const (
 // Leading zero units are omitted. As a special case, durations less than one
 // second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
 // that the leading digit is non-zero. The zero duration formats as 0s.
-// buf must have a capacity of at least 25 bytes.
+// buf must have a length of at least 25 bytes.
 func (d Duration) String(buf []byte) string {
 	var local [32]byte
 	n := d.format(&local)
