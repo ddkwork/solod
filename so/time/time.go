@@ -41,8 +41,6 @@
 // both the wall clock and monotonic clock readings to compute the result.
 // Because t.AddDate(y, m, d), t.Round(d), and t.Truncate(d) are wall time
 // computations, they always strip any monotonic clock reading from their results.
-// Because t.In, t.Local, and t.UTC are used for their effect on the interpretation
-// of the wall time, they also strip any monotonic clock reading from their results.
 // The canonical way to strip a monotonic clock reading is to use t = t.Round(0).
 //
 // If Times t and u both contain monotonic clock readings, the operations
@@ -67,9 +65,8 @@
 // friends.
 //
 // Note that the == operator compares not just the time instant but
-// also the [Location] and the monotonic clock reading. See the
-// documentation for the Time type for a discussion of equality
-// testing for Time values.
+// also the monotonic clock reading. See the documentation for the
+// Time type for a discussion of equality testing for Time values.
 //
 // For debugging, the result of t.String does include the monotonic
 // clock reading if present. If t != u because of different monotonic clock readings,
@@ -93,12 +90,7 @@ package time
 // Date returns a time that is correct in one of the two zones involved
 // in the transition, but it does not guarantee which.
 //
-// Date panics if loc is nil.
-func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) Time {
-	if loc == nil {
-		panic("time: missing Location in call to Date")
-	}
-
+func Date(year int, month Month, day, hour, min, sec, nsec int, offset Offset) Time {
 	// Normalize month, overflowing into year.
 	m := int(month) - 1
 	year, m = norm(year, m, 12)
@@ -115,25 +107,20 @@ func Date(year int, month Month, day, hour, min, sec, nsec int, loc *Location) T
 		int64(hour*secondsPerHour+min*secondsPerMinute+sec) +
 		absoluteToUnix
 
-	// Look for zone offset for expected time, so we can adjust to UTC.
-	// The lookup function expects UTC, so first we pass unixSec in the
-	// hope that it will not be too close to a zone transition,
-	// and then adjust if it is.
-	if loc.offset != 0 {
-		unixSec -= int64(loc.offset)
+	// Adjust to UTC by subtracting the offset.
+	if offset != 0 {
+		unixSec -= int64(offset)
 	}
 
-	t := unixTime(unixSec, int32(nsec))
-	t.setLoc(loc)
-	return t
+	return unixTime(unixSec, int32(nsec))
 }
 
-// Now returns the time in UTC.
+// Now returns the current time in UTC.
 func Now() Time {
 	sec, nsec := time_wall()
 	mono := time_mono()
 	if mono == 0 {
-		return Time{uint64(nsec), sec + unixToInternal, nil}
+		return Time{uint64(nsec), sec + unixToInternal}
 	}
 	mono -= time_monoStart
 	sec += unixToInternal - minWall
@@ -141,23 +128,14 @@ func Now() Time {
 		// Seconds field overflowed the 33 bits available when
 		// storing a monotonic time. This will be true after
 		// March 16, 2157.
-		return Time{uint64(nsec), sec + minWall, nil}
+		return Time{uint64(nsec), sec + minWall}
 	}
 	wall := hasMonotonic | (uint64(sec) << nsecShift) | uint64(nsec)
-	return Time{wall, mono, nil}
-}
-
-// Location represents a single time zone such as CET.
-// So doesn't support complex locations with multiple zones and
-// transitions - only fixed zones. The "Location" name is retained
-// for familiarity and to allow for future expansion if needed.
-type Location struct {
-	name   string // abbreviated name, "CET"
-	offset int    // seconds east of UTC
-	isDST  bool   // is this zone Daylight Savings Time?
+	return Time{wall, mono}
 }
 
 // A Time represents an instant in time with nanosecond precision.
+// Time always represents UTC internally.
 //
 // Programs using times should typically store and pass them as values,
 // not pointers. That is, time variables and struct fields should be of
@@ -167,20 +145,10 @@ type Location struct {
 // As this time is unlikely to come up in practice, the [Time.IsZero] method gives
 // a simple way of detecting a time that has not been initialized explicitly.
 //
-// Each time has an associated [Location]. Changing the Location of a Time value
-// does not change the actual instant it represents, only the time zone in which
-// to interpret it.
-//
 // In addition to the required "wall clock" reading, a Time may contain an optional
 // reading of the current process's monotonic clock, to provide additional precision
 // for comparison or subtraction. See the "Monotonic Clocks" section in the package
 // documentation for details.
-//
-// Note that the == operator compares not just the time instant but also the
-// Location and the monotonic clock reading. In general, prefer t.Equal(u)
-// to t == u, since t.Equal uses the most accurate comparison available and
-// correctly handles the case when only one of its arguments has a monotonic
-// clock reading.
 type Time struct {
 	// wall and ext encode the wall time seconds, wall time nanoseconds,
 	// and optional monotonic clock reading in nanoseconds.
@@ -195,13 +163,6 @@ type Time struct {
 	// signed 64-bit monotonic clock reading, nanoseconds since process start.
 	wall uint64
 	ext  int64
-
-	// loc specifies the Location that should be used to
-	// determine the minute, hour, month, day, and year
-	// that correspond to this Time.
-	// The nil location means UTC.
-	// All UTC times are represented with loc==nil, never loc==&utcLoc.
-	loc *Location
 }
 
 const (
@@ -278,44 +239,6 @@ func (t Time) Equal(u Time) bool {
 	return t.sec() == u.sec() && t.nsec() == u.nsec()
 }
 
-// In returns a copy of t representing the same time instant, but
-// with the copy's location information set to loc for display
-// purposes.
-//
-// In panics if loc is nil.
-func (t Time) In(loc *Location) Time {
-	if loc == nil {
-		panic("time: missing Location in call to Time.In")
-	}
-	t.setLoc(loc)
-	return t
-}
-
-// Location returns the time zone information associated with t.
-func (t Time) Location() *Location {
-	if t.loc == nil {
-		t.loc = UTC
-	}
-	return t.loc
-}
-
-// Zone computes the time zone in effect at time t, returning the abbreviated
-// name of the zone (such as "CET") and its offset in seconds east of UTC.
-func (t Time) Zone() (string, int) {
-	if t.loc == nil {
-		return UTC.name, 0
-	}
-	return t.loc.name, t.loc.offset
-}
-
-// IsDST reports whether the time in the configured location is in Daylight Savings Time.
-func (t Time) IsDST() bool {
-	if t.loc == nil {
-		return false
-	}
-	return t.loc.isDST
-}
-
 // nsec returns the time's nanoseconds.
 func (t *Time) nsec() int32 {
 	return int32(t.wall & nsecMask)
@@ -327,15 +250,6 @@ func (t *Time) sec() int64 {
 		return wallToInternal + int64((t.wall<<1)>>(nsecShift+1))
 	}
 	return t.ext
-}
-
-// setLoc sets the location associated with the time.
-func (t *Time) setLoc(loc *Location) {
-	if loc == UTC {
-		loc = nil
-	}
-	t.stripMono()
-	t.loc = loc
 }
 
 // stripMono strips the monotonic clock reading in t.

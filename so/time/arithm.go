@@ -296,12 +296,6 @@ func (t Time) YearDay() int {
 	return yday
 }
 
-// UTC returns t with the location set to UTC.
-func (t Time) UTC() Time {
-	t.setLoc(UTC)
-	return t
-}
-
 // Add returns the time t+d.
 func (t Time) Add(d Duration) Time {
 	dsec := int64(d / 1000000000)
@@ -382,15 +376,6 @@ func Until(t Time) Duration {
 // For example, AddDate(-1, 2, 3) applied to January 1, 2011
 // returns March 4, 2010.
 //
-// Note that dates are fundamentally coupled to timezones, and calendrical
-// periods like days don't have fixed durations. AddDate uses the Location of
-// the Time value to determine these durations. That means that the same
-// AddDate arguments can produce a different shift in absolute time depending on
-// the base Time value and its Location. For example, AddDate(0, 0, 1) applied
-// to 12:00 on March 27 always returns 12:00 on March 28. At some locations and
-// in some years this is a 24 hour shift. In others it's a 23 hour shift due to
-// daylight savings time transitions.
-//
 // AddDate normalizes its result in the same way that Date does,
 // so, for example, adding one month to October 31 yields
 // December 1, the normalized form for November 31.
@@ -400,17 +385,15 @@ func (t Time) AddDate(years int, months int, days int) Time {
 	return Date(
 		date.Year+years, date.Month+Month(months), date.Day+days,
 		clock.Hour, clock.Minute, clock.Second, int(t.nsec()),
-		t.Location(),
+		UTC,
 	)
 }
 
 // Truncate returns the result of rounding t down to a multiple of d (since the zero time).
 // If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
 //
-// Truncate operates on the time as an absolute duration since the
-// zero time; it does not operate on the presentation form of the
-// time. Thus, Truncate(Hour) may return a time with a non-zero
-// minute, depending on the time's Location.
+// Truncate operates on the time as an absolute duration since the zero time;
+// it does not operate on the presentation form of the time.
 func (t Time) Truncate(d Duration) Time {
 	t.stripMono()
 	if d <= 0 {
@@ -424,10 +407,8 @@ func (t Time) Truncate(d Duration) Time {
 // The rounding behavior for halfway values is to round up.
 // If d <= 0, Round returns t stripped of any monotonic clock reading but otherwise unchanged.
 //
-// Round operates on the time as an absolute duration since the
-// zero time; it does not operate on the presentation form of the
-// time. Thus, Round(Hour) may return a time with a non-zero
-// minute, depending on the time's Location.
+// Round operates on the time as an absolute duration since the zero time;
+// it does not operate on the presentation form of the time.
 func (t Time) Round(d Duration) Time {
 	t.stripMono()
 	if d <= 0 {
@@ -440,16 +421,10 @@ func (t Time) Round(d Duration) Time {
 	return t.Add(d - r)
 }
 
-// absSec returns the time t as an absolute seconds, adjusted by the zone offset.
+// absSec returns the time t as absolute seconds.
 // It is called when computing a presentation property like Month or Hour.
-// We'd rather call it abs, but there are linknames to abs that make that problematic.
-// See timeAbs below.
 func (t Time) absSec() absSeconds {
-	sec := t.unixSec()
-	if t.loc != nil {
-		sec += int64(t.loc.offset)
-	}
-	return absSeconds(sec + (unixToInternal + internalToAbsolute))
+	return absSeconds(t.unixSec() + (unixToInternal + internalToAbsolute))
 }
 
 // addSec adds d seconds to the time.

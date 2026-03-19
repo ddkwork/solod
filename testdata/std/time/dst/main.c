@@ -27,9 +27,6 @@ int main(void) {
         if (time_Time_Nanosecond(t) != 777888999) {
             so_panic("unexpected Time.Nanosecond");
         }
-        if (so_string_ne(time_Location_String(time_Time_Location(t)), so_str("UTC"))) {
-            so_panic("unexpected Time.Location");
-        }
-        so_println("%" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %.*s", time_Time_Year(t), time_Time_Month(t), time_Time_Day(t), time_Time_Hour(t), time_Time_Minute(t), time_Time_Second(t), time_Time_Nanosecond(t), time_Location_String(time_Time_Location(t)).len, time_Location_String(time_Time_Location(t)).ptr);
+        so_println("%" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64 " %" PRId64, time_Time_Year(t), time_Time_Month(t), time_Time_Day(t), time_Time_Hour(t), time_Time_Minute(t), time_Time_Second(t), time_Time_Nanosecond(t));
     }
 }

@@ -10,11 +10,6 @@ import (
 	. "github.com/nalgeon/solod/so/time"
 )
 
-var tzUTCMinus5 = FixedZone("UTC-5", -5*3600)
-var tzUTCMinus12 = FixedZone("UTC-12", -12*3600)
-var tzUTCPlus1 = FixedZone("UTC+1", 1*3600)
-var tzUTCPlus12 = FixedZone("UTC+12", 12*3600)
-
 func TestZeroTime(t *testing.T) {
 	var zero Time
 	date := zero.Date()
@@ -36,8 +31,6 @@ type parsedTime struct {
 	Hour, Minute, Second int // 15:04:05 is 15, 4, 5.
 	Nanosecond           int // Fractional second.
 	Weekday              Weekday
-	ZoneOffset           int    // seconds east of UTC, e.g. -7*60*60 for -0700
-	Zone                 string // e.g., "MST"
 }
 
 type TimeTest struct {
@@ -46,22 +39,22 @@ type TimeTest struct {
 }
 
 var utctests = []TimeTest{
-	{0, parsedTime{1970, January, 1, 0, 0, 0, 0, Thursday, 0, "UTC"}},
-	{1221681866, parsedTime{2008, September, 17, 20, 4, 26, 0, Wednesday, 0, "UTC"}},
-	{-1221681866, parsedTime{1931, April, 16, 3, 55, 34, 0, Thursday, 0, "UTC"}},
-	{-11644473600, parsedTime{1601, January, 1, 0, 0, 0, 0, Monday, 0, "UTC"}},
-	{599529660, parsedTime{1988, December, 31, 0, 1, 0, 0, Saturday, 0, "UTC"}},
-	{978220860, parsedTime{2000, December, 31, 0, 1, 0, 0, Sunday, 0, "UTC"}},
+	{0, parsedTime{1970, January, 1, 0, 0, 0, 0, Thursday}},
+	{1221681866, parsedTime{2008, September, 17, 20, 4, 26, 0, Wednesday}},
+	{-1221681866, parsedTime{1931, April, 16, 3, 55, 34, 0, Thursday}},
+	{-11644473600, parsedTime{1601, January, 1, 0, 0, 0, 0, Monday}},
+	{599529660, parsedTime{1988, December, 31, 0, 1, 0, 0, Saturday}},
+	{978220860, parsedTime{2000, December, 31, 0, 1, 0, 0, Sunday}},
 }
 
 var nanoutctests = []TimeTest{
-	{0, parsedTime{1970, January, 1, 0, 0, 0, 1e8, Thursday, 0, "UTC"}},
-	{1221681866, parsedTime{2008, September, 17, 20, 4, 26, 2e8, Wednesday, 0, "UTC"}},
+	{0, parsedTime{1970, January, 1, 0, 0, 0, 1e8, Thursday}},
+	{1221681866, parsedTime{2008, September, 17, 20, 4, 26, 2e8, Wednesday}},
 }
 
 var dateTests = []struct {
 	year, month, day, hour, min, sec, nsec int
-	z                                      *Location
+	z                                      Offset
 	unix                                   int64
 }{
 	{2011, 11, 6, 8, 0, 0, 0, UTC, 1320566400},   // 8:00:00 UTC
@@ -81,16 +74,16 @@ var dateTests = []struct {
 	{2011, 11, 18, 14, 116, 35, 0, UTC, 1321631795},                // Nov 18 14:116:35
 	{2011, 10, 49, 15, 56, 35, 0, UTC, 1321631795},                 // Oct 49 15:56:35
 	{2011, 11, 18, 15, 55, 95, 0, UTC, 1321631795},                 // Nov 18 15:55:95
-	{2011, 11, 18, 15, 56, 34, 1e9, UTC, 1321631795},               // Nov 18 15:56:34 + 10⁹ns
+	{2011, 11, 18, 15, 56, 34, 1e9, UTC, 1321631795},               // Nov 18 15:56:34 + 10^9ns
 	{2011, 12, -12, 15, 56, 35, 0, UTC, 1321631795},                // Dec -12 15:56:35
 	{2012, 1, -43, 15, 56, 35, 0, UTC, 1321631795},                 // 2012 Jan -43 15:56:35
 	{2012, int(January - 2), 18, 15, 56, 35, 0, UTC, 1321631795},   // 2012 (Jan-2) 18 15:56:35
 	{2010, int(December + 11), 18, 15, 56, 35, 0, UTC, 1321631795}, // 2010 (Dec+11) 18 15:56:35
 	{1970, 1, 15297, 15, 56, 35, 0, UTC, 1321631795},               // large number of days
-	{2011, 11, 18, 10, 56, 35, 0, &tzUTCMinus5, 1321631795},        // UTC-5
-	{2011, 11, 18, 3, 56, 35, 0, &tzUTCMinus12, 1321631795},        // UTC-12
-	{2011, 11, 18, 16, 56, 35, 0, &tzUTCPlus1, 1321631795},         // UTC+1
-	{2011, 11, 19, 3, 56, 35, 0, &tzUTCPlus12, 1321631795},         // UTC+12
+	{2011, 11, 18, 10, 56, 35, 0, Offset(-5 * 3600), 1321631795},   // UTC-5
+	{2011, 11, 18, 3, 56, 35, 0, Offset(-12 * 3600), 1321631795},   // UTC-12
+	{2011, 11, 18, 16, 56, 35, 0, Offset(1 * 3600), 1321631795},    // UTC+1
+	{2011, 11, 19, 3, 56, 35, 0, Offset(12 * 3600), 1321631795},    // UTC+12
 
 	{1970, 1, -25508, 8, 0, 0, 0, UTC, -2203948800}, // negative Unix time
 }
@@ -100,7 +93,7 @@ func TestDate(t *testing.T) {
 		time := Date(tt.year, Month(tt.month), tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z)
 		want := Unix(tt.unix, 0)
 		if !time.Equal(want) {
-			t.Errorf("Date(%d, %d, %d, %d, %d, %d, %d, %s) = %v, want %v",
+			t.Errorf("Date(%d, %d, %d, %d, %d, %d, %d, %v) = %v, want %v",
 				tt.year, tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z,
 				time, want)
 		}
@@ -149,15 +142,6 @@ var defaultLocTests = []struct {
 	// Original cause for this test case bug 15852
 	{"AddDate", func(t1, t2 Time) bool { return t1.AddDate(1991, 9, 3) == t2.AddDate(1991, 9, 3) }},
 
-	{"UTC", func(t1, t2 Time) bool { return t1.UTC() == t2.UTC() }},
-	{"In", func(t1, t2 Time) bool { return t1.In(UTC) == t2.In(UTC) }},
-
-	{"Zone", func(t1, t2 Time) bool {
-		a1, b1 := t1.Zone()
-		a2, b2 := t2.Zone()
-		return a1 == a2 && b1 == b2
-	}},
-
 	{"Unix", func(t1, t2 Time) bool { return t1.Unix() == t2.Unix() }},
 	{"UnixNano", func(t1, t2 Time) bool { return t1.UnixNano() == t2.UnixNano() }},
 	{"UnixMilli", func(t1, t2 Time) bool { return t1.UnixMilli() == t2.UnixMilli() }},
@@ -170,13 +154,12 @@ var defaultLocTests = []struct {
 }
 
 func TestDefaultLoc(t *testing.T) {
-	// Verify that all of Time's methods behave identically if loc is set to
-	// nil or UTC.
+	// Verify that all of Time's methods behave identically for two zero values.
 	for _, tt := range defaultLocTests {
 		t1 := Time{}
-		t2 := Time{}.UTC()
+		t2 := Time{}
 		if !tt.f(t1, t2) {
-			t.Errorf("Time{} and Time{}.UTC() behave differently for %s", tt.name)
+			t.Errorf("Time{} values behave differently for %s", tt.name)
 		}
 	}
 }

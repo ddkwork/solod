@@ -150,7 +150,7 @@ func TestTruncateRound(t *testing.T) {
 	testOne := func(ti, tns, di int64) bool {
 		t.Helper()
 
-		t0 := Unix(ti, tns).UTC()
+		t0 := Unix(ti, tns)
 		d := Duration(di)
 		if d < 0 {
 			d = -d
@@ -419,25 +419,13 @@ var yearDayTests = []YearDayTest{
 	{1582, 10, 15, 288},
 }
 
-// Check to see if YearDay is location sensitive
-var yearDayLocations = []Location{
-	FixedZone("UTC-8", -8*60*60),
-	FixedZone("UTC-4", -4*60*60),
-	*UTC,
-	FixedZone("UTC+4", 4*60*60),
-	FixedZone("UTC+8", 8*60*60),
-}
-
 func TestYearDay(t *testing.T) {
-	for _, loc := range yearDayLocations {
-		for _, ydt := range yearDayTests {
-			dt := Date(ydt.year, Month(ydt.month), ydt.day, 0, 0, 0, 0, &loc)
-			yday := dt.YearDay()
-			if yday != ydt.yday {
-				t.Errorf("Date(%d-%02d-%02d in %v).YearDay() = %d, want %d",
-					ydt.year, ydt.month, ydt.day, loc, yday, ydt.yday)
-				continue
-			}
+	for _, ydt := range yearDayTests {
+		dt := Date(ydt.year, Month(ydt.month), ydt.day, 0, 0, 0, 0, UTC)
+		yday := dt.YearDay()
+		if yday != ydt.yday {
+			t.Errorf("Date(%d-%02d-%02d).YearDay() = %d, want %d",
+				ydt.year, ydt.month, ydt.day, yday, ydt.yday)
 		}
 	}
 }

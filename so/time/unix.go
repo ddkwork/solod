@@ -76,5 +76,5 @@ func UnixMicro(usec int64) Time {
 func (t *Time) unixSec() int64 { return t.sec() + internalToUnix }
 
 func unixTime(sec int64, nsec int32) Time {
-	return Time{uint64(nsec), sec + unixToInternal, nil}
+	return Time{uint64(nsec), sec + unixToInternal}
 }

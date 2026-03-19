@@ -29,9 +29,6 @@ func main() {
 		if t.Nanosecond() != 777888999 {
 			panic("unexpected Time.Nanosecond")
 		}
-		if t.Location().String() != "UTC" {
-			panic("unexpected Time.Location")
-		}
-		println(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location().String())
+		println(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
 	}
 }

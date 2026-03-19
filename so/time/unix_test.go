@@ -15,7 +15,7 @@ func TestUnixUTC(t *testing.T) {
 	for _, test := range utctests {
 		sec := test.seconds
 		golden := &test.golden
-		tm := Unix(sec, 0).UTC()
+		tm := Unix(sec, 0)
 		newsec := tm.Unix()
 		if newsec != sec {
 			t.Errorf("Unix(%d, 0).Unix() = %d", sec, newsec)
@@ -32,7 +32,7 @@ func TestUnixNanoUTC(t *testing.T) {
 	for _, test := range nanoutctests {
 		golden := &test.golden
 		nsec := test.seconds*1e9 + int64(golden.Nanosecond)
-		tm := Unix(0, nsec).UTC()
+		tm := Unix(0, nsec)
 		newnsec := tm.Unix()*1e9 + int64(tm.Nanosecond())
 		if newnsec != nsec {
 			t.Errorf("Unix(0, %d).Nanoseconds() = %d", nsec, newnsec)
@@ -46,7 +46,7 @@ func TestUnixNanoUTC(t *testing.T) {
 }
 
 func TestUnixUTCAndBack(t *testing.T) {
-	f := func(sec int64) bool { return Unix(sec, 0).UTC().Unix() == sec }
+	f := func(sec int64) bool { return Unix(sec, 0).Unix() == sec }
 	f32 := func(sec int32) bool { return f(int64(sec)) }
 	cfg := &quick.Config{MaxCount: 10000}
 
@@ -61,7 +61,7 @@ func TestUnixUTCAndBack(t *testing.T) {
 
 func TestUnixNanoUTCAndBack(t *testing.T) {
 	f := func(nsec int64) bool {
-		t := Unix(0, nsec).UTC()
+		t := Unix(0, nsec)
 		ns := t.Unix()*1e9 + int64(t.Nanosecond())
 		return ns == nsec
 	}
@@ -104,10 +104,8 @@ func same(t Time, u *parsedTime) bool {
 	// Check aggregates.
 	date := t.Date()
 	clock := t.Clock()
-	name, offset := t.Zone()
 	if date.Year != u.Year || date.Month != u.Month || date.Day != u.Day ||
-		clock.Hour != u.Hour || clock.Minute != u.Minute || clock.Second != u.Second ||
-		name != u.Zone || offset != u.ZoneOffset {
+		clock.Hour != u.Hour || clock.Minute != u.Minute || clock.Second != u.Second {
 		return false
 	}
 	// Check individual entries.

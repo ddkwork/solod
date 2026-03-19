@@ -162,25 +162,25 @@ Types:
 
 ## [so/time](https://pkg.go.dev/github.com/nalgeon/solod/so/time)
 
-Measuring and displaying time. Offers an API similar to Go's `time` package, but with only fixed time zones (no IANA timezone database). Parsing and formatting are not yet supported.
+Measuring and displaying time. Time is always stored as UTC internally. Parsing and formatting are not yet supported.
 
 Constants:
 
+- `UTC` - zero offset (UTC).
 - `Nanosecond`, `Microsecond`, `Millisecond`, `Second`, `Minute`, `Hour` - common durations.
 
 Functions:
 
 - `Now` returns the current time in UTC (with monotonic clock reading).
-- `Date` returns the Time for a given year, month, day, hour, min, sec, nsec, and location.
+- `Date` returns the Time for a given year, month, day, hour, min, sec, nsec, and offset (seconds east of UTC).
 - `Unix`, `UnixMilli`, `UnixMicro` create a Time from a Unix timestamp.
 - `Since` and `Until` return the duration elapsed since or until a given time.
-- `FixedZone` returns a Location with a fixed UTC offset.
 
 Types:
 
-- `Time` represents an instant in time with nanosecond precision.
+- `Time` represents an instant in time with nanosecond precision. Always UTC.
 - `Duration` represents elapsed time as an int64 nanosecond count.
-- `Location` represents a single fixed time zone.
+- `Offset` represents a fixed offset from UTC in seconds.
 
 ## [so/unicode](https://pkg.go.dev/github.com/nalgeon/solod/so/unicode)
 
