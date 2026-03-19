@@ -75,7 +75,6 @@ int main(void) {
         }
         so_println("%s %.*s", "UTC:", time_Time_String(t, so_make_slice(so_byte, 64, 64)).len, time_Time_String(t, so_make_slice(so_byte, 64, 64)).ptr);
         time_Offset utc5 = (time_Offset)(5 * 3600);
-        so_String layout = so_str("%Y-%m-%dT%H:%M:%S%z");
-        so_println("%s %.*s", "UTC+5:", time_Time_Format(t, layout, utc5, so_make_slice(so_byte, 64, 64)).len, time_Time_Format(t, layout, utc5, so_make_slice(so_byte, 64, 64)).ptr);
+        so_println("%s %.*s", "UTC+5:", time_Time_Format(t, time_RFC3339, utc5, so_make_slice(so_byte, 64, 64)).len, time_Time_Format(t, time_RFC3339, utc5, so_make_slice(so_byte, 64, 64)).ptr);
     }
 }
