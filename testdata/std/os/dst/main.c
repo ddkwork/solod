@@ -283,6 +283,28 @@ int main(void) {
         os_Remove(name);
     }
     {
+        // Stdout, Stderr.
+        so_Result _res20 = os_File_WriteString(&os_Stdout, so_str("hello"));
+        so_int n = _res20.val.as_int;
+        so_Error err = _res20.err;
+        if (err != NULL) {
+            so_panic("Stdout failed");
+        }
+        if (n != 5) {
+            so_panic("Stdout: wrong count");
+        }
+        so_Result _res21 = os_File_WriteString(&os_Stderr, so_str("goodbye"));
+        n = _res21.val.as_int;
+        err = _res21.err;
+        if (err != NULL) {
+            so_panic("Stderr failed");
+        }
+        if (n != 7) {
+            so_panic("Stderr: wrong count");
+        }
+        so_println("");
+    }
+    {
         // Getenv.
         so_String path = os_Getenv(so_str("PATH"));
         if (so_len(path) == 0) {

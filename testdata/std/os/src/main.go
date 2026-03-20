@@ -229,6 +229,24 @@ func main() {
 		}
 	}
 	{
+		// Stdout, Stderr.
+		n, err := os.Stdout.WriteString("hello")
+		if err != nil {
+			panic("Stdout failed")
+		}
+		if n != 5 {
+			panic("Stdout: wrong count")
+		}
+		n, err = os.Stderr.WriteString("goodbye")
+		if err != nil {
+			panic("Stderr failed")
+		}
+		if n != 7 {
+			panic("Stderr: wrong count")
+		}
+		println()
+	}
+	{
 		// Getenv.
 		path := os.Getenv("PATH")
 		if len(path) == 0 {

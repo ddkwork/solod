@@ -3,10 +3,27 @@ package os
 import "solod.dev/so/io"
 
 // File represents an open file descriptor.
+//
+//so:extern
 type File struct {
 	fd     *os_file
 	closed bool
 }
+
+// Stdin is the standard input file descriptor.
+//
+//so:extern
+var Stdin = File{}
+
+// Stdout is the standard output file descriptor.
+//
+//so:extern
+var Stdout = File{}
+
+// Stderr is the standard error file descriptor.
+//
+//so:extern
+var Stderr = File{}
 
 // Read reads up to len(b) bytes from the file and stores them in b.
 // It returns the number of bytes read and any error encountered.
