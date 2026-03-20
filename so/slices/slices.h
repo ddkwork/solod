@@ -41,6 +41,20 @@ static inline so_Result slices_grow(mem_Allocator a, so_Slice s, size_t newLen,
     return res;
 }
 
+// Make allocates a slice of type T with given length using allocator a.
+// Returns an allocated slice or panics on failure.
+// If the allocator is nil, uses the system allocator.
+#define slices_Make(T, a, len) mem_AllocSlice(T, (a), (len), (len))
+
+// MakeCap allocates a slice of type T with given length and capacity using allocator a.
+// Returns an allocated slice or panics on failure.
+// If the allocator is nil, uses the system allocator.
+#define slices_MakeCap(T, a, len, cap) mem_AllocSlice(T, (a), (len), (cap))
+
+// Free frees a previously allocated slice.
+// If the allocator is nil, uses the system allocator.
+#define slices_Free(T, a, s) mem_FreeSlice(T, (a), (s))
+
 // TryAppend appends elements to a heap-allocated slice, growing it if needed.
 // Returns a result with the updated slice or an error if reallocation fails.
 // If the allocator is nil, uses the system allocator.

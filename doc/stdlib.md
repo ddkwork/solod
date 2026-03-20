@@ -128,10 +128,12 @@ Types:
 
 ## [so/slices](https://pkg.go.dev/solod.dev/so/slices)
 
-Operations on slices.
+Operations on slices:
 
-- `Append` - append elements to a heap slice, growing if needed.
-- `Extend` - append another slice to a heap slice, growing if needed.
+- `Make` and `MakeCap` allocate a slice, `Free` deallocates it.
+- `Append` appends elements to a heap slice, growing if needed.
+- `Extend` appends another slice to a heap slice, growing if needed.
+- `Clone` creates a shallow copy of the slice.
 
 ## [so/strings](https://pkg.go.dev/solod.dev/so/strings)
 

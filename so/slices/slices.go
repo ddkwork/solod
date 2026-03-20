@@ -10,6 +10,32 @@ import (
 //so:embed slices.h
 var slices_h string
 
+// Make allocates a slice of type T with given length using allocator a.
+// Returns an allocated slice or panics on failure.
+// If the allocator is nil, uses the system allocator.
+//
+//so:extern
+func Make[T any](a mem.Allocator, len int) []T {
+	return mem.AllocSlice[T](a, len, len)
+}
+
+// MakeCap allocates a slice of type T with given length and capacity using allocator a.
+// Returns an allocated slice or panics on failure.
+// If the allocator is nil, uses the system allocator.
+//
+//so:extern
+func MakeCap[T any](a mem.Allocator, len int, cap int) []T {
+	return mem.AllocSlice[T](a, len, cap)
+}
+
+// Free frees a previously allocated slice.
+// If the allocator is nil, uses the system allocator.
+//
+//so:extern
+func Free[T any](a mem.Allocator, s []T) {
+	mem.FreeSlice(a, s)
+}
+
 // Append appends elements to a heap-allocated slice, growing it if needed.
 // Returns the updated slice or panics on allocation failure.
 // If the allocator is nil, uses the system allocator.
