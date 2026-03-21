@@ -170,7 +170,7 @@ _Simplicity is key_. Fewer features are always better. Every new feature is stro
 
 _No heap allocations_ are allowed in language built-ins (like maps, slices, new, or append). Heap allocations are allowed in the standard library, but they must clearly state when an allocation happens and who owns the allocated data.
 
-_Fast and easy C interop_. Even though So uses Go syntax, it's basically C with its own standard library. Calling C from So, and So from C, should always be simple to write and run efficiently. The So standard library (compiled to C) should be easy to add to any C project.
+_Fast and easy C interop_. Even though So uses Go syntax, it's basically C with its own standard library. Calling C from So, and So from C, should always be simple to write and run efficiently. The So standard library (translated to C) should be easy to add to any C project.
 
 _Readability_. There are several languages that claim they can transpile to readable C code. Unfortunately, the C code they generate is usually unreadable or barely readable at best. So isn't perfect in this area either (though it's arguably better than others), but it aims to produce C code that's as readable as possible.
 
@@ -179,7 +179,7 @@ _Go compatibility_. So code is valid Go code. No exceptions.
 Non-goals:
 
 - Raw performance. You can definitely write C code by hand that runs faster than code produced by So. Also, some features in So, like interfaces, are currently implemented in a way that's not very efficient, mainly to keep things simple.
-- Hiding C. So is a cleaner way to write C, not a replacement for it. You should know C to use So effectively.
+- Hiding C entirely. So is a cleaner way to write C, not a replacement for it. You should know C to use So effectively.
 - Go feature parity. Less is more. Iterators aren't coming, and neither are generic methods.
 
 ## Frequently asked questions
@@ -194,7 +194,7 @@ TinyGo is lightweight, but it still has a garbage collector, a runtime, and aims
 
 _How does So handle memory?_
 
-Everything is stack-allocated by default. There's no garbage collector or reference counting. The standard library provides explicit heap allocation when you need it.
+Everything is stack-allocated by default. There's no garbage collector or reference counting. The standard library provides explicit heap allocation in the `so/mem` package when you need it.
 
 _Is it safe?_
 

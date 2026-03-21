@@ -244,7 +244,7 @@ Unlike in Go, a nil slice and an empty slice are the same thing:
 ```go
 // Both emit `(so_Slice){0}`.
 var nils []int = nil
-var empty [] = []int{}
+var empty []int = []int{}
 ```
 
 Slicing:
@@ -669,7 +669,7 @@ func (s HttpStatus) String() string {
 
 ## Interfaces
 
-Interfaces in So are more like Rust traits (static) than Go interfaces (dynamic) because they don't include type information at runtime.
+Interfaces in So are like Go interfaces, but they don't include runtime type information.
 
 Interface declarations list the required methods:
 
