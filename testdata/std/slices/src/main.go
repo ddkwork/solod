@@ -58,4 +58,25 @@ func main() {
 		}
 		slices.Free(nil, s2)
 	}
+	{
+		// Equal slices.
+		s1 := []int{1, 2, 3}
+		s2 := []int{1, 2, 3}
+		s3 := []int{1, 2, 4}
+		s4 := []int{1, 2}
+		s5 := []int{}
+		var s6 []int = nil
+		if !slices.Equal(s1, s2) {
+			panic("want s1 == s2")
+		}
+		if slices.Equal(s1, s3) {
+			panic("want s1 != s3")
+		}
+		if slices.Equal(s1, s4) {
+			panic("want s1 != s4")
+		}
+		if !slices.Equal(s5, s6) {
+			panic("want empty and nil slices equal")
+		}
+	}
 }

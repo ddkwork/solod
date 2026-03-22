@@ -118,3 +118,12 @@ static inline so_Result slices_grow(mem_Allocator a, so_Slice s, size_t newLen,
     memcpy(_newSlice.ptr, _s.ptr, _s.len * sizeof(T));           \
     _newSlice;                                                   \
 })
+
+// Equal reports whether two slices are equal: the same length and all
+// elements equal. Empty and nil slices are considered equal.
+#define slices_Equal(T, s1, s2) ({                                                \
+    so_Slice _s1 = (s1);                                                          \
+    so_Slice _s2 = (s2);                                                          \
+    size_t _size = _s1.len * sizeof(T);                                           \
+    (_s1.len == _s2.len) && (_size == 0 || memcmp(_s1.ptr, _s2.ptr, _size) == 0); \
+})

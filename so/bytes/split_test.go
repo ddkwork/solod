@@ -6,10 +6,10 @@ package bytes_test
 
 import (
 	"math"
-	"slices"
 	"testing"
 
 	. "solod.dev/so/bytes"
+	"solod.dev/so/slices"
 )
 
 var abcd = "abcd"

@@ -61,3 +61,19 @@ func Extend[T any](a mem.Allocator, s []T, other []T) []T {
 func Clone[T any](a mem.Allocator, s []T) []T {
 	return append([]T{}, s...)
 }
+
+// Equal reports whether two slices are equal: the same length and all
+// elements equal. Empty and nil slices are considered equal.
+//
+//so:extern
+func Equal[T comparable](s1, s2 []T) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}

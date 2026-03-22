@@ -56,4 +56,25 @@ int main(void) {
         }
         slices_Free(so_int, (mem_Allocator){0}, s2);
     }
+    {
+        // Equal slices.
+        so_Slice s1 = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
+        so_Slice s2 = (so_Slice){(so_int[3]){1, 2, 3}, 3, 3};
+        so_Slice s3 = (so_Slice){(so_int[3]){1, 2, 4}, 3, 3};
+        so_Slice s4 = (so_Slice){(so_int[2]){1, 2}, 2, 2};
+        so_Slice s5 = (so_Slice){0};
+        so_Slice s6 = (so_Slice){0};
+        if (!slices_Equal(so_int, s1, s2)) {
+            so_panic("want s1 == s2");
+        }
+        if (slices_Equal(so_int, s1, s3)) {
+            so_panic("want s1 != s3");
+        }
+        if (slices_Equal(so_int, s1, s4)) {
+            so_panic("want s1 != s4");
+        }
+        if (!slices_Equal(so_int, s5, s6)) {
+            so_panic("want empty and nil slices equal");
+        }
+    }
 }

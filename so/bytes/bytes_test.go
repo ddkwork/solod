@@ -5,11 +5,11 @@
 package bytes_test
 
 import (
-	"slices"
 	"testing"
 
 	. "solod.dev/so/bytes"
 	"solod.dev/so/mem"
+	"solod.dev/so/slices"
 	"solod.dev/so/strings"
 )
 
