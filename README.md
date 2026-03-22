@@ -1,6 +1,6 @@
 # Solod: Go can be a better C
 
-Solod (**So**) is a strict subset of Go that transpiles to regular C. Write programs in Go — with its type safety, tooling, and clean syntax — and get plain C11 code you can read, debug, and ship without a runtime.
+Solod (**So**) is a strict subset of Go that translates to regular C — with zero runtime, manual memory management, and source-level interop.
 
 Highlights:
 
@@ -91,6 +91,18 @@ int main(void) {
 
 Check out more examples in [So by example](example/README.md) and learn about the supported language features in the [spec](doc/spec.md).
 
+## Language tour
+
+To learn about So's features and limitations, check out the brief [overview of the language](./doc/spec.md).
+
+## Standard library
+
+So provides a growing set of [high-level packages](./doc/stdlib.md) similar to Go's stdlib, as well as low-level packages that wrap the libc API.
+
+## So by example
+
+If you like learning by doing, try a [hands-on introduction](./example/README.md) to So with annotated example programs.
+
 ## Installation and usage
 
 Install the So command line tool:
@@ -166,21 +178,25 @@ Supported operating systems: Linux, macOS, and Windows (partial support).
 
 ## Design decisions
 
-_Simplicity is key_. Fewer features are always better. Every new feature is strongly discouraged by default and should be added only if there are very convincing real-world use cases to support it. This applies to the standard library too — So tries to export as little of Go's stdlib API as possible while still remaining highly useful for real-world use cases.
+So is highly opinionated.
 
-_No heap allocations_ are allowed in language built-ins (like maps, slices, new, or append). Heap allocations are allowed in the standard library, but they must clearly state when an allocation happens and who owns the allocated data.
+**Simplicity is key**. Fewer features are always better. Every new feature is strongly discouraged by default and should be added only if there are very convincing real-world use cases to support it. This applies to the standard library too — So tries to export as little of Go's stdlib API as possible while still remaining highly useful for real-world use cases.
 
-_Fast and easy C interop_. Even though So uses Go syntax, it's basically C with its own standard library. Calling C from So, and So from C, should always be simple to write and run efficiently. The So standard library (translated to C) should be easy to add to any C project.
+**No heap allocations** are allowed in language built-ins (like maps, slices, new, or append). Heap allocations are allowed in the standard library, but they must clearly state when an allocation happens and who owns the allocated data.
 
-_Readability_. There are several languages that claim they can transpile to readable C code. Unfortunately, the C code they generate is usually unreadable or barely readable at best. So isn't perfect in this area either (though it's arguably better than others), but it aims to produce C code that's as readable as possible.
+**Fast and easy C interop**. Even though So uses Go syntax, it's basically C with its own standard library. Calling C from So, and So from C, should always be simple to write and run efficiently. The So standard library (translated to C) should be easy to add to any C project.
 
-_Go compatibility_. So code is valid Go code. No exceptions.
+**Readability**. There are several languages that claim they can transpile to readable C code. Unfortunately, the C code they generate is usually unreadable or barely readable at best. So isn't perfect in this area either (though it's arguably better than others), but it aims to produce C code that's as readable as possible.
+
+**Go compatibility**. So code is valid Go code. No exceptions.
 
 Non-goals:
 
-- Raw performance. You can definitely write C code by hand that runs faster than code produced by So. Also, some features in So, like interfaces, are currently implemented in a way that's not very efficient, mainly to keep things simple.
-- Hiding C entirely. So is a cleaner way to write C, not a replacement for it. You should know C to use So effectively.
-- Go feature parity. Less is more. Iterators aren't coming, and neither are generic methods.
+**Raw performance**. You can definitely write C code by hand that runs faster than code produced by So. Also, some features in So, like interfaces, are currently implemented in a way that's not very efficient, mainly to keep things simple.
+
+**Hiding C entirely**. So is a cleaner way to write C, not a replacement for it. You should know C to use So effectively.
+
+**Go feature parity**. Less is more. Iterators aren't coming, and neither are generic methods.
 
 ## Frequently asked questions
 
@@ -204,7 +220,7 @@ Most memory-related problems can be caught with AddressSanitizer in modern compi
 
 _Can I use So code from C (and vice versa)?_
 
-Yes. So compiles to plain C, therefore calling So from C is just calling C from C. Calling C from So is equally straightforward — see the [spec](doc/spec.md#c-interop) for details.
+Yes. So compiles to plain C, therefore calling So from C is just calling C from C. Calling C from So is equally straightforward — see the language tour for details.
 
 _Can I compile existing Go packages with So?_
 
@@ -216,7 +232,7 @@ Not for production at the moment.
 
 _Where's the standard library?_
 
-There is a growing set of high-level packages (`so/bytes`, `so/mem`, `so/slices`, ...). There are also low-level packages that wrap the libc API (`so/c/stdlib`, `so/c/stdio`, `so/c/cstring`, ...). Check out the [stdlib](doc/stdlib.md) document for a quick overview, or see the full [package documentation](https://pkg.go.dev/solod.dev/so) for more details.
+There is a growing set of high-level packages (`so/bytes`, `so/mem`, `so/slices`, ...). There are also low-level packages that wrap the libc API (`so/c/stdlib`, `so/c/stdio`, `so/c/cstring`, ...). Check out the standard library overview for more details.
 
 ## Roadmap
 
