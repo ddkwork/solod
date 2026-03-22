@@ -6,11 +6,11 @@ package bytes_test
 
 import (
 	"slices"
-	"strings"
 	"testing"
 
 	. "solod.dev/so/bytes"
 	"solod.dev/so/mem"
+	"solod.dev/so/strings"
 )
 
 const space = "\t\v\r\f\n\u0085\u00a0\u2000\u3000"
@@ -33,10 +33,10 @@ func TestClone(t *testing.T) {
 		[]byte(nil),
 		[]byte{},
 		Clone(nil, []byte{}),
-		[]byte(strings.Repeat("a", 42))[:0],
-		[]byte(strings.Repeat("a", 42))[:0:0],
+		[]byte(strings.Repeat(nil, "a", 42))[:0],
+		[]byte(strings.Repeat(nil, "a", 42))[:0:0],
 		[]byte("short"),
-		[]byte(strings.Repeat("a", 42)),
+		[]byte(strings.Repeat(nil, "a", 42)),
 	}
 	for _, input := range cloneTests {
 		clone := Clone(nil, input)
