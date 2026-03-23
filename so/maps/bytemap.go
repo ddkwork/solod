@@ -70,6 +70,7 @@ type ByteMap struct {
 // ByteMap will automatically grow and shrink as needed,
 // but will not shrink below minCap.
 //
+// If the allocator is nil, uses the system allocator.
 // The caller is responsible for freeing map resources
 // with [ByteMap.Free] when done using it.
 func NewByteMap(a mem.Allocator, minCap, ksize, vsize int) ByteMap {

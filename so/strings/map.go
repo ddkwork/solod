@@ -16,6 +16,7 @@ import (
 type RuneFunc func(rune) rune
 
 // ToUpper returns s with all Unicode letters mapped to their upper case.
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func ToUpper(a mem.Allocator, s string) string {
 	isASCII, hasLower := true, false
@@ -55,6 +56,7 @@ func ToUpper(a mem.Allocator, s string) string {
 }
 
 // ToLower returns s with all Unicode letters mapped to their lower case.
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func ToLower(a mem.Allocator, s string) string {
 	isASCII, hasUpper := true, false
@@ -97,6 +99,7 @@ func ToLower(a mem.Allocator, s string) string {
 // according to the mapping function. If mapping returns a negative value, the character is
 // dropped from the string with no replacement.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func Map(a mem.Allocator, mapping RuneFunc, s string) string {
 	// The output buffer b is initialized on demand, the first

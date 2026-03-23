@@ -28,6 +28,7 @@ var ErrTooLarge = errors.New("strings: data too large")
 // Clone should typically be used only rarely, and only when
 // profiling indicates that it is needed.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func Clone(a mem.Allocator, s string) string {
 	return stringslite.Clone(a, s)
@@ -91,6 +92,7 @@ func CutSuffix(s, suffix string) (string, bool) {
 // The separator string sep is placed between elements in the resulting string.
 // Panics if the result is too large to fit in a string.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func Join(a mem.Allocator, elems []string, sep string) string {
 	if len(elems) == 0 {
@@ -142,6 +144,7 @@ func HasSuffix(s, suffix string) bool {
 //
 // If n < 0, there is no limit on the number of replacements.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func Replace(a mem.Allocator, s, old, new string, n int) string {
 	if old == new || n == 0 {
@@ -186,6 +189,7 @@ func Replace(a mem.Allocator, s, old, new string, n int) string {
 // and after each UTF-8 sequence, yielding up to k+1 replacements
 // for a k-rune string.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func ReplaceAll(a mem.Allocator, s, old, new string) string {
 	return Replace(a, s, old, new, -1)

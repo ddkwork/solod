@@ -148,6 +148,7 @@ func CopyN(dst Writer, src Reader, n int64) (int64, error) {
 // defined to read from src until EOF, it does not treat an EOF from Read
 // as an error to be reported.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func ReadAll(a mem.Allocator, r Reader) ([]byte, error) {
 	// Build slices of exponentially growing size,

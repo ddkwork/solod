@@ -11,8 +11,8 @@ import (
 var slices_h string
 
 // Make allocates a slice of type T with given length using allocator a.
-// Returns an allocated slice or panics on failure.
 // If the allocator is nil, uses the system allocator.
+// The returned slice is allocated; the caller owns it.
 //
 //so:extern
 func Make[T any](a mem.Allocator, len int) []T {
@@ -20,8 +20,8 @@ func Make[T any](a mem.Allocator, len int) []T {
 }
 
 // MakeCap allocates a slice of type T with given length and capacity using allocator a.
-// Returns an allocated slice or panics on failure.
 // If the allocator is nil, uses the system allocator.
+// The returned slice is allocated; the caller owns it.
 //
 //so:extern
 func MakeCap[T any](a mem.Allocator, len int, cap int) []T {
@@ -37,8 +37,8 @@ func Free[T any](a mem.Allocator, s []T) {
 }
 
 // Append appends elements to a heap-allocated slice, growing it if needed.
-// Returns the updated slice or panics on allocation failure.
 // If the allocator is nil, uses the system allocator.
+// Returns an updated allocated slice; the caller owns it.
 //
 //so:extern
 func Append[T any](a mem.Allocator, s []T, elems ...T) []T {
@@ -46,8 +46,8 @@ func Append[T any](a mem.Allocator, s []T, elems ...T) []T {
 }
 
 // Extend appends all elements from another heap-allocated slice, growing if needed.
-// Returns the updated slice or panics on allocation failure.
 // If the allocator is nil, uses the system allocator.
+// Returns an updated allocated slice; the caller owns it.
 //
 //so:extern
 func Extend[T any](a mem.Allocator, s []T, other []T) []T {
@@ -55,7 +55,8 @@ func Extend[T any](a mem.Allocator, s []T, other []T) []T {
 }
 
 // Clone returns a shallow copy of the slice.
-// The returned slice is heap-allocated; the caller owns it.
+// If the allocator is nil, uses the system allocator.
+// The returned slice is allocated; the caller owns it.
 //
 //so:extern
 func Clone[T any](a mem.Allocator, s []T) []T {

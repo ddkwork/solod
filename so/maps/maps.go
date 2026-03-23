@@ -17,6 +17,7 @@ type Map[K comparable, V any] struct{}
 // Map will automatically grow and shrink as needed,
 // but will not shrink below minCap.
 //
+// If the allocator is nil, uses the system allocator.
 // The caller is responsible for freeing map resources
 // with [Map.Free] when done using it.
 //

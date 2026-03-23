@@ -58,6 +58,7 @@ func Open(name string) (File, error) {
 // Because ReadFile reads the whole file, it does not treat
 // an EOF from Read as an error to be reported.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func ReadFile(a mem.Allocator, name string) ([]byte, error) {
 	f, err := Open(name)

@@ -25,6 +25,7 @@ var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
 //
 // To split around the first instance of a separator, see [Cut].
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func Split(a mem.Allocator, s, sep string) []string { return genSplit(a, s, sep, 0, -1) }
@@ -42,6 +43,7 @@ func Split(a mem.Allocator, s, sep string) []string { return genSplit(a, s, sep,
 //
 // To split around the first instance of a separator, see [Cut].
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func SplitN(a mem.Allocator, s, sep string, n int) []string { return genSplit(a, s, sep, 0, n) }
@@ -57,6 +59,7 @@ func SplitN(a mem.Allocator, s, sep string, n int) []string { return genSplit(a,
 //
 // It is equivalent to [SplitAfterN] with a count of -1.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func SplitAfter(a mem.Allocator, s, sep string) []string {
@@ -76,6 +79,7 @@ type span struct {
 // non-empty. Unlike [Split], leading and trailing runs of white space characters
 // are discarded.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func Fields(a mem.Allocator, s string) []string {
@@ -136,6 +140,7 @@ func Fields(a mem.Allocator, s string) []string {
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func FieldsFunc(a mem.Allocator, s string, f RunePredicate) []string {
@@ -179,6 +184,7 @@ func FieldsFunc(a mem.Allocator, s string, f RunePredicate) []string {
 // Generic split: splits after each instance of sep,
 // including sepSave bytes of sep in the subarrays.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func genSplit(a mem.Allocator, s, sep string, sepSave, n int) []string {
@@ -215,6 +221,7 @@ func genSplit(a mem.Allocator, s, sep string, sepSave, n int) []string {
 // one string per Unicode character up to a maximum of n (n < 0 means no limit).
 // Invalid UTF-8 bytes are sliced individually.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The substrings in the slice are references to the original string s.
 func explode(a mem.Allocator, s string, n int) []string {

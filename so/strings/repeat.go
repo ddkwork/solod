@@ -44,6 +44,7 @@ var ErrRepeatCount = errors.New("strings: negative Repeat count")
 // It panics if count is negative or if the result of (len(s) * count)
 // overflows.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func Repeat(a mem.Allocator, s string, count int) string {
 	if count == 0 {

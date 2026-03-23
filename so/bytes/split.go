@@ -16,6 +16,7 @@ import (
 //
 // To split around the first instance of a separator, see [Cut].
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The subslices in the returned slice are views into the original slice s.
 func Split(a mem.Allocator, s, sep []byte) [][]byte {
@@ -32,6 +33,7 @@ func Split(a mem.Allocator, s, sep []byte) [][]byte {
 //
 // To split around the first instance of a separator, see [Cut].
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The subslices in the returned slice are views into the original slice s.
 func SplitN(a mem.Allocator, s, sep []byte, n int) [][]byte {
@@ -41,6 +43,7 @@ func SplitN(a mem.Allocator, s, sep []byte, n int) [][]byte {
 // Generic split: splits after each instance of sep,
 // including sepSave bytes of sep in the subslices.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The subslices in the returned slice are views into the original slice s.
 func genSplit(a mem.Allocator, s, sep []byte, sepSave, n int) [][]byte {
@@ -77,6 +80,7 @@ func genSplit(a mem.Allocator, s, sep []byte, sepSave, n int) [][]byte {
 // (still slices of bytes), up to a maximum of n byte slices. Invalid UTF-8
 // sequences are chopped into individual bytes.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 // The subslices in the returned slice are views into the original slice s.
 func explode(a mem.Allocator, s []byte, n int) [][]byte {

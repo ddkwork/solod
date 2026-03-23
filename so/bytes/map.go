@@ -18,6 +18,7 @@ type RuneFunc func(rune) rune
 // ToLower returns a copy of the byte slice s with all Unicode letters mapped to
 // their lower case.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func ToLower(a mem.Allocator, s []byte) []byte {
 	isASCII, hasUpper := true, false
@@ -50,6 +51,7 @@ func ToLower(a mem.Allocator, s []byte) []byte {
 // ToUpper returns a copy of the byte slice s with all Unicode letters mapped to
 // their upper case.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func ToUpper(a mem.Allocator, s []byte) []byte {
 	isASCII, hasLower := true, false
@@ -85,6 +87,7 @@ func ToUpper(a mem.Allocator, s []byte) []byte {
 // dropped from the byte slice with no replacement. The characters in s and the
 // output are interpreted as UTF-8-encoded code points.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func Map(a mem.Allocator, mapping RuneFunc, s []byte) []byte {
 	b := mem.AllocSlice[byte](a, 0, len(s))

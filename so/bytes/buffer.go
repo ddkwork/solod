@@ -389,6 +389,7 @@ func (b *Buffer) ReadString(delim byte) (string, error) {
 // NewBuffer creates and initializes a new [Buffer] using a copy of buf as its
 // initial contents. It is intended to prepare a buffer to read existing data.
 //
+// If the allocator is nil, uses the system allocator.
 // The caller is responsible for freeing the buffer's resources
 // with [Buffer.Free] when done using it.
 func NewBuffer(a mem.Allocator, buf []byte) Buffer {
@@ -403,6 +404,7 @@ func NewBuffer(a mem.Allocator, buf []byte) Buffer {
 // NewBufferString creates and initializes a new [Buffer] using string s as its
 // initial contents. It is intended to prepare a buffer to read an existing string.
 //
+// If the allocator is nil, uses the system allocator.
 // The caller is responsible for freeing the buffer's resources
 // with [Buffer.Free] when done using it.
 func NewBufferString(a mem.Allocator, s string) Buffer {

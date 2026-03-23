@@ -23,6 +23,7 @@ import (
 var ErrTooLarge = errors.New("bytes: data too large")
 
 // Clone returns a copy of b[:len(b)].
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func Clone(a mem.Allocator, b []byte) []byte {
 	return slices.Clone(a, b)
@@ -164,6 +165,7 @@ func IndexByte(b []byte, c byte) int {
 // sep is placed between elements in the resulting slice.
 // Panics with [ErrTooLarge] if the result is too large to allocate.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func Join(a mem.Allocator, s [][]byte, sep []byte) []byte {
 	if len(s) == 0 {
@@ -204,6 +206,7 @@ func Join(a mem.Allocator, s [][]byte, sep []byte) []byte {
 // for a k-rune slice.
 // If n < 0, there is no limit on the number of replacements.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func Replace(a mem.Allocator, s, old, new []byte, n int) []byte {
 	m := 0
@@ -248,6 +251,7 @@ func Replace(a mem.Allocator, s, old, new []byte, n int) []byte {
 // Runes interprets s as a sequence of UTF-8-encoded code points.
 // It returns a slice of runes (Unicode code points) equivalent to s.
 //
+// If the allocator is nil, uses the system allocator.
 // The returned slice is allocated; the caller owns it.
 func Runes(a mem.Allocator, s []byte) []rune {
 	tlen := utf8.RuneCount(s)
@@ -263,6 +267,7 @@ func Runes(a mem.Allocator, s []byte) []rune {
 }
 
 // String creates a string from a byte slice.
+// If the allocator is nil, uses the system allocator.
 // The returned string is allocated; the caller owns it.
 func String(a mem.Allocator, s []byte) string {
 	clone := slices.Clone(a, s)
