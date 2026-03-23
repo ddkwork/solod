@@ -11,6 +11,8 @@ import (
 //so:embed mem.h
 var mem_h string
 
+// ErrOutOfMemory is returned when a memory allocation
+// fails due to insufficient memory.
 var ErrOutOfMemory = errors.New("out of memory")
 
 // Alloc allocates a single value of type T using allocator a.

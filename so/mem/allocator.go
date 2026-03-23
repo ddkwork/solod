@@ -1,5 +1,7 @@
 package mem
 
+// System is an instance of a memory allocator that uses
+// the system's malloc, realloc, and free functions.
 var System Allocator = &SystemAllocator{}
 
 // Allocator defines the interface for memory allocators.
