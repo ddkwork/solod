@@ -111,3 +111,13 @@ func realloc(ptr any, newSize uintptr) any {
 
 //so:extern
 func free(ptr any) {}
+
+// void* memmove(void* dest, const void* src, size_t count);
+//
+//so:extern
+func memmove(dst any, src any, count uintptr) any {
+	dstSlice := unsafe.Slice(dst.(*byte), int(count))
+	srcSlice := unsafe.Slice(src.(*byte), int(count))
+	copy(dstSlice, srcSlice)
+	return dst
+}

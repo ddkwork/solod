@@ -42,4 +42,33 @@ func main() {
 	q.x = 30
 	q.y = 40
 	println("allocated:", q.x, q.y)
+
+	// `mem.Arena` uses a pre-allocated buffer for fast, linear allocation.
+	// Individual `Free` calls are no-ops - call `Reset` to reclaim
+	// all memory at once. If the backing buffer is heap-allocated,
+	// free it with `mem.FreeSlice` when done.
+	//
+	// Arenas are ideal for short-lived allocations with simple lifetimes,
+	// such as during parsing or temporary buffers.
+	buf := mem.Alloca(1024) // stack-allocated buffer, no need to free
+	arena := mem.NewArena(buf)
+	var a mem.Allocator = &arena
+
+	// Allocate 10 points (16B x 10 = 160B) from the arena.
+	points := make([]*Point, 10)
+	for i := range points {
+		pt := mem.Alloc[Point](a)
+		pt.x = i + 1
+		pt.y = (i + 1) * 2
+		points[i] = pt
+	}
+	println("allocated", len(points), "points in arena")
+	println("points[0]:", points[0].x, points[0].y)
+	println("points[9]:", points[9].x, points[9].y)
+
+	// Reset reclaims all arena memory for reuse.
+	arena.Reset()
+
+	// If the buffer was heap-allocated, we'd need to free it here:
+	// mem.FreeSlice(nil, buf)
 }
