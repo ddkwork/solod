@@ -5,8 +5,7 @@
 package math_test
 
 import (
-	"fmt"
-
+	"solod.dev/so/fmt"
 	"solod.dev/so/math"
 )
 

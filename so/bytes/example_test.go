@@ -2,11 +2,11 @@ package bytes_test
 
 import (
 	"encoding/base64"
-	"fmt"
 	"os"
 	"slices"
 
 	"solod.dev/so/bytes"
+	"solod.dev/so/fmt"
 	"solod.dev/so/io"
 	"solod.dev/so/unicode"
 )
@@ -37,8 +37,8 @@ func ExampleBuffer_Bytes() {
 func ExampleBuffer_Cap() {
 	buf1 := bytes.NewBuffer(nil, make([]byte, 10))
 	buf2 := bytes.NewBuffer(nil, make([]byte, 0, 10))
-	fmt.Println(buf1.Cap())
-	fmt.Println(buf2.Cap())
+	fmt.Printf("%d\n", buf1.Cap())
+	fmt.Printf("%d\n", buf2.Cap())
 	// Output:
 	// 10
 	// 10
@@ -83,7 +83,7 @@ func ExampleBuffer_Read() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(n)
+	fmt.Printf("%d\n", n)
 	fmt.Println(b.String())
 	fmt.Println(string(rdbuf))
 	// Output:
@@ -100,7 +100,7 @@ func ExampleBuffer_ReadByte() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(c)
+	fmt.Printf("%d\n", c)
 	fmt.Println(b.String())
 	// Output:
 	// 97
@@ -156,10 +156,10 @@ func ExampleCompare_search() {
 }
 
 func ExampleContains() {
-	fmt.Println(bytes.Contains([]byte("seafood"), []byte("foo")))
-	fmt.Println(bytes.Contains([]byte("seafood"), []byte("bar")))
-	fmt.Println(bytes.Contains([]byte("seafood"), []byte("")))
-	fmt.Println(bytes.Contains([]byte(""), []byte("")))
+	fmt.Printf("%t\n", bytes.Contains([]byte("seafood"), []byte("foo")))
+	fmt.Printf("%t\n", bytes.Contains([]byte("seafood"), []byte("bar")))
+	fmt.Printf("%t\n", bytes.Contains([]byte("seafood"), []byte("")))
+	fmt.Printf("%t\n", bytes.Contains([]byte(""), []byte("")))
 	// Output:
 	// true
 	// false
@@ -168,8 +168,8 @@ func ExampleContains() {
 }
 
 func ExampleCount() {
-	fmt.Println(bytes.Count([]byte("cheese"), []byte("e")))
-	fmt.Println(bytes.Count([]byte("five"), []byte(""))) // before & after each rune
+	fmt.Printf("%d\n", bytes.Count([]byte("cheese"), []byte("e")))
+	fmt.Printf("%d\n", bytes.Count([]byte("five"), []byte(""))) // before & after each rune
 	// Output:
 	// 3
 	// 5
@@ -192,17 +192,17 @@ func ExampleCut() {
 }
 
 func ExampleEqual() {
-	fmt.Println(bytes.Equal([]byte("Go"), []byte("Go")))
-	fmt.Println(bytes.Equal([]byte("Go"), []byte("C++")))
+	fmt.Printf("%t\n", bytes.Equal([]byte("Go"), []byte("Go")))
+	fmt.Printf("%t\n", bytes.Equal([]byte("Go"), []byte("C++")))
 	// Output:
 	// true
 	// false
 }
 
 func ExampleHasPrefix() {
-	fmt.Println(bytes.HasPrefix([]byte("Gopher"), []byte("Go")))
-	fmt.Println(bytes.HasPrefix([]byte("Gopher"), []byte("C")))
-	fmt.Println(bytes.HasPrefix([]byte("Gopher"), []byte("")))
+	fmt.Printf("%t\n", bytes.HasPrefix([]byte("Gopher"), []byte("Go")))
+	fmt.Printf("%t\n", bytes.HasPrefix([]byte("Gopher"), []byte("C")))
+	fmt.Printf("%t\n", bytes.HasPrefix([]byte("Gopher"), []byte("")))
 	// Output:
 	// true
 	// false
@@ -210,10 +210,10 @@ func ExampleHasPrefix() {
 }
 
 func ExampleHasSuffix() {
-	fmt.Println(bytes.HasSuffix([]byte("Amigo"), []byte("go")))
-	fmt.Println(bytes.HasSuffix([]byte("Amigo"), []byte("O")))
-	fmt.Println(bytes.HasSuffix([]byte("Amigo"), []byte("Ami")))
-	fmt.Println(bytes.HasSuffix([]byte("Amigo"), []byte("")))
+	fmt.Printf("%t\n", bytes.HasSuffix([]byte("Amigo"), []byte("go")))
+	fmt.Printf("%t\n", bytes.HasSuffix([]byte("Amigo"), []byte("O")))
+	fmt.Printf("%t\n", bytes.HasSuffix([]byte("Amigo"), []byte("Ami")))
+	fmt.Printf("%t\n", bytes.HasSuffix([]byte("Amigo"), []byte("")))
 	// Output:
 	// true
 	// false
@@ -222,16 +222,16 @@ func ExampleHasSuffix() {
 }
 
 func ExampleIndex() {
-	fmt.Println(bytes.Index([]byte("chicken"), []byte("ken")))
-	fmt.Println(bytes.Index([]byte("chicken"), []byte("dmr")))
+	fmt.Printf("%d\n", bytes.Index([]byte("chicken"), []byte("ken")))
+	fmt.Printf("%d\n", bytes.Index([]byte("chicken"), []byte("dmr")))
 	// Output:
 	// 4
 	// -1
 }
 
 func ExampleIndexByte() {
-	fmt.Println(bytes.IndexByte([]byte("chicken"), byte('k')))
-	fmt.Println(bytes.IndexByte([]byte("chicken"), byte('g')))
+	fmt.Printf("%d\n", bytes.IndexByte([]byte("chicken"), byte('k')))
+	fmt.Printf("%d\n", bytes.IndexByte([]byte("chicken"), byte('g')))
 	// Output:
 	// 4
 	// -1
@@ -260,9 +260,9 @@ func ExampleMap() {
 
 func ExampleReader_Len() {
 	r1 := bytes.NewReader([]byte("Hi!"))
-	fmt.Println(r1.Len())
+	fmt.Printf("%d\n", r1.Len())
 	r2 := bytes.NewReader([]byte("こんにちは!"))
-	fmt.Println(r2.Len())
+	fmt.Printf("%d\n", r2.Len())
 	// Output:
 	// 3
 	// 16

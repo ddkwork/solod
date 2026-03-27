@@ -7,8 +7,9 @@ High-level:
 [errors](#soerrors) •
 [fmt](#sofmt) •
 [io](#soio) •
-[math/bits](#somathbits) •
 [maps](#somaps) •
+[math](#somath) •
+[math/bits](#somathbits) •
 [mem](#somem) •
 [os](#soos) •
 [slices](#soslices) •

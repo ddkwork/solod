@@ -5,8 +5,7 @@
 package unicode_test
 
 import (
-	"fmt"
-
+	"solod.dev/so/fmt"
 	"solod.dev/so/unicode"
 )
 

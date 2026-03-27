@@ -5,9 +5,9 @@
 package strings_test
 
 import (
-	"math"
 	"testing"
 
+	"solod.dev/so/math"
 	"solod.dev/so/slices"
 	. "solod.dev/so/strings"
 	"solod.dev/so/unicode"

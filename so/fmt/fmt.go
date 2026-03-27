@@ -24,6 +24,7 @@ package fmt
 
 import (
 	_ "embed"
+	"fmt" // for testing
 
 	"solod.dev/so/errors"
 	"solod.dev/so/io"
@@ -54,14 +55,22 @@ var ErrSize = errors.New("buffer size exceeded")
 //
 //so:extern
 func Print(a ...string) (int, error) {
-	return 0, nil
+	args := make([]any, len(a))
+	for i, s := range a {
+		args[i] = s
+	}
+	return fmt.Print(args...)
 }
 
 // Println is like Print but adds a newline at the end.
 //
 //so:extern
 func Println(a ...string) (int, error) {
-	return 0, nil
+	args := make([]any, len(a))
+	for i, s := range a {
+		args[i] = s
+	}
+	return fmt.Println(args...)
 }
 
 // Printf formats according to a format specifier and writes to standard output.
@@ -69,7 +78,14 @@ func Println(a ...string) (int, error) {
 //
 //so:extern
 func Printf(format string, a ...any) (int, error) {
-	return 0, nil
+	return fmt.Printf(format, a...)
+}
+
+// Sprintf is not implemented, provided here for testing purposes only.
+//
+//so:extern
+func Sprintf(format string, a ...any) string {
+	return fmt.Sprintf(format, a...)
 }
 
 // Fprintf formats according to a format specifier and writes to w.
@@ -78,7 +94,7 @@ func Printf(format string, a ...any) (int, error) {
 //
 //so:extern
 func Fprintf(w io.Writer, format string, a ...any) (int, error) {
-	return 0, nil
+	return fmt.Fprintf(w, format, a...)
 }
 
 // Scanf scans text read from standard input, storing successive
@@ -87,7 +103,7 @@ func Fprintf(w io.Writer, format string, a ...any) (int, error) {
 //
 //so:extern
 func Scanf(format string, a ...any) (int, error) {
-	return 0, nil
+	return fmt.Scanf(format, a...)
 }
 
 // Sscanf scans the argument string, storing successive space-separated
@@ -96,7 +112,7 @@ func Scanf(format string, a ...any) (int, error) {
 //
 //so:extern
 func Sscanf(str string, format string, a ...any) (int, error) {
-	return 0, nil
+	return fmt.Sscanf(str, format, a...)
 }
 
 // Fscanf scans text read from r, storing successive space-separated
@@ -105,5 +121,5 @@ func Sscanf(str string, format string, a ...any) (int, error) {
 //
 //so:extern
 func Fscanf(r io.Reader, format string, a ...any) (int, error) {
-	return 0, nil
+	return fmt.Fscanf(r, format, a...)
 }

@@ -5,7 +5,6 @@
 package strings_test
 
 import (
-	"fmt"
 	"testing"
 
 	. "solod.dev/so/strings"
@@ -63,16 +62,16 @@ func TestRepeatCatchesOverflow(t *testing.T) {
 
 	runTestCases := func(prefix string, tests []testCase) {
 		for i, tt := range tests {
-			err := repeat(tt.s, tt.count)
+			errStr := repeat(tt.s, tt.count)
 			if tt.errStr == "" {
-				if err != nil {
-					t.Errorf("#%d panicked %v", i, err)
+				if errStr != "" {
+					t.Errorf("#%d panicked %v", i, errStr)
 				}
 				continue
 			}
 
-			if err == nil || !Contains(err.Error(), tt.errStr) {
-				t.Errorf("%s#%d got %q want %q", prefix, i, err, tt.errStr)
+			if errStr == "" || !Contains(errStr, tt.errStr) {
+				t.Errorf("%s#%d got %q want %q", prefix, i, errStr, tt.errStr)
 			}
 		}
 	}
@@ -99,14 +98,14 @@ func TestRepeatCatchesOverflow(t *testing.T) {
 	})
 }
 
-func repeat(s string, count int) (err error) {
+func repeat(s string, count int) (err string) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch v := r.(type) {
 			case error:
-				err = v
+				err = v.Error()
 			default:
-				err = fmt.Errorf("%s", v)
+				err = v.(string)
 			}
 		}
 	}()

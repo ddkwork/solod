@@ -5,7 +5,6 @@
 package bytes_test
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 
@@ -77,14 +76,14 @@ func TestReaderAt(t *testing.T) {
 		off     int64
 		n       int
 		want    string
-		wanterr any
+		wanterr error
 	}{
 		{0, 10, "0123456789", nil},
 		{1, 10, "123456789", io.EOF},
 		{1, 9, "123456789", nil},
 		{11, 10, "", io.EOF},
 		{0, 0, "", nil},
-		{-1, 0, "", io.ErrOffset.Error()},
+		{-1, 0, "", io.ErrOffset},
 	}
 	for i, tt := range tests {
 		b := make([]byte, tt.n)
@@ -93,7 +92,7 @@ func TestReaderAt(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("%d. got %q; want %q", i, got, tt.want)
 		}
-		if fmt.Sprintf("%v", err) != fmt.Sprintf("%v", tt.wanterr) {
+		if err != nil && err.Error() != tt.wanterr.Error() {
 			t.Errorf("%d. got error = %v; want %v", i, err, tt.wanterr)
 		}
 	}

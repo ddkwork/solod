@@ -5,7 +5,6 @@
 package bytes_test
 
 import (
-	"fmt"
 	"testing"
 
 	. "solod.dev/so/bytes"
@@ -158,7 +157,7 @@ func TestTrim(t *testing.T) {
 			if s == nil {
 				return "nil"
 			} else {
-				return fmt.Sprintf("%q", s)
+				return string(s)
 			}
 		}
 		if len(actual) != 0 {

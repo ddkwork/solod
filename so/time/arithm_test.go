@@ -5,11 +5,11 @@
 package time_test
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 	"testing/quick"
 
+	"solod.dev/so/fmt"
 	. "solod.dev/so/time"
 )
 

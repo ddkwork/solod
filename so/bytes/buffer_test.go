@@ -5,7 +5,6 @@
 package bytes_test
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -267,7 +266,8 @@ func TestWriteInvalidRune(t *testing.T) {
 	for _, r := range []rune{-1, utf8.MaxRune + 1} {
 		var buf Buffer
 		buf.WriteRune(r)
-		check(t, fmt.Sprintf("TestWriteInvalidRune (%d)", r), &buf, "\uFFFD")
+		testName := "TestWriteInvalidRune " + string(r)
+		check(t, testName, &buf, "\uFFFD")
 	}
 }
 

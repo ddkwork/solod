@@ -5,9 +5,9 @@
 package strings_test
 
 import (
-	"fmt"
 	"unsafe"
 
+	"solod.dev/so/fmt"
 	"solod.dev/so/strings"
 	"solod.dev/so/unicode"
 )
@@ -15,8 +15,8 @@ import (
 func ExampleClone() {
 	s := "abc"
 	clone := strings.Clone(nil, s)
-	fmt.Println(s == clone)
-	fmt.Println(unsafe.StringData(s) == unsafe.StringData(clone))
+	fmt.Printf("%t\n", s == clone)
+	fmt.Printf("%t\n", unsafe.StringData(s) == unsafe.StringData(clone))
 	// Output:
 	// true
 	// false
@@ -34,9 +34,9 @@ func ExampleBuilder() {
 }
 
 func ExampleCompare() {
-	fmt.Println(strings.Compare("a", "b"))
-	fmt.Println(strings.Compare("a", "a"))
-	fmt.Println(strings.Compare("b", "a"))
+	fmt.Printf("%d\n", strings.Compare("a", "b"))
+	fmt.Printf("%d\n", strings.Compare("a", "a"))
+	fmt.Printf("%d\n", strings.Compare("b", "a"))
 	// Output:
 	// -1
 	// 0
@@ -44,10 +44,10 @@ func ExampleCompare() {
 }
 
 func ExampleContains() {
-	fmt.Println(strings.Contains("seafood", "foo"))
-	fmt.Println(strings.Contains("seafood", "bar"))
-	fmt.Println(strings.Contains("seafood", ""))
-	fmt.Println(strings.Contains("", ""))
+	fmt.Printf("%t\n", strings.Contains("seafood", "foo"))
+	fmt.Printf("%t\n", strings.Contains("seafood", "bar"))
+	fmt.Printf("%t\n", strings.Contains("seafood", ""))
+	fmt.Printf("%t\n", strings.Contains("", ""))
 	// Output:
 	// true
 	// false
@@ -56,12 +56,12 @@ func ExampleContains() {
 }
 
 func ExampleContainsAny() {
-	fmt.Println(strings.ContainsAny("team", "i"))
-	fmt.Println(strings.ContainsAny("fail", "ui"))
-	fmt.Println(strings.ContainsAny("ure", "ui"))
-	fmt.Println(strings.ContainsAny("failure", "ui"))
-	fmt.Println(strings.ContainsAny("foo", ""))
-	fmt.Println(strings.ContainsAny("", ""))
+	fmt.Printf("%t\n", strings.ContainsAny("team", "i"))
+	fmt.Printf("%t\n", strings.ContainsAny("fail", "ui"))
+	fmt.Printf("%t\n", strings.ContainsAny("ure", "ui"))
+	fmt.Printf("%t\n", strings.ContainsAny("failure", "ui"))
+	fmt.Printf("%t\n", strings.ContainsAny("foo", ""))
+	fmt.Printf("%t\n", strings.ContainsAny("", ""))
 	// Output:
 	// false
 	// true
@@ -74,8 +74,8 @@ func ExampleContainsAny() {
 func ExampleContainsRune() {
 	// Finds whether a string contains a particular Unicode code point.
 	// The code point for the lowercase letter "a", for example, is 97.
-	fmt.Println(strings.ContainsRune("aardvark", 97))
-	fmt.Println(strings.ContainsRune("timeout", 97))
+	fmt.Printf("%t\n", strings.ContainsRune("aardvark", 97))
+	fmt.Printf("%t\n", strings.ContainsRune("timeout", 97))
 	// Output:
 	// true
 	// false
@@ -85,16 +85,16 @@ func ExampleContainsFunc() {
 	f := func(r rune) bool {
 		return r == 'a' || r == 'e' || r == 'i' || r == 'o' || r == 'u'
 	}
-	fmt.Println(strings.ContainsFunc("hello", f))
-	fmt.Println(strings.ContainsFunc("rhythms", f))
+	fmt.Printf("%t\n", strings.ContainsFunc("hello", f))
+	fmt.Printf("%t\n", strings.ContainsFunc("rhythms", f))
 	// Output:
 	// true
 	// false
 }
 
 func ExampleCount() {
-	fmt.Println(strings.Count("cheese", "e"))
-	fmt.Println(strings.Count("five", "")) // before & after each rune
+	fmt.Printf("%d\n", strings.Count("cheese", "e"))
+	fmt.Printf("%d\n", strings.Count("five", "")) // before & after each rune
 	// Output:
 	// 3
 	// 5
@@ -154,9 +154,9 @@ func ExampleFieldsFunc() {
 }
 
 func ExampleHasPrefix() {
-	fmt.Println(strings.HasPrefix("Gopher", "Go"))
-	fmt.Println(strings.HasPrefix("Gopher", "C"))
-	fmt.Println(strings.HasPrefix("Gopher", ""))
+	fmt.Printf("%t\n", strings.HasPrefix("Gopher", "Go"))
+	fmt.Printf("%t\n", strings.HasPrefix("Gopher", "C"))
+	fmt.Printf("%t\n", strings.HasPrefix("Gopher", ""))
 	// Output:
 	// true
 	// false
@@ -164,10 +164,10 @@ func ExampleHasPrefix() {
 }
 
 func ExampleHasSuffix() {
-	fmt.Println(strings.HasSuffix("Amigo", "go"))
-	fmt.Println(strings.HasSuffix("Amigo", "O"))
-	fmt.Println(strings.HasSuffix("Amigo", "Ami"))
-	fmt.Println(strings.HasSuffix("Amigo", ""))
+	fmt.Printf("%t\n", strings.HasSuffix("Amigo", "go"))
+	fmt.Printf("%t\n", strings.HasSuffix("Amigo", "O"))
+	fmt.Printf("%t\n", strings.HasSuffix("Amigo", "Ami"))
+	fmt.Printf("%t\n", strings.HasSuffix("Amigo", ""))
 	// Output:
 	// true
 	// false
@@ -176,8 +176,8 @@ func ExampleHasSuffix() {
 }
 
 func ExampleIndex() {
-	fmt.Println(strings.Index("chicken", "ken"))
-	fmt.Println(strings.Index("chicken", "dmr"))
+	fmt.Printf("%d\n", strings.Index("chicken", "ken"))
+	fmt.Printf("%d\n", strings.Index("chicken", "dmr"))
 	// Output:
 	// 4
 	// -1
@@ -187,42 +187,42 @@ func ExampleIndexFunc() {
 	f := func(c rune) bool {
 		return unicode.Is(unicode.White_Space, c)
 	}
-	fmt.Println(strings.IndexFunc("Hello, 世界", f))
-	fmt.Println(strings.IndexFunc("Helloworld", f))
+	fmt.Printf("%d\n", strings.IndexFunc("Hello, 世界", f))
+	fmt.Printf("%d\n", strings.IndexFunc("Helloworld", f))
 	// Output:
 	// 6
 	// -1
 }
 
 func ExampleIndexAny() {
-	fmt.Println(strings.IndexAny("chicken", "aeiouy"))
-	fmt.Println(strings.IndexAny("crwth", "aeiouy"))
+	fmt.Printf("%d\n", strings.IndexAny("chicken", "aeiouy"))
+	fmt.Printf("%d\n", strings.IndexAny("crwth", "aeiouy"))
 	// Output:
 	// 2
 	// -1
 }
 
 func ExampleIndexByte() {
-	fmt.Println(strings.IndexByte("golang", 'g'))
-	fmt.Println(strings.IndexByte("gophers", 'h'))
-	fmt.Println(strings.IndexByte("golang", 'x'))
+	fmt.Printf("%d\n", strings.IndexByte("golang", 'g'))
+	fmt.Printf("%d\n", strings.IndexByte("gophers", 'h'))
+	fmt.Printf("%d\n", strings.IndexByte("golang", 'x'))
 	// Output:
 	// 0
 	// 3
 	// -1
 }
 func ExampleIndexRune() {
-	fmt.Println(strings.IndexRune("chicken", 'k'))
-	fmt.Println(strings.IndexRune("chicken", 'd'))
+	fmt.Printf("%d\n", strings.IndexRune("chicken", 'k'))
+	fmt.Printf("%d\n", strings.IndexRune("chicken", 'd'))
 	// Output:
 	// 4
 	// -1
 }
 
 func ExampleLastIndex() {
-	fmt.Println(strings.Index("go gopher", "go"))
-	fmt.Println(strings.LastIndex("go gopher", "go"))
-	fmt.Println(strings.LastIndex("go gopher", "rodent"))
+	fmt.Printf("%d\n", strings.Index("go gopher", "go"))
+	fmt.Printf("%d\n", strings.LastIndex("go gopher", "go"))
+	fmt.Printf("%d\n", strings.LastIndex("go gopher", "rodent"))
 	// Output:
 	// 0
 	// 3
@@ -230,9 +230,9 @@ func ExampleLastIndex() {
 }
 
 func ExampleLastIndexByte() {
-	fmt.Println(strings.LastIndexByte("Hello, world", 'l'))
-	fmt.Println(strings.LastIndexByte("Hello, world", 'o'))
-	fmt.Println(strings.LastIndexByte("Hello, world", 'x'))
+	fmt.Printf("%d\n", strings.LastIndexByte("Hello, world", 'l'))
+	fmt.Printf("%d\n", strings.LastIndexByte("Hello, world", 'o'))
+	fmt.Printf("%d\n", strings.LastIndexByte("Hello, world", 'x'))
 	// Output:
 	// 10
 	// 8

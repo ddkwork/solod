@@ -5,8 +5,7 @@
 package utf8_test
 
 import (
-	"fmt"
-
+	"solod.dev/so/fmt"
 	"solod.dev/so/unicode/utf8"
 )
 
@@ -101,8 +100,8 @@ func ExampleEncodeRune() {
 
 	n := utf8.EncodeRune(buf, r)
 
-	fmt.Println(buf)
-	fmt.Println(n)
+	fmt.Printf("%v\n", buf)
+	fmt.Printf("%d\n", n)
 	// Output:
 	// [228 184 150]
 	// 3
@@ -130,8 +129,8 @@ func ExampleEncodeRune_outOfRange() {
 
 func ExampleFullRune() {
 	buf := []byte{228, 184, 150} // 世
-	fmt.Println(utf8.FullRune(buf))
-	fmt.Println(utf8.FullRune(buf[:2]))
+	fmt.Printf("%t\n", utf8.FullRune(buf))
+	fmt.Printf("%t\n", utf8.FullRune(buf[:2]))
 	// Output:
 	// true
 	// false
@@ -139,8 +138,8 @@ func ExampleFullRune() {
 
 func ExampleFullRuneInString() {
 	str := "世"
-	fmt.Println(utf8.FullRuneInString(str))
-	fmt.Println(utf8.FullRuneInString(str[:2]))
+	fmt.Printf("%t\n", utf8.FullRuneInString(str))
+	fmt.Printf("%t\n", utf8.FullRuneInString(str[:2]))
 	// Output:
 	// true
 	// false
@@ -148,8 +147,8 @@ func ExampleFullRuneInString() {
 
 func ExampleRuneCount() {
 	buf := []byte("Hello, 世界")
-	fmt.Println("bytes =", len(buf))
-	fmt.Println("runes =", utf8.RuneCount(buf))
+	fmt.Printf("bytes = %d\n", len(buf))
+	fmt.Printf("runes = %d\n", utf8.RuneCount(buf))
 	// Output:
 	// bytes = 13
 	// runes = 9
@@ -157,16 +156,16 @@ func ExampleRuneCount() {
 
 func ExampleRuneCountInString() {
 	str := "Hello, 世界"
-	fmt.Println("bytes =", len(str))
-	fmt.Println("runes =", utf8.RuneCountInString(str))
+	fmt.Printf("bytes = %d\n", len(str))
+	fmt.Printf("runes = %d\n", utf8.RuneCountInString(str))
 	// Output:
 	// bytes = 13
 	// runes = 9
 }
 
 func ExampleRuneLen() {
-	fmt.Println(utf8.RuneLen('a'))
-	fmt.Println(utf8.RuneLen('界'))
+	fmt.Printf("%d\n", utf8.RuneLen('a'))
+	fmt.Printf("%d\n", utf8.RuneLen('界'))
 	// Output:
 	// 1
 	// 3
@@ -174,9 +173,9 @@ func ExampleRuneLen() {
 
 func ExampleRuneStart() {
 	buf := []byte("a界")
-	fmt.Println(utf8.RuneStart(buf[0]))
-	fmt.Println(utf8.RuneStart(buf[1]))
-	fmt.Println(utf8.RuneStart(buf[2]))
+	fmt.Printf("%t\n", utf8.RuneStart(buf[0]))
+	fmt.Printf("%t\n", utf8.RuneStart(buf[1]))
+	fmt.Printf("%t\n", utf8.RuneStart(buf[2]))
 	// Output:
 	// true
 	// true
@@ -187,8 +186,8 @@ func ExampleValid() {
 	valid := []byte("Hello, 世界")
 	invalid := []byte{0xff, 0xfe, 0xfd}
 
-	fmt.Println(utf8.Valid(valid))
-	fmt.Println(utf8.Valid(invalid))
+	fmt.Printf("%t\n", utf8.Valid(valid))
+	fmt.Printf("%t\n", utf8.Valid(invalid))
 	// Output:
 	// true
 	// false
@@ -198,8 +197,8 @@ func ExampleValidRune() {
 	valid := 'a'
 	invalid := rune(0xfffffff)
 
-	fmt.Println(utf8.ValidRune(valid))
-	fmt.Println(utf8.ValidRune(invalid))
+	fmt.Printf("%t\n", utf8.ValidRune(valid))
+	fmt.Printf("%t\n", utf8.ValidRune(invalid))
 	// Output:
 	// true
 	// false
@@ -209,8 +208,8 @@ func ExampleValidString() {
 	valid := "Hello, 世界"
 	invalid := string([]byte{0xff, 0xfe, 0xfd})
 
-	fmt.Println(utf8.ValidString(valid))
-	fmt.Println(utf8.ValidString(invalid))
+	fmt.Printf("%t\n", utf8.ValidString(valid))
+	fmt.Printf("%t\n", utf8.ValidString(invalid))
 	// Output:
 	// true
 	// false
@@ -219,8 +218,8 @@ func ExampleValidString() {
 func ExampleAppendRune() {
 	buf1 := utf8.AppendRune(nil, 0x10000)
 	buf2 := utf8.AppendRune([]byte("init"), 0x10000)
-	fmt.Println(string(buf1))
-	fmt.Println(string(buf2))
+	fmt.Printf("%s\n", string(buf1))
+	fmt.Printf("%s\n", string(buf2))
 	// Output:
 	// 𐀀
 	// init𐀀
