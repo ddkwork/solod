@@ -9,6 +9,7 @@ Solod (So) is a strict subset of Go that transpiles to regular C. This document 
 [Slices](#slices) •
 [Maps](#maps) •
 [If/else](#ifelse) •
+[Switch](#switch) •
 [For](#for) •
 [Goto](#goto) •
 [Functions](#functions) •
@@ -386,7 +387,46 @@ if num := 9; num < 10 {
 }
 ```
 
-`switch` is not supported. Use `if-then-else` instead.
+## Switch
+
+Switch statements are translated to if/else-if/else chains.
+
+Tagged switch:
+
+```go
+switch x {
+case 1:
+    println("one")
+case 2, 3:
+    println("two or three")
+default:
+    println("other")
+}
+```
+
+Tagless switch (bool conditions):
+
+```go
+switch {
+case x > 100:
+    println("big")
+case x > 0:
+    println("positive")
+}
+```
+
+Init statement (scoped to the switch block):
+
+```go
+switch n := compute(); n {
+case 42:
+    println("answer")
+}
+```
+
+String switch uses `so_string_eq` for comparisons.
+
+`fallthrough` and type switches are not supported.
 
 ## For
 

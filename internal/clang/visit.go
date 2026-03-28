@@ -80,6 +80,9 @@ func (g *Generator) Visit(node ast.Node) ast.Visitor {
 	case *ast.ReturnStmt:
 		g.emitReturnStmt(n)
 		return nil
+	case *ast.SwitchStmt:
+		g.emitSwitchStmt(n)
+		return nil
 	}
 
 	// Fail on unsupported expressions, statements, and declarations.
