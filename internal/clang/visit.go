@@ -114,9 +114,15 @@ func (g *Generator) emitBlockStmt(stmt *ast.BlockStmt) {
 // emitBranchStmt emits a break, continue, or goto statement.
 func (g *Generator) emitBranchStmt(stmt *ast.BranchStmt) {
 	w := g.state.writer
-	if stmt.Label != nil {
+	if stmt.Label != nil && stmt.Tok == token.BREAK {
+		// Labeled break is translated to goto because C has no "break label".
+		// ("break label" -> "goto label_end").
+		fmt.Fprintf(w, "%sgoto %s_end;\n", g.indent(), stmt.Label.Name)
+	} else if stmt.Label != nil {
+		// Regular labeled goto, emit as-is.
 		fmt.Fprintf(w, "%s%s %s;\n", g.indent(), stmt.Tok, stmt.Label.Name)
 	} else {
+		// Unlabeled break/continue.
 		fmt.Fprintf(w, "%s%s;\n", g.indent(), stmt.Tok)
 	}
 }
@@ -457,8 +463,18 @@ func (g *Generator) emitIncDecStmt(stmt *ast.IncDecStmt) {
 // emitLabeledStmt emits a label followed by its statement.
 func (g *Generator) emitLabeledStmt(stmt *ast.LabeledStmt) {
 	w := g.state.writer
-	fmt.Fprintf(w, "%s%s:;\n", g.indent(), stmt.Label.Name)
-	ast.Walk(g, stmt.Stmt)
+	switch stmt.Stmt.(type) {
+	case *ast.ForStmt, *ast.RangeStmt, *ast.SwitchStmt:
+		// For loops and switches, only emit the end label
+		// (for "break label" -> "goto label_end").
+		ast.Walk(g, stmt.Stmt)
+		fmt.Fprintf(w, "%s%s_end:;\n", g.indent(), stmt.Label.Name)
+	default:
+		// For other labels (regular goto targets),
+		// emit the label before the statement.
+		fmt.Fprintf(w, "%s%s:;\n", g.indent(), stmt.Label.Name)
+		ast.Walk(g, stmt.Stmt)
+	}
 }
 
 // emitRangeStmt emits a range-based for statement.

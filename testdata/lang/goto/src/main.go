@@ -1,6 +1,6 @@
 package main
 
-func main() {
+func regularGoto() {
 	fails := 0
 
 	for i := range 10 {
@@ -16,6 +16,27 @@ func main() {
 
 fallback:
 	if fails != 3 {
-		panic("want fails == 3")
+		panic("fails != 3")
 	}
+}
+
+func labeledBreak() {
+	sum := 0
+outer:
+	for i := range 5 {
+		for j := range 5 {
+			if i+j > 3 {
+				break outer
+			}
+			sum += i + j
+		}
+	}
+	if sum != 6 {
+		panic("sum != 6")
+	}
+}
+
+func main() {
+	regularGoto()
+	labeledBreak()
 }
