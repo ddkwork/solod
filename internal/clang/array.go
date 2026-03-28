@@ -133,7 +133,7 @@ func (g *Generator) emitSliceExpr(n *ast.SliceExpr) {
 		}
 
 	case *types.Basic:
-		if t.Kind() != types.String {
+		if t.Kind() != types.String && t.Kind() != types.UntypedString {
 			g.fail(n, "unsupported slice expression on basic type: %s", t)
 			break
 		}
