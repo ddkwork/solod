@@ -1,10 +1,7 @@
 package mem
 
-// System is an instance of a memory allocator that uses
-// the system's malloc, realloc, and free functions.
-var System Allocator = &SystemAllocator{}
-
 // Allocator defines the interface for memory allocators.
+// Whether allocated or reallocated memory is zeroed is allocator-specific.
 type Allocator interface {
 	// Alloc allocates a block of memory of the given size and alignment.
 	Alloc(size int, align int) (any, error)
@@ -14,39 +11,22 @@ type Allocator interface {
 	Free(ptr any, size int, align int)
 }
 
-// SystemAllocator uses the system's malloc, realloc, and free functions.
-type SystemAllocator struct{}
+// A Stats records statistics about the memory allocator.
+type Stats struct {
+	// Alloc is bytes of allocated heap objects.
+	Alloc uint64
 
-func (*SystemAllocator) Alloc(size int, align int) (any, error) {
-	if size <= 0 {
-		panic("mem: invalid allocation size")
-	}
-	if align <= 0 || (align&(align-1)) != 0 {
-		panic("mem: invalid alignment")
-	}
-	ptr := calloc(1, uintptr(size))
-	if ptr == nil {
-		return nil, ErrOutOfMemory
-	}
-	return ptr, nil
-}
+	// TotalAlloc is cumulative bytes allocated for heap objects.
+	//
+	// TotalAlloc increases as heap objects are allocated, but
+	// unlike Alloc, it does not decrease when
+	// objects are freed.
+	TotalAlloc uint64
 
-func (*SystemAllocator) Realloc(ptr any, oldSize int, newSize int, align int) (any, error) {
-	if oldSize <= 0 || newSize <= 0 {
-		panic("mem: invalid allocation size")
-	}
-	if align <= 0 || (align&(align-1)) != 0 {
-		panic("mem: invalid alignment")
-	}
-	newPtr := realloc(ptr, uintptr(newSize))
-	if newPtr == nil {
-		return nil, ErrOutOfMemory
-	}
-	return newPtr, nil
-}
+	// Mallocs is the cumulative count of heap objects allocated.
+	// The number of live objects is Mallocs - Frees.
+	Mallocs uint64
 
-func (*SystemAllocator) Free(ptr any, size int, align int) {
-	_ = size
-	_ = align
-	free(ptr)
+	// Frees is the cumulative count of heap objects freed.
+	Frees uint64
 }

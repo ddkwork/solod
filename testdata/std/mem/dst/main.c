@@ -2,8 +2,10 @@
 
 // -- Forward declarations --
 static void withDefer(void);
+static void allocTest(void);
+static void arenaTest(void);
 
-// -- Implementation --
+// -- alloc.go --
 
 static void withDefer(void) {
     main_Point* p = mem_Alloc(main_Point, (mem_Allocator){0});
@@ -16,7 +18,7 @@ static void withDefer(void) {
     mem_Free(main_Point, (mem_Allocator){0}, p);
 }
 
-int main(void) {
+static void allocTest(void) {
     {
         // TryAlloc and Free.
         so_Result _res1 = mem_TryAlloc(main_Point, mem_System);
@@ -70,6 +72,61 @@ int main(void) {
         mem_FreeSlice(so_int, (mem_Allocator){0}, slice);
     }
     {
+        // TryReallocSlice with explicit allocator.
+        so_Result _res3 = mem_TryAllocSlice(so_int, mem_System, 3, 3);
+        so_Slice slice = _res3.val.as_slice;
+        so_Error err = _res3.err;
+        if (err != NULL) {
+            so_panic("ReallocSlice: initial allocation failed");
+        }
+        so_at(so_int, slice, 0) = 11;
+        so_at(so_int, slice, 1) = 22;
+        so_at(so_int, slice, 2) = 33;
+        so_Result _res4 = mem_TryReallocSlice(so_int, mem_System, slice, 3, 6);
+        slice = _res4.val.as_slice;
+        err = _res4.err;
+        if (err != NULL) {
+            so_panic("ReallocSlice: reallocation failed");
+        }
+        if (so_len(slice) != 3 || so_cap(slice) != 6) {
+            so_panic("ReallocSlice: unexpected len/cap");
+        }
+        if (so_at(so_int, slice, 0) != 11 || so_at(so_int, slice, 1) != 22 || so_at(so_int, slice, 2) != 33) {
+            so_panic("ReallocSlice: data not preserved");
+        }
+        mem_FreeSlice(so_int, mem_System, slice);
+    }
+    {
+        // ReallocSlice with default allocator.
+        so_Slice slice = mem_AllocSlice(so_int, (mem_Allocator){0}, 2, 2);
+        so_at(so_int, slice, 0) = 44;
+        so_at(so_int, slice, 1) = 55;
+        slice = mem_ReallocSlice(so_int, (mem_Allocator){0}, slice, 4, 8);
+        if (so_len(slice) != 4 || so_cap(slice) != 8) {
+            so_panic("ReallocSlice default: unexpected len/cap");
+        }
+        if (so_at(so_int, slice, 0) != 44 || so_at(so_int, slice, 1) != 55) {
+            so_panic("ReallocSlice default: data not preserved");
+        }
+        // New elements should be zeroed.
+        if (so_at(so_int, slice, 2) != 0 || so_at(so_int, slice, 3) != 0) {
+            so_panic("ReallocSlice default: new elements not zeroed");
+        }
+        mem_FreeSlice(so_int, (mem_Allocator){0}, slice);
+    }
+    {
+        // ReallocSlice from empty slice.
+        so_Slice empty = {0};
+        so_Slice slice = mem_ReallocSlice(so_int, (mem_Allocator){0}, empty, 3, 4);
+        if (so_len(slice) != 3 || so_cap(slice) != 4) {
+            so_panic("ReallocSlice empty: unexpected len/cap");
+        }
+        if (so_at(so_int, slice, 0) != 0 || so_at(so_int, slice, 1) != 0 || so_at(so_int, slice, 2) != 0) {
+            so_panic("ReallocSlice empty: not zeroed");
+        }
+        mem_FreeSlice(so_int, (mem_Allocator){0}, slice);
+    }
+    {
         // Free with nil or an empty slice.
         main_Point* p = NULL;
         mem_Free(main_Point, (mem_Allocator){0}, p);
@@ -91,15 +148,20 @@ int main(void) {
         // Free with defer.
         withDefer();
     }
+}
+
+// -- arena.go --
+
+static void arenaTest(void) {
     {
         // Arena allocator.
         so_Slice buf = so_make_slice(so_byte, 1024, 1024);
         mem_Arena arena = mem_NewArena(buf);
         mem_Allocator a = (mem_Allocator){.self = &arena, .Alloc = mem_Arena_Alloc, .Free = mem_Arena_Free, .Realloc = mem_Arena_Realloc};
         // Allocate a Point.
-        so_Result _res3 = mem_TryAlloc(main_Point, a);
-        main_Point* p = _res3.val.as_ptr;
-        so_Error err = _res3.err;
+        so_Result _res1 = mem_TryAlloc(main_Point, a);
+        main_Point* p = _res1.val.as_ptr;
+        so_Error err = _res1.err;
         if (err != NULL) {
             so_panic("initial allocation failed");
         }
@@ -112,9 +174,9 @@ int main(void) {
         mem_Free(main_Point, a, p);
         // Reset and reallocate.
         mem_Arena_Reset(&arena);
-        so_Result _res4 = mem_TryAlloc(main_Point, a);
-        main_Point* p2 = _res4.val.as_ptr;
-        err = _res4.err;
+        so_Result _res2 = mem_TryAlloc(main_Point, a);
+        main_Point* p2 = _res2.val.as_ptr;
+        err = _res2.err;
         if (err != NULL) {
             so_panic("allocation after reset failed");
         }
@@ -125,4 +187,11 @@ int main(void) {
         p2->x = 33;
         p2->y = 44;
     }
+}
+
+// -- main.go --
+
+int main(void) {
+    allocTest();
+    arenaTest();
 }
