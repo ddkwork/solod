@@ -69,6 +69,15 @@ func NewBuffer(size int) Buffer {
 	}
 }
 
+// BufferFrom creates a Buffer that uses the provided byte slice as its storage.
+// The buffer doesn't take ownership of the slice and doesn't free it.
+func BufferFrom(buf []byte) Buffer {
+	return Buffer{
+		Ptr: &buf[0],
+		Len: len(buf),
+	}
+}
+
 // String returns the contents of the Buffer as a string,
 // up to the first null byte.
 func (b Buffer) String() string {

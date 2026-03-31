@@ -20,6 +20,20 @@ type Builder struct {
 	buf []byte
 }
 
+// NewBuilder returns a new Builder that uses the provided allocator.
+func NewBuilder(a mem.Allocator) Builder {
+	return Builder{a: a}
+}
+
+// FixedBuilder returns a new Builder that uses the provided buffer
+// as its internal buffer. The builder doesn't take ownership of the
+// buffer and doesn't free it (Free is a no-op). The builder doesn't
+// allocate additional memory, so writes that exceed the buffer's
+// capacity will panic.
+func FixedBuilder(buf []byte) Builder {
+	return Builder{a: mem.NoAlloc, buf: buf[:0]}
+}
+
 // String returns the accumulated string.
 func (b *Builder) String() string {
 	return string(b.buf)
