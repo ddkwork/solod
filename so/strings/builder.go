@@ -61,6 +61,8 @@ func (b *Builder) Free() {
 
 // grow copies the buffer to a new, larger buffer so that there are at least n
 // bytes of capacity beyond len(b.buf).
+//
+//so:inline
 func (b *Builder) grow(n int) {
 	if cap(b.buf)-len(b.buf) >= n {
 		return
@@ -81,16 +83,18 @@ func (b *Builder) Grow(n int) {
 
 // Write appends the contents of p to b's buffer.
 // Write always returns len(p), nil.
+//
+//so:inline
 func (b *Builder) Write(p []byte) (int, error) {
 	b.grow(len(p))
-	l := len(b.buf)
-	b.buf = b.buf[:l+len(p)]
-	copy(b.buf[l:], p)
+	b.buf = append(b.buf, p...)
 	return len(p), nil
 }
 
 // WriteByte appends the byte c to b's buffer.
 // The returned error is always nil.
+//
+//so:inline
 func (b *Builder) WriteByte(c byte) error {
 	b.grow(1)
 	b.buf = append(b.buf, c)
@@ -108,6 +112,8 @@ func (b *Builder) WriteRune(r rune) (int, error) {
 
 // WriteString appends the contents of s to b's buffer.
 // It returns the length of s and a nil error.
+//
+//so:inline
 func (b *Builder) WriteString(s string) (int, error) {
 	b.grow(len(s))
 	b.buf = append(b.buf, s...)
