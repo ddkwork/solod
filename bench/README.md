@@ -69,6 +69,32 @@ So is 2-4x faster than Go and uses 10%-20% less memory.
 
 Apple M1 • Go 1.26.1 • [details](./strings/README.md#builder)
 
+## Maps
+
+### Int keys
+
+So lookups are 3.4x faster than Go, while modifications are 1.6x slower.
+
+| Benchmark |      Go | So (mimalloc) | So (arena) | Winner        |
+| --------- | ------: | ------------: | ---------: | ------------- |
+| Set       | 35580ns |       56696ns |    57661ns | Go - 0.6x     |
+| Get       |  5573ns |        1638ns |     1583ns | **So** - 3.4x |
+| Has       |  5660ns |        1596ns |     1532ns | **So** - 3.5x |
+| Delete    | 23892ns |       38556ns |    38821ns | Go - 0.6x     |
+
+### String keys
+
+So lookups are on par with Go, while modifications are 1.5x slower.
+
+| Benchmark |      Go | So (mimalloc) | So (arena) | Winner        |
+| --------- | ------: | ------------: | ---------: | ------------- |
+| Set       | 48677ns |       71879ns |    63500ns | Go - 0.7x     |
+| Get       |  8990ns |       10206ns |    10083ns | Go - 0.9x     |
+| Has       | 10174ns |       10135ns |    10203ns | ~same         |
+| Delete    | 33878ns |       50111ns |    49507ns | Go - 0.7x     |
+
+Apple M1 • Go 1.26.1 • [details](./maps/README.md)
+
 ## Methodology
 
 So is compiled with `-Ofast -march=native -flto -funroll-loops` and uses mimalloc as the system allocator. Go is run with default `go test -bench=.` settings.

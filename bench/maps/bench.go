@@ -19,21 +19,22 @@ var (
 	sinkBool bool
 )
 
-const N = 1024
+// nKeys is the number of map keys to use in benchmarks.
+const nKeys = 1024
 
 // strKeys holds pre-generated string keys for string benchmarks.
 var strKeys []string
 
 func initStrKeys() {
-	strKeys = mem.AllocSlice[string](nil, N, N)
+	strKeys = mem.AllocSlice[string](nil, nKeys, nKeys)
 	buf := fmt.NewBuffer(32)
-	for i := range N {
+	for i := range nKeys {
 		strKeys[i] = strings.Clone(nil, fmt.Sprintf(buf, "key-%d", i))
 	}
 }
 
 func freeStrKeys() {
-	for i := range N {
+	for i := range nKeys {
 		mem.FreeString(nil, strKeys[i])
 	}
 	mem.FreeSlice(nil, strKeys)
@@ -43,7 +44,7 @@ func IntSet(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[int, int](a, 0)
-		for i := range N {
+		for i := range nKeys {
 			m.Set(i, i)
 		}
 		m.Free()
@@ -54,26 +55,26 @@ func IntSet(b *testing.B) {
 }
 
 func IntGet(b *testing.B) {
-	m := maps.New[int, int](nil, N)
-	for i := range N {
+	m := maps.New[int, int](nil, nKeys)
+	for i := range nKeys {
 		m.Set(i, i)
 	}
 	defer m.Free()
 	for b.Loop() {
-		for i := range N {
+		for i := range nKeys {
 			sinkInt = m.Get(i)
 		}
 	}
 }
 
 func IntHas(b *testing.B) {
-	m := maps.New[int, int](nil, N)
-	for i := range N {
+	m := maps.New[int, int](nil, nKeys)
+	for i := range nKeys {
 		m.Set(i, i)
 	}
 	defer m.Free()
 	for b.Loop() {
-		for i := range N {
+		for i := range nKeys {
 			sinkBool = m.Has(i)
 		}
 	}
@@ -82,26 +83,11 @@ func IntHas(b *testing.B) {
 func IntDelete(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
-		m := maps.New[int, int](a, N)
-		for i := range N {
+		m := maps.New[int, int](a, nKeys)
+		for i := range nKeys {
 			m.Set(i, i)
 		}
-		for i := range N {
-			m.Delete(i)
-		}
-		m.Free()
-		if arena != nil {
-			arena.Reset()
-		}
-	}
-}
-
-func IntSetDel(b *testing.B) {
-	a := b.Allocator()
-	for b.Loop() {
-		m := maps.New[int, int](a, 0)
-		for i := range N {
-			m.Set(i, i)
+		for i := range nKeys {
 			m.Delete(i)
 		}
 		m.Free()
@@ -115,7 +101,7 @@ func StrSet(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
 		m := maps.New[string, int](a, 0)
-		for i := range N {
+		for i := range nKeys {
 			m.Set(strKeys[i], i)
 		}
 		m.Free()
@@ -126,26 +112,26 @@ func StrSet(b *testing.B) {
 }
 
 func StrGet(b *testing.B) {
-	m := maps.New[string, int](nil, N)
-	for i := range N {
+	m := maps.New[string, int](nil, nKeys)
+	for i := range nKeys {
 		m.Set(strKeys[i], i)
 	}
 	defer m.Free()
 	for b.Loop() {
-		for i := range N {
+		for i := range nKeys {
 			sinkInt = m.Get(strKeys[i])
 		}
 	}
 }
 
 func StrHas(b *testing.B) {
-	m := maps.New[string, int](nil, N)
-	for i := range N {
+	m := maps.New[string, int](nil, nKeys)
+	for i := range nKeys {
 		m.Set(strKeys[i], i)
 	}
 	defer m.Free()
 	for b.Loop() {
-		for i := range N {
+		for i := range nKeys {
 			sinkBool = m.Has(strKeys[i])
 		}
 	}
@@ -154,11 +140,11 @@ func StrHas(b *testing.B) {
 func StrDelete(b *testing.B) {
 	a := b.Allocator()
 	for b.Loop() {
-		m := maps.New[string, int](a, N)
-		for i := range N {
+		m := maps.New[string, int](a, nKeys)
+		for i := range nKeys {
 			m.Set(strKeys[i], i)
 		}
-		for i := range N {
+		for i := range nKeys {
 			m.Delete(strKeys[i])
 		}
 		m.Free()
@@ -168,17 +154,43 @@ func StrDelete(b *testing.B) {
 	}
 }
 
-func StrSetDel(b *testing.B) {
-	a := b.Allocator()
+func StackSet(b *testing.B) {
+	nKeys := 128
 	for b.Loop() {
-		m := maps.New[string, int](a, 0)
-		for i := range N {
-			m.Set(strKeys[i], i)
-			m.Delete(strKeys[i])
+		stackSet(nKeys) // alloca only frees when the function returns
+	}
+}
+
+func stackSet(nKeys int) {
+	m := make(map[string]int, nKeys)
+	for i := range nKeys {
+		m[strKeys[i]] = i
+	}
+	sinkInt = m[strKeys[0]]
+}
+
+func StackGet(b *testing.B) {
+	nKeys := 128
+	m := make(map[string]int, nKeys)
+	for i := range nKeys {
+		m[strKeys[i]] = i
+	}
+	for b.Loop() {
+		for i := range nKeys {
+			sinkInt = m[strKeys[i]]
 		}
-		m.Free()
-		if arena != nil {
-			arena.Reset()
+	}
+}
+
+func StackHas(b *testing.B) {
+	nKeys := 128
+	m := make(map[string]int, nKeys)
+	for i := range nKeys {
+		m[strKeys[i]] = i
+	}
+	for b.Loop() {
+		for i := range nKeys {
+			_, sinkBool = m[strKeys[i]]
 		}
 	}
 }
@@ -187,25 +199,19 @@ func main() {
 	initStrKeys()
 	defer freeStrKeys()
 
-	intBenchs := []testing.Benchmark{
+	benchs := []testing.Benchmark{
 		{Name: "IntSet", F: IntSet},
 		{Name: "IntGet", F: IntGet},
 		{Name: "IntHas", F: IntHas},
 		{Name: "IntDelete", F: IntDelete},
-		{Name: "IntSetDel", F: IntSetDel},
-	}
-
-	strBenchs := []testing.Benchmark{
 		{Name: "StrSet", F: StrSet},
 		{Name: "StrGet", F: StrGet},
 		{Name: "StrHas", F: StrHas},
 		{Name: "StrDelete", F: StrDelete},
-		{Name: "StrSetDel", F: StrSetDel},
 	}
 
 	fmt.Println("Malloc-based allocator:")
-	testing.RunBenchmarks(mem.System, intBenchs)
-	testing.RunBenchmarks(mem.System, strBenchs)
+	testing.RunBenchmarks(mem.System, benchs)
 
 	fmt.Println("Arena allocator:")
 	const size = 4 << 20
@@ -213,6 +219,13 @@ func main() {
 	defer mem.FreeSlice(nil, buf)
 	a := mem.NewArena(buf[:])
 	arena = &a
-	testing.RunBenchmarks(arena, intBenchs)
-	testing.RunBenchmarks(arena, strBenchs)
+	testing.RunBenchmarks(arena, benchs)
+
+	stackBenchs := []testing.Benchmark{
+		{Name: "StackSet", F: StackSet},
+		{Name: "StackGet", F: StackGet},
+		{Name: "StackHas", F: StackHas},
+	}
+	fmt.Println("Stack-based map:")
+	testing.RunBenchmarks(mem.System, stackBenchs)
 }
