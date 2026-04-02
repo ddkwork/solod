@@ -7,10 +7,12 @@ import (
 	"go/types"
 )
 
-// emitMapLit emits a map literal as a so_Map compound literal.
+// emitMapLit emits a map literal as a so_map_lit call.
 // Example: map[string]int{"a": 11, "b": 22} ->
 //
-//	(so_Map){(so_String[2]){so_str("a"), so_str("b")}, (so_int[2]){11, 22}, 2, 2}
+//	so_map_lit(so_String, so_int, 2,
+//		((so_String[]){so_str("a"), so_str("b")}),
+//		((so_int[]){11, 22})))
 func (g *Generator) emitMapLit(n *ast.CompositeLit) {
 	w := g.state.writer
 	mapType := g.types.TypeOf(n).Underlying().(*types.Map)
@@ -24,21 +26,21 @@ func (g *Generator) emitMapLit(n *ast.CompositeLit) {
 		return
 	}
 
-	fmt.Fprintf(w, "&(so_Map){(%s[%d]){", keyType, size)
+	fmt.Fprintf(w, "so_map_lit(%s, %s, %d, ((%s[]){", keyType, valType, size, keyType)
 	for i, elt := range n.Elts {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
 		g.emitExpr(elt.(*ast.KeyValueExpr).Key)
 	}
-	fmt.Fprintf(w, "}, (%s[%d]){", valType, size)
+	fmt.Fprintf(w, "}), ((%s[]){", valType)
 	for i, elt := range n.Elts {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
 		g.emitExpr(elt.(*ast.KeyValueExpr).Value)
 	}
-	fmt.Fprintf(w, "}, %d, %d}", size, size)
+	fmt.Fprintf(w, "}))")
 }
 
 // emitMapIndexExpr emits a map index read as so_map_get(K, V, m, key).
@@ -119,9 +121,14 @@ func (g *Generator) emitMapRange(stmt *ast.RangeStmt) {
 
 	fmt.Fprintf(w, "%sfor (so_int _i = 0; _i < (so_int)", g.indent())
 	g.emitExpr(stmt.X)
-	fmt.Fprintf(w, "->len; _i++) {\n")
+	fmt.Fprintf(w, "->cap; _i++) {\n")
 
 	g.state.indent++
+
+	// Skip empty slots in hash table.
+	fmt.Fprintf(w, "%sif (!", g.indent())
+	g.emitExpr(stmt.X)
+	fmt.Fprintf(w, "->used[_i]) continue;\n")
 
 	// Emit key variable.
 	if stmt.Key != nil {

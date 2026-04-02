@@ -278,7 +278,7 @@ c := cap(s)                 // capacity
 x := s[2]                   // index access
 ```
 
-`make()` allocates a fixed amount of memory on the stack (`sizeof(T)*cap`). `append()` only works up to the initial capacity and panics if it's exceeded. There's no automatic reallocation. Use the standard library for heap allocation and dynamic arrays.
+`make()` allocates a fixed amount of memory on the stack (`sizeof(T)*cap`). `append()` only works up to the initial capacity and panics if it's exceeded. There's no automatic reallocation. Use the `so/slices` package instead of `make` and `append` for heap allocation and dynamic arrays.
 
 Iterating over a slice with `range`:
 
@@ -300,9 +300,9 @@ s[1]++
 
 ## Maps
 
-Maps are fixed-size and stack-allocated, backed by parallel key/value arrays with linear search. They are pointer-based reference types, represented as `so_Map*` in C. No delete, no resize.
+Maps are fixed-size and stack-allocated, backed by "mask-step-index" hashtables. They are pointer-based reference types, represented as `so_Map*` in C. No delete, no resize.
 
-Only use maps when you have a small, fixed number of key-value pairs. For anything else, use heap-allocated maps from the `so/maps` package.
+Only use maps when you have a small, fixed number of items (<1024). For anything else, use heap-allocated maps from the `so/maps` package.
 
 Map literals:
 

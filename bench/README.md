@@ -86,12 +86,14 @@ So lookups are 3.4x faster than Go, while modifications are 1.6x slower.
 
 So lookups are on par with Go, while modifications are 1.5x slower.
 
-| Benchmark |      Go | So (mimalloc) | So (arena) | Winner        |
-| --------- | ------: | ------------: | ---------: | ------------- |
-| Set       | 48677ns |       71879ns |    63500ns | Go - 0.7x     |
-| Get       |  8990ns |       10206ns |    10083ns | Go - 0.9x     |
-| Has       | 10174ns |       10135ns |    10203ns | ~same         |
-| Delete    | 33878ns |       50111ns |    49507ns | Go - 0.7x     |
+So's built-in map is just as good as Go's for lookups and modifications, but I wouldn't call it the winner because it's only useful in certain situations — it's fixed size and stack-allocated.
+
+| Benchmark |      Go | So (mimalloc) | So (arena) | So (built-in) | Winner    |
+| --------- | ------: | ------------: | ---------: | ------------: | --------- |
+| Set       | 48677ns |       71879ns |    63500ns |        6354ns | Go - 0.7x |
+| Get       |  8990ns |       10206ns |    10083ns |       10848ns | Go - 0.9x |
+| Has       | 10174ns |       10135ns |    10203ns |       10987ns | ~same     |
+| Delete    | 33878ns |       50111ns |    49507ns |           n/a | Go - 0.7x |
 
 Apple M1 • Go 1.26.1 • [details](./maps/README.md)
 

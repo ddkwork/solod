@@ -55,10 +55,10 @@ Benchmark_StrHas        118683    10203 ns/op         0 B/op     0 allocs/op
 Benchmark_StrDelete      24212    49507 ns/op     98304 B/op     6 allocs/op
 ```
 
-So (stack-allocated map, 128 keys):
+So (built-in map, string keys):
 
 ```text
-Benchmark_StackSet       73699    16554 ns/op
-Benchmark_StackGet       69466    17995 ns/op
-Benchmark_StackHas       68262    21342 ns/op
+Benchmark_BuiltinSet    188593     6354 ns/op
+Benchmark_BuiltinGet    110814    10848 ns/op
+Benchmark_BuiltinHas    109297    10987 ns/op
 ```

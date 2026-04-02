@@ -154,14 +154,13 @@ func StrDelete(b *testing.B) {
 	}
 }
 
-func StackSet(b *testing.B) {
-	nKeys := 128
+func BuiltinSet(b *testing.B) {
 	for b.Loop() {
-		stackSet(nKeys) // alloca only frees when the function returns
+		builtinSet(nKeys) // alloca only frees when the function returns
 	}
 }
 
-func stackSet(nKeys int) {
+func builtinSet(nKeys int) {
 	m := make(map[string]int, nKeys)
 	for i := range nKeys {
 		m[strKeys[i]] = i
@@ -169,8 +168,7 @@ func stackSet(nKeys int) {
 	sinkInt = m[strKeys[0]]
 }
 
-func StackGet(b *testing.B) {
-	nKeys := 128
+func BuiltinGet(b *testing.B) {
 	m := make(map[string]int, nKeys)
 	for i := range nKeys {
 		m[strKeys[i]] = i
@@ -182,8 +180,7 @@ func StackGet(b *testing.B) {
 	}
 }
 
-func StackHas(b *testing.B) {
-	nKeys := 128
+func BuiltinHas(b *testing.B) {
 	m := make(map[string]int, nKeys)
 	for i := range nKeys {
 		m[strKeys[i]] = i
@@ -221,11 +218,11 @@ func main() {
 	arena = &a
 	testing.RunBenchmarks(arena, benchs)
 
-	stackBenchs := []testing.Benchmark{
-		{Name: "StackSet", F: StackSet},
-		{Name: "StackGet", F: StackGet},
-		{Name: "StackHas", F: StackHas},
+	builtinBenchs := []testing.Benchmark{
+		{Name: "BuiltinSet", F: BuiltinSet},
+		{Name: "BuiltinGet", F: BuiltinGet},
+		{Name: "BuiltinHas", F: BuiltinHas},
 	}
-	fmt.Println("Stack-based map:")
-	testing.RunBenchmarks(mem.System, stackBenchs)
+	fmt.Println("Built-in map:")
+	testing.RunBenchmarks(mem.System, builtinBenchs)
 }
