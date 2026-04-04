@@ -152,14 +152,18 @@ typedef struct {
     size_t cap;
 } so_Slice;
 
+// Nil sentinel: address used as the pointer for nil/empty slices.
+// Non-NULL to satisfy static analyzers; never dereferenced.
+extern so_byte so_Nil;
+
 // make_slice creates a zero-initialized slice on the stack.
 // Allocates memory on the stack until the calling function returns.
-#define so_make_slice(T, len, cap) ({ \
-    size_t _cap = (cap);              \
-    size_t _n = sizeof(T) * _cap;     \
-    void* _p = so_alloca(_n);         \
-    if (_p) memset(_p, 0, _n);        \
-    (so_Slice){_p, (len), _cap};      \
+#define so_make_slice(T, len, cap) ({        \
+    size_t _cap = (cap);                     \
+    size_t _n = sizeof(T) * _cap;            \
+    void* _p = _n ? so_alloca(_n) : &so_Nil; \
+    if (_n) memset(_p, 0, _n);               \
+    (so_Slice){_p, (len), _cap};             \
 })
 
 // slice creates a slice from another slice
@@ -528,43 +532,148 @@ typedef struct so_Error_* so_Error;
 // --- Result types ---
 
 // Result types for (T, error):
-typedef struct { bool val; so_Error err; } so_R_bool_err;
-typedef struct { double val; so_Error err; } so_R_f64_err;
-typedef struct { float val; so_Error err; } so_R_f32_err;
-typedef struct { int32_t val; so_Error err; } so_R_i32_err;
-typedef struct { int64_t val; so_Error err; } so_R_i64_err;
-typedef struct { so_byte val; so_Error err; } so_R_byte_err;
-typedef struct { so_int val; so_Error err; } so_R_int_err;
-typedef struct { so_rune val; so_Error err; } so_R_rune_err;
-typedef struct { so_Slice val; so_Error err; } so_R_slice_err;
-typedef struct { so_String val; so_Error err; } so_R_str_err;
-typedef struct { so_uint val; so_Error err; } so_R_uint_err;
-typedef struct { uint32_t val; so_Error err; } so_R_u32_err;
-typedef struct { uint64_t val; so_Error err; } so_R_u64_err;
-typedef struct { void* val; so_Error err; } so_R_ptr_err;
+typedef struct {
+    bool val;
+    so_Error err;
+} so_R_bool_err;
+typedef struct {
+    double val;
+    so_Error err;
+} so_R_f64_err;
+typedef struct {
+    float val;
+    so_Error err;
+} so_R_f32_err;
+typedef struct {
+    int32_t val;
+    so_Error err;
+} so_R_i32_err;
+typedef struct {
+    int64_t val;
+    so_Error err;
+} so_R_i64_err;
+typedef struct {
+    so_byte val;
+    so_Error err;
+} so_R_byte_err;
+typedef struct {
+    so_int val;
+    so_Error err;
+} so_R_int_err;
+typedef struct {
+    so_rune val;
+    so_Error err;
+} so_R_rune_err;
+typedef struct {
+    so_Slice val;
+    so_Error err;
+} so_R_slice_err;
+typedef struct {
+    so_String val;
+    so_Error err;
+} so_R_str_err;
+typedef struct {
+    so_uint val;
+    so_Error err;
+} so_R_uint_err;
+typedef struct {
+    uint32_t val;
+    so_Error err;
+} so_R_u32_err;
+typedef struct {
+    uint64_t val;
+    so_Error err;
+} so_R_u64_err;
+typedef struct {
+    void* val;
+    so_Error err;
+} so_R_ptr_err;
 
 // Result types for (T, T):
-typedef struct { bool val; bool val2; } so_R_bool_bool;
-typedef struct { bool val; so_int val2; } so_R_bool_int;
-typedef struct { double val; bool val2; } so_R_f64_bool;
-typedef struct { double val; double val2; } so_R_f64_f64;
-typedef struct { double val; so_int val2; } so_R_f64_int;
-typedef struct { float val; bool val2; } so_R_f32_bool;
-typedef struct { int64_t val; int32_t val2; } so_R_i64_i32;
-typedef struct { so_int val; bool val2; } so_R_int_bool;
-typedef struct { so_int val; so_int val2; } so_R_int_int;
-typedef struct { so_int val; uint64_t val2; } so_R_int_u64;
-typedef struct { so_rune val; bool val2; } so_R_rune_bool;
-typedef struct { so_rune val; so_int val2; } so_R_rune_int;
-typedef struct { so_String val; bool val2; } so_R_str_bool;
-typedef struct { so_String val; so_String val2; } so_R_str_str;
-typedef struct { so_uint val; so_uint val2; } so_R_uint_uint;
-typedef struct { uint32_t val; bool val2; } so_R_u32_bool;
-typedef struct { uint32_t val; so_int val2; } so_R_u32_int;
-typedef struct { uint32_t val; uint32_t val2; } so_R_u32_u32;
-typedef struct { uint64_t val; bool val2; } so_R_u64_bool;
-typedef struct { uint64_t val; so_int val2; } so_R_u64_int;
-typedef struct { uint64_t val; uint64_t val2; } so_R_u64_u64;
+typedef struct {
+    bool val;
+    bool val2;
+} so_R_bool_bool;
+typedef struct {
+    bool val;
+    so_int val2;
+} so_R_bool_int;
+typedef struct {
+    double val;
+    bool val2;
+} so_R_f64_bool;
+typedef struct {
+    double val;
+    double val2;
+} so_R_f64_f64;
+typedef struct {
+    double val;
+    so_int val2;
+} so_R_f64_int;
+typedef struct {
+    float val;
+    bool val2;
+} so_R_f32_bool;
+typedef struct {
+    int64_t val;
+    int32_t val2;
+} so_R_i64_i32;
+typedef struct {
+    so_int val;
+    bool val2;
+} so_R_int_bool;
+typedef struct {
+    so_int val;
+    so_int val2;
+} so_R_int_int;
+typedef struct {
+    so_int val;
+    uint64_t val2;
+} so_R_int_u64;
+typedef struct {
+    so_rune val;
+    bool val2;
+} so_R_rune_bool;
+typedef struct {
+    so_rune val;
+    so_int val2;
+} so_R_rune_int;
+typedef struct {
+    so_String val;
+    bool val2;
+} so_R_str_bool;
+typedef struct {
+    so_String val;
+    so_String val2;
+} so_R_str_str;
+typedef struct {
+    so_uint val;
+    so_uint val2;
+} so_R_uint_uint;
+typedef struct {
+    uint32_t val;
+    bool val2;
+} so_R_u32_bool;
+typedef struct {
+    uint32_t val;
+    so_int val2;
+} so_R_u32_int;
+typedef struct {
+    uint32_t val;
+    uint32_t val2;
+} so_R_u32_u32;
+typedef struct {
+    uint64_t val;
+    bool val2;
+} so_R_u64_bool;
+typedef struct {
+    uint64_t val;
+    so_int val2;
+} so_R_u64_int;
+typedef struct {
+    uint64_t val;
+    uint64_t val2;
+} so_R_u64_u64;
 
 // --- Printing ---
 
@@ -585,12 +694,18 @@ static inline void* unsafe_Add(void* ptr, size_t offset) {
     return (char*)ptr + offset;
 }
 static inline so_String unsafe_String(void* ptr, size_t len) {
-    return (so_String){(const char*)ptr, len};
+    if (ptr == NULL) {
+        return (so_String){(char*)&so_Nil, 0};
+    }
+    return (so_String){(char*)ptr, len};
 }
 static inline so_byte* unsafe_StringData(so_String s) {
     return (so_byte*)s.ptr;
 }
 static inline so_Slice unsafe_Slice(void* ptr, size_t len) {
+    if (ptr == NULL) {
+        return (so_Slice){&so_Nil, 0, 0};
+    }
     return (so_Slice){ptr, len, len};
 }
 static inline void* unsafe_SliceData(so_Slice s) {

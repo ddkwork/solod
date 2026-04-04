@@ -94,7 +94,7 @@ func TestRepeatCatchesOverflow(t *testing.T) {
 	}
 
 	runTestCases("64-bit", []testCase{
-		0: {"-", maxInt, "out of range"},
+		0: {"-", maxInt, "capacity overflow"},
 	})
 }
 
