@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
 func init() {
-	initStrKeys()
+	for i := range nKeys {
+		strKeys = append(strKeys, fmt.Sprintf("key-%d", i))
+	}
 }
 
 func Benchmark_IntSet(b *testing.B) {

@@ -1,6 +1,12 @@
 #pragma once
 #include "so/builtin/builtin.h"
 
+// -- Embeds --
+
+typedef struct {
+    int val;
+} main_Box;
+
 // -- Functions and methods --
 
 #define identity(T, val_) ({ \
@@ -46,9 +52,3 @@
 #define main_Box_set(T, b_, val_) do { \
     (b_)->val = (val_); \
 } while (0)
-
-// -- Embeds --
-
-typedef struct {
-    int val;
-} main_Box;

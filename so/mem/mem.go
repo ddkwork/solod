@@ -185,15 +185,25 @@ func FreeString(a Allocator, s string) {
 	Free(a, unsafe.StringData(s))
 }
 
-// Clear zeroes size bytes starting at ptr + offset.
+// Clear zeroes size bytes starting at ptr.
 //
 //so:inline
-func Clear(ptr any, offset int, size int) {
+func Clear(ptr any, size int) {
 	c.Assert(ptr != nil, "mem: nil pointer")
-	c.Assert(offset >= 0, "mem: negative offset")
 	c.Assert(size >= 0, "mem: negative size")
-	p := c.PtrAdd(ptr, offset)
-	memset(p, 0, uintptr(size))
+	memset(ptr, 0, uintptr(size))
+}
+
+// Copy copies n bytes from src to dst. Returns dst.
+// The memory areas must not overlap.
+// Panics if either dst or src is nil.
+//
+//so:inline
+func Copy(dst any, src any, n int) any {
+	c.Assert(dst != nil, "mem: nil pointer")
+	c.Assert(src != nil, "mem: nil pointer")
+	c.Assert(n >= 0, "mem: negative size")
+	return memcpy(dst, src, uintptr(n))
 }
 
 // Move copies n bytes from src to dst. Returns dst.
@@ -217,6 +227,13 @@ func memset(ptr any, ch int, count uintptr) any {
 		s[i] = byte(ch)
 	}
 	return ptr
+}
+
+// void* memcpy(void* dest, const void* src, size_t count);
+//
+//so:extern
+func memcpy(dst any, src any, count uintptr) any {
+	return memmove(dst, src, count)
 }
 
 // void* memmove(void* dest, const void* src, size_t count);

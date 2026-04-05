@@ -15,7 +15,12 @@
 
 package maps
 
-import "solod.dev/so/mem"
+import (
+	"unsafe"
+
+	"solod.dev/so/c"
+	"solod.dev/so/mem"
+)
 
 const loadFactor = 0.85 // must be above 50%
 
@@ -67,8 +72,6 @@ func (m *ByteMap) Len() int {
 // the map can be reused after Clear.
 func (m *ByteMap) Clear() {
 	clear(m.hdib)
-	m.keys = m.keys[:0]
-	m.vals = m.vals[:0]
 	m.len = 0
 }
 
@@ -97,8 +100,61 @@ func (m *ByteMap) Resize(size int) {
 	*m = nmap
 }
 
-//so:extern maps_rehash
-func rehash(dst, src *ByteMap) {}
+// rehash moves all entries from src into dst.
+func rehash(dst, src *ByteMap) {
+	hdib := unsafe.SliceData(src.hdib)
+	keys := unsafe.SliceData(src.keys)
+	vals := unsafe.SliceData(src.vals)
+	ksize := src.ksize
+	vsize := src.vsize
+	n := len(src.hdib)
+	for i := range n {
+		hdI := c.PtrAt(hdib, i)
+		if *hdI&0xFFFF > 0 {
+			insert(dst, int(*hdI>>16),
+				c.PtrAdd(keys, i*ksize),
+				c.PtrAdd(vals, i*vsize))
+		}
+	}
+}
 
-//so:extern maps_seed
-func seed() uint64 { return 0 }
+// insert does byte-level Robin Hood insertion into a map.
+// Used during rehash only - skips equality check since keys are unique.
+func insert(m *ByteMap, h int, key any, val any) {
+	ehdib := (uint64(h) << 16) | 1
+	ksize := m.ksize
+	vsize := m.vsize
+	hdib := unsafe.SliceData(m.hdib)
+	keys := unsafe.SliceData(m.keys)
+	vals := unsafe.SliceData(m.vals)
+	ekey := c.Alloca[byte](ksize)
+	eval := c.Alloca[byte](vsize)
+	mem.Copy(ekey, key, ksize)
+	mem.Copy(eval, val, vsize)
+	i := h & m.mask
+	tmpk := c.Alloca[byte](ksize)
+	tmpv := c.Alloca[byte](vsize)
+	for {
+		hdI := c.PtrAt(hdib, i)
+		if *hdI&0xFFFF == 0 {
+			*hdI = ehdib
+			mem.Copy(c.PtrAdd(keys, i*ksize), ekey, ksize)
+			mem.Copy(c.PtrAdd(vals, i*vsize), eval, vsize)
+			m.len++
+			return
+		}
+		if *hdI&0xFFFF < ehdib&0xFFFF {
+			te := ehdib
+			ehdib = *hdI
+			*hdI = te
+			mem.Copy(tmpk, ekey, ksize)
+			mem.Copy(ekey, c.PtrAdd(keys, i*ksize), ksize)
+			mem.Copy(c.PtrAdd(keys, i*ksize), tmpk, ksize)
+			mem.Copy(tmpv, eval, vsize)
+			mem.Copy(eval, c.PtrAdd(vals, i*vsize), vsize)
+			mem.Copy(c.PtrAdd(vals, i*vsize), tmpv, vsize)
+		}
+		i = (i + 1) & m.mask
+		ehdib++
+	}
+}

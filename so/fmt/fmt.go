@@ -50,6 +50,8 @@ var (
 
 // Buffer is a fixed-size stack-allocated buffer
 // for formatted output and scanning.
+//
+//so:extern
 type Buffer struct {
 	Ptr *byte
 	Len int

@@ -1,5 +1,7 @@
 package mem
 
+import "solod.dev/so/c"
+
 // System is an instance of a memory allocator that uses
 // the system's malloc, realloc, and free functions.
 var System Allocator = &SystemAllocator{}
@@ -35,7 +37,8 @@ func (*SystemAllocator) Realloc(ptr any, oldSize int, newSize int, align int) (a
 	}
 	if newSize > oldSize {
 		// Zero new memory beyond the old size.
-		Clear(newPtr, oldSize, newSize-oldSize)
+		p := c.PtrAdd(newPtr.(*byte), oldSize)
+		Clear(p, newSize-oldSize)
 	}
 	return newPtr, nil
 }

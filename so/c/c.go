@@ -18,6 +18,15 @@ func Alignof[T any]() int {
 	return int(unsafe.Alignof(v))
 }
 
+// Alloca allocates an array of the given length
+// on the stack and returns a pointer to it.
+//
+//so:extern
+func Alloca[T any](n int) *T {
+	v := make([]T, n)
+	return &v[0]
+}
+
 // Assert aborts the program with the given message
 // if the condition is not true.
 // If assertions are disabled, does nothing.
@@ -37,7 +46,12 @@ func Assert(cond bool, msg string) {
 //	(so_Slice){ptr, n, n}
 //
 //so:extern
-func Bytes(ptr *byte, n int) []byte { _, _ = ptr, n; return nil }
+func Bytes(ptr *byte, n int) []byte {
+	if ptr == nil {
+		return nil
+	}
+	return unsafe.Slice(ptr, n)
+}
 
 // CharPtr casts a *byte (uint8_t*) to char* for C functions
 // that expect char* instead of uint8_t*.
@@ -45,7 +59,39 @@ func Bytes(ptr *byte, n int) []byte { _, _ = ptr, n; return nil }
 //	(char*)ptr
 //
 //so:extern
-func CharPtr(ptr *byte) *byte { _ = ptr; return nil }
+func CharPtr(ptr *byte) *byte {
+	return ptr
+}
+
+// PtrAdd adds offset bytes to a pointer and returns the result.
+//
+//	ptr + offset
+//
+//so:extern
+func PtrAdd[T any](ptr *T, offset int) *T {
+	raw := ptrVal(ptr)
+	p := unsafe.Add(raw, offset)
+	return (*T)(p)
+}
+
+// PtrAs casts a raw pointer (void*) to *T.
+//
+//	(T*)(ptr)
+//
+//so:extern
+func PtrAs[T any](ptr any) *T {
+	raw := ptrVal(ptr)
+	return (*T)(raw)
+}
+
+// PtrAt returns a pointer to the element at the given index in an array or slice.
+//
+//	&ptr[index]
+//
+//so:extern
+func PtrAt[T any](ptr *T, index int) *T {
+	return PtrAdd(ptr, index*Sizeof[T]())
+}
 
 // Sizeof returns the size of type T in bytes.
 //
@@ -79,29 +125,18 @@ func Slice[T any](ptr *T, len int, cap int) []T {
 //so:extern
 func String(ptr *byte) string { _ = ptr; return "" }
 
-// PtrAdd adds offset bytes to a raw pointer (void*).
+// Zero returns the zero value of type T.
 //
-//	(void*)(ptr + offset)
-//
-//so:extern
-func PtrAdd(ptr any, offset int) any {
-	raw := ptrVal(ptr)
-	p := unsafe.Add(raw, offset)
-	return (*byte)(p)
-}
-
-// PtrAs casts a raw pointer (void*) to *T.
-//
-//	(T*)(ptr)
+//	{0}
 //
 //so:extern
-func PtrAs[T any](ptr any) *T {
-	raw := ptrVal(ptr)
-	return (*T)(raw)
+func Zero[T any]() T {
+	var v T
+	return v
 }
 
 // ptrVal extracts a raw pointer from an interface containing any pointer type.
-// For testing only; in C, any pointers are void*.
+// For testing only: in C any is void*, so unwrapping is unnecessary.
 //
 //so:extern
 func ptrVal(v any) unsafe.Pointer {

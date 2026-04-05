@@ -9,6 +9,13 @@ extern so_Error fmt_ErrPrint;  // print failure
 extern so_Error fmt_ErrScan;   // scan failure
 extern so_Error fmt_ErrSize;   // buffer size exceeded
 
+// Buffer is a fixed-size stack-allocated buffer
+// for formatted output and scanning.
+typedef struct {
+    so_byte* Ptr;
+    so_int Len;
+} fmt_Buffer;
+
 // NewBuffer creates a new stack-allocated Buffer of the given size.
 #define fmt_NewBuffer(size) ({                             \
     so_int _isize = (size);                                \
