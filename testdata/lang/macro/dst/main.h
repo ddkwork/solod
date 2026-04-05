@@ -25,24 +25,24 @@ typedef struct {
 })
 
 #define a(T, n_) ({ \
-    so_int some = 11; \
-    (void)some; \
-    T x = b(T, (n_)) + 1; \
-    x; \
+    so_int _some = 11; \
+    (void)_some; \
+    T _x = b(T, (n_)) + 1; \
+    _x; \
 })
 
 #define b(T, n_) ({ \
-    double some = 22.2; \
-    (void)some; \
-    T x = c(T, (n_)) + 1; \
-    x; \
+    double _some = 22.2; \
+    (void)_some; \
+    T _x = c(T, (n_)) + 1; \
+    _x; \
 })
 
 #define c(T, n_) ({ \
-    so_String some = so_str("33"); \
-    (void)some; \
-    T x = (n_) + 1; \
-    x; \
+    so_String _some = so_str("33"); \
+    (void)_some; \
+    T _x = (n_) + 1; \
+    _x; \
 })
 
 #define work(T, v_) ({ \

@@ -993,85 +993,13 @@ The function body is emitted directly in the `.h` file and skipped from the `.c`
 
 ## Generics
 
-So supports generics only for extern declarations. Generic type parameters are translated to C macro arguments, prepended before the regular arguments.
-
-Generic extern functions:
-
-```go
-//so:extern
-func newObj[T any]() *T {
-    return nil
-}
-
-//so:extern
-func freeObj[T any](ptr *T) {
-}
-```
-
-Calling with explicit or inferred type arguments:
-
-```go
-v := newObj[int]()  // newObj(so_int)
-freeObj(v)          // freeObj(so_int, v) - type argument inferred
-```
-
-Generic extern types:
-
-```go
-//so:extern
-type Map[K comparable, V any] struct {
-    // ...
-}
-```
-
-Generic extern methods:
-
-```go
-//so:extern
-func (m *Map[K, V]) Len() int {
-    return m.len
-}
-```
-
-Method calls prepend the receiver's type arguments:
-
-```go
-// go
-m := newMap[string, int](10)
-l := m.Len()
-```
-
-```c
-// c
-main_Map m = newMap(so_String, so_int, 10);
-so_int l = main_Map_Len(so_String, so_int, &m);
-```
-
-On the C side, generic functions and methods should be manually implemented as macros that receive the type arguments:
-
-```c
-#define newObj(T) (alloca(sizeof(T)))
-#define freeObj(T, ptr) ((void)(ptr))
-
-#define newMap(K, V, size) ((main_Map){0})
-#define main_Map_Len(K, V, m) ((m)->len)
-
-typedef struct {
-    // ...
-} main_Map;
-```
-
-Constraints (`any`, `comparable`, etc.) are used only for Go type-checking and are not emitted in C.
-
-Non-extern generic functions and types are not supported.
+So supports two forms of generic functions: extern declarations and inline macros. Both are very limited and usually not needed. They are explained in a [separate document](./generics.md).
 
 ## Embeds
 
 Embed C files directly into the generated output using `//so:embed`:
 
 ```go
-import _ "embed"
-
 //so:embed main.h
 var main_h string
 
@@ -1079,7 +1007,7 @@ var main_h string
 var main_c string
 ```
 
-`.h` files are embedded into the generated header, `.c` files into the generated implementation. The embed variable declarations are not emitted as C variables — they serve as markers only.
+`.h` files are embedded into the generated header, `.c` files into the generated implementation. The embed variable declarations are not emitted as C variables - they serve as markers only.
 
 ## Packages
 

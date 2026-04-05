@@ -23,26 +23,26 @@ func increment[T int](n T) T {
 
 //so:inline
 func a[T int](n T) T {
-	var some int = 11
-	_ = some
-	x := b(n) + 1
-	return x
+	var _some int = 11
+	_ = _some
+	_x := b(n) + 1
+	return _x
 }
 
 //so:inline
 func b[T int](n T) T {
-	var some float64 = 22.2
-	_ = some
-	x := c(n) + 1
-	return x
+	var _some float64 = 22.2
+	_ = _some
+	_x := c(n) + 1
+	return _x
 }
 
 //so:inline
 func c[T int](n T) T {
-	var some string = "33"
-	_ = some
-	x := n + 1
-	return x
+	var _some string = "33"
+	_ = _some
+	_x := n + 1
+	return _x
 }
 
 //so:inline
