@@ -1,6 +1,8 @@
 package os
 
 import (
+	"unsafe"
+
 	"solod.dev/so/io"
 	"solod.dev/so/mem"
 )
@@ -100,7 +102,7 @@ func (f *File) Read(b []byte) (int, error) {
 	if len(b) == 0 {
 		return 0, nil
 	}
-	n := int(fread(&b[0], 1, uintptr(len(b)), f.fd))
+	n := int(fread(unsafe.SliceData(b), 1, uintptr(len(b)), f.fd))
 	if n < len(b) {
 		if ferror(f.fd) {
 			return n, mapError()
@@ -119,7 +121,7 @@ func (f *File) Write(b []byte) (int, error) {
 	if len(b) == 0 {
 		return 0, nil
 	}
-	n := int(fwrite(&b[0], 1, uintptr(len(b)), f.fd))
+	n := int(fwrite(unsafe.SliceData(b), 1, uintptr(len(b)), f.fd))
 	if n < len(b) {
 		return n, mapError()
 	}

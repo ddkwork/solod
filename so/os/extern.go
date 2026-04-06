@@ -44,7 +44,7 @@ func fopen(path string, mode string) *os_file {
 	return &os_file{}
 }
 
-// int fclose( FILE *stream );
+// int fclose(FILE *stream);
 //
 //so:extern
 func fclose(stream *os_file) int {

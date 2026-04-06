@@ -1,6 +1,8 @@
 package os
 
 import (
+	"unsafe"
+
 	"solod.dev/so/c"
 )
 
@@ -14,11 +16,15 @@ import (
 // The caller can use the file's Name method to find the pathname of the file.
 // It is the caller's responsibility to remove the file when it is no longer needed.
 //
-// Writes the path of the created file into buf.
+// Writes the path of the created file into buf. Panics if buf is empty.
 // The name in the returned File is a view into buf.
 func CreateTemp(buf []byte, dir, pattern string) (File, error) {
 	tmpl := buildTempTemplate(buf[:0], dir, pattern)
-	fd := mkstemp(c.CharPtr(&tmpl[0]))
+	tmplPtr := unsafe.SliceData(tmpl)
+	if tmplPtr == nil {
+		panic("os: empty buffer")
+	}
+	fd := mkstemp(c.CharPtr(tmplPtr))
 	if fd < 0 {
 		return File{}, mapError()
 	}
@@ -40,11 +46,15 @@ func CreateTemp(buf []byte, dir, pattern string) (File, error) {
 // for temporary files, as returned by TempDir.
 // It is the caller's responsibility to remove the directory when it is no longer needed.
 //
-// Writes the path of the created directory into buf.
+// Writes the path of the created directory into buf. Panics if buf is empty.
 // The returned string is a view into buf.
 func MkdirTemp(buf []byte, dir, pattern string) (string, error) {
 	tmpl := buildTempTemplate(buf[:0], dir, pattern)
-	result := mkdtemp(c.CharPtr(&tmpl[0])).(*byte)
+	tmplPtr := unsafe.SliceData(tmpl)
+	if tmplPtr == nil {
+		panic("os: empty buffer")
+	}
+	result := mkdtemp(c.CharPtr(tmplPtr)).(*byte)
 	if result == nil {
 		return "", mapError()
 	}

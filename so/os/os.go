@@ -6,6 +6,7 @@ package os
 import (
 	"unsafe"
 
+	"solod.dev/so/c"
 	"solod.dev/so/errors"
 	"solod.dev/so/time"
 )
@@ -102,10 +103,14 @@ func Mkdir(name string, perm FileMode) error {
 // If the link destination is relative, Readlink returns the relative path
 // without resolving it to an absolute one.
 //
-// Writes the result into buf. The returned string is a view into buf.
+// Writes the result into buf. Panics if buf is empty.
+// The returned string is a view into buf.
 func Readlink(buf []byte, name string) (string, error) {
-	bufPtr := &buf[0]
-	n := os_readlink(name, bufPtr, len(buf))
+	bufPtr := unsafe.SliceData(buf)
+	if bufPtr == nil {
+		panic("os: empty buffer")
+	}
+	n := readlink(name, c.CharPtr(bufPtr), uintptr(len(buf)))
 	if n < 0 {
 		return "", mapError()
 	}

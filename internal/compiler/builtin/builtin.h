@@ -700,6 +700,9 @@ static inline so_String unsafe_String(void* ptr, size_t len) {
     return (so_String){(char*)ptr, len};
 }
 static inline so_byte* unsafe_StringData(so_String s) {
+    if (s.len == 0) {
+        return NULL;
+    }
     return (so_byte*)s.ptr;
 }
 static inline so_Slice unsafe_Slice(void* ptr, size_t len) {
@@ -709,5 +712,8 @@ static inline so_Slice unsafe_Slice(void* ptr, size_t len) {
     return (so_Slice){ptr, len, len};
 }
 static inline void* unsafe_SliceData(so_Slice s) {
+    if (s.len == 0) {
+        return NULL;
+    }
     return s.ptr;
 }

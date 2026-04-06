@@ -96,12 +96,10 @@ func fdopen(fd int, mode string) *os_file {
 	return &os_file{}
 }
 
-// os_getcwd wraps getcwd with a null check to avoid
-// glibc fortify-source nonnull warning when buf comes from a slice.
 // char* getcwd(char *buf, size_t size);
 //
 //so:extern
-func os_getcwd(buf *byte, size int) *byte {
+func getcwd(buf *byte, size uintptr) any {
 	_, _ = buf, size
 	return nil
 }
@@ -148,13 +146,11 @@ func getuid() uid_t {
 	return 0
 }
 
-// os_gethostname wraps gethostname with a null check to avoid
-// glibc fortify-source nonnull warning when buf comes from a slice.
 // int gethostname(char* name, size_t namelen);
 //
 //so:extern
-func os_gethostname(buf *byte, size int) int {
-	_, _ = buf, size
+func gethostname(name *byte, namelen uintptr) int {
+	_, _ = name, namelen
 	return 0
 }
 
@@ -216,13 +212,11 @@ func posixOpen(path string, flags int, mode uint32) int {
 	return 42
 }
 
-// os_readlink wraps readlink with a null check to avoid
-// glibc fortify-source nonnull warning when buf comes from a slice.
 // ssize_t readlink(const char* restrict path, char* restrict buf, size_t bufsize);
 //
 //so:extern
-func os_readlink(path string, buf *byte, bufsiz int) int {
-	_, _, _ = path, buf, bufsiz
+func readlink(path string, buf *byte, bufsize uintptr) int {
+	_, _, _ = path, buf, bufsize
 	return 0
 }
 

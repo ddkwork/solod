@@ -1,6 +1,10 @@
 package os
 
-import "solod.dev/so/c"
+import (
+	"unsafe"
+
+	"solod.dev/so/c"
+)
 
 // Getegid returns the numeric effective group id of the caller.
 func Getegid() int {
@@ -41,23 +45,33 @@ func Getuid() int {
 // Getwd returns an absolute path name corresponding to the
 // current directory.
 //
-// Writes the result into buf. The returned string is a view into buf.
+// Writes the result into buf. Panics if buf is empty.
+// The returned string is a view into buf.
 func Getwd(buf []byte) (string, error) {
-	ptr := os_getcwd(&buf[0], len(buf))
-	if ptr == nil {
+	bufPtr := unsafe.SliceData(buf)
+	if bufPtr == nil {
+		panic("os: empty buffer")
+	}
+	cwd := getcwd(c.CharPtr(bufPtr), uintptr(len(buf))).(*byte)
+	if cwd == nil {
 		return "", mapError()
 	}
-	return c.String(ptr), nil
+	return c.String(cwd), nil
 }
 
 // Hostname returns the host name reported by the kernel.
 //
-// Writes the result into buf. The returned string is a view into buf.
+// Writes the result into buf. Panics if buf is empty.
+// The returned string is a view into buf.
 func Hostname(buf []byte) (string, error) {
-	if os_gethostname(&buf[0], len(buf)) != 0 {
+	name := unsafe.SliceData(buf)
+	if name == nil {
+		panic("os: empty buffer")
+	}
+	if gethostname(c.CharPtr(name), uintptr(len(buf))) != 0 {
 		return "", mapError()
 	}
-	return c.String(&buf[0]), nil
+	return c.String(name), nil
 }
 
 // Exit causes the current program to exit with the given status code.
