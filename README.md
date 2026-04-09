@@ -200,9 +200,9 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ✅ Low-level stdlib (libc wrappers).
 
-⏳ Core stdlib packages: fmt, io, strings, time, ...
+✅ Maps.
 
-⏳ Maps.
+⏳ Core stdlib packages: fmt, io, strings, time, ...
 
 ⬜ Hardened transpiler.
 
@@ -210,7 +210,7 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ⬜ More stdlib packages: crypto, http, json, ...
 
-⬜ Full Windows support.
+🤔 Full Windows support.
 
 ## Contributing
 
