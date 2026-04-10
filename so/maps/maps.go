@@ -121,15 +121,9 @@ func (m *Map[K, V]) Set(key K, value V) {
 			break
 		}
 		if *_hdi&0xFFFF < _ehdib&0xFFFF {
-			_tmphdib := _ehdib
-			_ehdib = *_hdi
-			*_hdi = _tmphdib
-			_tmpk := _ekey
-			_ekey = *c.PtrAt(_keys, _i)
-			*c.PtrAt(_keys, _i) = _tmpk
-			_tmpv := _eval
-			_eval = *c.PtrAt(_vals, _i)
-			*c.PtrAt(_vals, _i) = _tmpv
+			mem.Swap(_hdi, &_ehdib)
+			mem.Swap(c.PtrAt(_keys, _i), &_ekey)
+			mem.Swap(c.PtrAt(_vals, _i), &_eval)
 		}
 		_i = (_i + 1) & _m.mask
 		_ehdib++

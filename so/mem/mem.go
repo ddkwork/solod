@@ -9,6 +9,9 @@ import (
 	"solod.dev/so/math"
 )
 
+//so:embed mem.h
+var mem_h string
+
 // ErrOutOfMemory is returned when a memory allocation
 // fails due to insufficient memory.
 var ErrOutOfMemory = errors.New("out of memory")
@@ -216,6 +219,33 @@ func Move(dst any, src any, n int) any {
 	c.Assert(src != nil, "mem: nil pointer")
 	c.Assert(n >= 0, "mem: negative size")
 	return memmove(dst, src, uintptr(n))
+}
+
+// Swap swaps the values pointed to by a and b.
+// Panics if either a or b is nil.
+//
+//so:inline
+func Swap[T any](a *T, b *T) {
+	c.Assert(a != nil, "mem: nil pointer")
+	c.Assert(b != nil, "mem: nil pointer")
+	_tmp := *a
+	*a = *b
+	*b = _tmp
+}
+
+// SwapByte swaps n bytes between a and b.
+// Panics if either a or b is nil.
+//
+// SwapByte temporarily allocates a buffer of size n
+// on the stack, so it's not suitable for large n.
+//
+//so:extern
+func SwapByte(a any, b any, n int) {
+	// Has to be implemented as extern because it uses VLA.
+	tmp := make([]byte, n)
+	memcpy(tmp, b, uintptr(n))
+	memcpy(b, a, uintptr(n))
+	memcpy(a, tmp, uintptr(n))
 }
 
 // void* memset(void *dest, int ch, size_t count);

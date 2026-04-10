@@ -111,6 +111,7 @@ func rehash(dst, src *ByteMap) {
 	n := len(src.hdib)
 	for i := range n {
 		hdI := c.PtrAt(hdib, i)
+		c.Assert(hdI != nil, "maps: nil hdib pointer") // for gcc analyzer
 		if *hdI&0xFFFF > 0 {
 			insert(dst, int(*hdI>>16),
 				c.PtrAdd(keys, i*ksize),
@@ -133,8 +134,6 @@ func insert(m *ByteMap, h int, key any, val any) {
 	mem.Copy(ekey, key, ksize)
 	mem.Copy(eval, val, vsize)
 	i := h & m.mask
-	tmpk := c.Alloca[byte](ksize)
-	tmpv := c.Alloca[byte](vsize)
 	for {
 		hdI := c.PtrAt(hdib, i)
 		if *hdI&0xFFFF == 0 {
@@ -145,15 +144,9 @@ func insert(m *ByteMap, h int, key any, val any) {
 			return
 		}
 		if *hdI&0xFFFF < ehdib&0xFFFF {
-			te := ehdib
-			ehdib = *hdI
-			*hdI = te
-			mem.Copy(tmpk, ekey, ksize)
-			mem.Copy(ekey, c.PtrAdd(keys, i*ksize), ksize)
-			mem.Copy(c.PtrAdd(keys, i*ksize), tmpk, ksize)
-			mem.Copy(tmpv, eval, vsize)
-			mem.Copy(eval, c.PtrAdd(vals, i*vsize), vsize)
-			mem.Copy(c.PtrAdd(vals, i*vsize), tmpv, vsize)
+			mem.Swap(hdI, &ehdib)
+			mem.SwapByte(c.PtrAdd(keys, i*ksize), ekey, ksize)
+			mem.SwapByte(c.PtrAdd(vals, i*vsize), eval, vsize)
 		}
 		i = (i + 1) & m.mask
 		ehdib++
