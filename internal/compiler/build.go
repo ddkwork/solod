@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 )
 
@@ -76,6 +77,7 @@ func compileC(includeDir string, cFiles []string, outFile string) error {
 	}
 
 	args := []string{"-I" + includeDir}
+	args = append(args, fmt.Sprintf(`-Dso_version="%s"`, version()))
 	args = append(args, splitFlags(os.Getenv("CFLAGS"))...)
 	args = append(args, cFiles...)
 	args = append(args, "-o", outFile)
@@ -97,4 +99,20 @@ func splitFlags(s string) []string {
 		return nil
 	}
 	return strings.Fields(s)
+}
+
+// version returns the compiler version string to embed into compiled
+// programs via -Dso_version. It uses the module version from
+// runtime/debug.BuildInfo when available (e.g. go install ...@vx.y.z),
+// falling back to "(devel)" (e.g. go run during development).
+func version() string {
+	const devel = "(devel)"
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return devel
+	}
+	if v := info.Main.Version; v != "" {
+		return v
+	}
+	return devel
 }

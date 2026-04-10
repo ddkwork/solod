@@ -9,7 +9,7 @@ var runtime_h string
 var buildVersion string
 
 // Version returns the So tree's version string.
-// It is either the commit hash of the build or,
+// It is either the commit hash and date at the time of the build or,
 // when possible, a release tag like "v0.1.0".
 func Version() string {
 	return buildVersion

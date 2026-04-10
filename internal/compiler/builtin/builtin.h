@@ -28,7 +28,7 @@ typedef uint64_t so_uint;
 
 // --- Build metadata ---
 #if !defined(so_version)
-#define so_version "devel"
+#define so_version "(devel)"
 #endif
 
 #if defined(__APPLE__)
