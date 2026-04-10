@@ -35,6 +35,8 @@ This Go code in a file `main.go`:
 ```go
 package main
 
+import "solod.dev/so/time"
+
 type Person struct {
     Name string
     Age  int
@@ -53,6 +55,9 @@ func main() {
 
     p.Nums[0] = 42
     println("1st lucky number is", p.Nums[0])
+
+    year := time.Now().Year()
+    println("The year is", year)
 }
 ```
 
@@ -61,6 +66,7 @@ Translates to a header file `main.h`:
 ```c
 #pragma once
 #include "so/builtin/builtin.h"
+#include "so/time/time.h"
 
 typedef struct main_Person {
     so_String Name;
@@ -86,8 +92,12 @@ int main(void) {
     main_Person p = (main_Person){.Name = so_str("Alice"), .Age = 30};
     main_Person_Sleep(&p);
     so_println("%.*s %s %" PRId64 " %s", p.Name.len, p.Name.ptr, "is now", p.Age, "years old.");
+
     p.Nums[0] = 42;
     so_println("%s %" PRId64, "1st lucky number is", p.Nums[0]);
+
+    so_int year = time_Time_Year(time_Now());
+    so_println("%s %" PRId64, "The year is", year);
 }
 ```
 
