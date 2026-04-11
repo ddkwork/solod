@@ -206,19 +206,26 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ## Roadmap
 
-✅ Transpiler with basic Go features.
+✅ Core language features.
 
-✅ Low-level stdlib (libc wrappers).
+✅ C interop.
 
-✅ Maps.
+✅ Limited generics and maps.
 
-⏳ Core stdlib packages: fmt, io, strings, time, ...
+⏳ Core stdlib packages:
 
-⬜ Hardened transpiler.
+```text
+✗ bufio       ✓ fmt     ✓ os        ✓ strings
+✓ bytes       ✓ io      ✗ rand      ✓ strconv
+✗ filepath    ✗ maps    ✗ slices    ✓ time
+✗ flag        ✓ math    ✗ slog      ✓ unicode
+```
 
-⬜ Real-world examples.
+⬜ Example applications.
 
-⬜ More stdlib packages: crypto, http, json, ...
+⬜ Concurrency.
+
+⬜ More stdlib packages: crypto, http, json, regexp, ...
 
 🤔 Full Windows support.
 
