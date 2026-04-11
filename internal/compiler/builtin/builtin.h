@@ -329,182 +329,6 @@ static inline so_int so_copy_string(so_Slice dst, so_String src) {
 // cap returns the capacity of a slice.
 #define so_cap(s) ((so_int)(s).cap)
 
-// --- Map type ---
-
-// Map is an open-addressed hash table with MSI (mask-step-index) probing.
-typedef struct {
-    void* keys;
-    void* vals;
-    uint8_t* used;  // 0=empty, 1=occupied
-    size_t len;
-    size_t cap;  // always power of 2
-} so_Map;
-
-// key_hash hashes a map key to a 64-bit value (FNV-1a).
-// The seed is the map's own address (randomized by ASLR).
-static inline uint64_t so_key_hash_default(const void* ptr, size_t n, uint64_t seed) {
-    const uint8_t* p = (const uint8_t*)ptr;
-    uint64_t h = seed;
-    for (size_t i = 0; i < n; i++) {
-        h ^= p[i];
-        h *= 0x100000001b3ULL;
-    }
-    return h;
-}
-static inline uint64_t so_key_hash_string(const void* ptr, size_t n, uint64_t seed) {
-    (void)n;
-    const so_String* s = (const so_String*)ptr;
-    return so_key_hash_default(s->ptr, s->len, seed);
-}
-
-#define so_key_hash(k, seed) ({                                             \
-    so_typeof(k) _kh = (k);                                                 \
-    _Generic((_kh),                                                         \
-        so_String: so_key_hash_string,                                      \
-        default: so_key_hash_default)(&_kh, sizeof(_kh), (uint64_t)(seed)); \
-})
-
-// key_eq compares two map keys for equality.
-// Uses so_string_eq for strings, memcmp for everything else.
-static inline bool so_key_eq_default(const void* a, const void* b, size_t n) {
-    return memcmp(a, b, n) == 0;
-}
-static inline bool so_key_eq_string(const void* a, const void* b, size_t n) {
-    (void)n;
-    return so_string_eq(*(const so_String*)a, *(const so_String*)b);
-}
-
-#define so_key_eq(a, b) ({                                    \
-    so_typeof(a) _ka = (a);                                   \
-    so_typeof(a) _kb = (b);                                   \
-    _Generic((_ka),                                           \
-        so_String: so_key_eq_string,                          \
-        default: so_key_eq_default)(&_ka, &_kb, sizeof(_ka)); \
-})
-
-// map_nextpow2 rounds up to the next power of 2.
-static inline size_t so_map_nextpow2(size_t n) {
-    if (n == 0) return 1;
-    n--;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    n |= n >> 32;
-    return n + 1;
-}
-
-// map_cap computes the internal capacity for n elements (keeps load <= 75%).
-static inline size_t so_map_cap(size_t n) {
-    if (n == 0) return 0;
-    return so_map_nextpow2(n + n / 3 + 1);
-}
-
-// make_map creates a zero-initialized map on the stack.
-#define so_make_map(K, V, n) ({              \
-    size_t _n = (n);                         \
-    if (_n == 0)                             \
-        so_panic("map: zero capacity");      \
-    size_t _cap = so_map_cap(_n);            \
-    size_t _ksz = sizeof(K) * _cap;          \
-    size_t _vsz = sizeof(V) * _cap;          \
-    size_t _usz = sizeof(uint8_t) * _cap;    \
-    void* _kp = so_alloca(_ksz);             \
-    void* _vp = so_alloca(_vsz);             \
-    uint8_t* _up = so_alloca(_usz);          \
-    if (_kp) memset(_kp, 0, _ksz);           \
-    if (_vp) memset(_vp, 0, _vsz);           \
-    if (_up) memset(_up, 0, _usz);           \
-    so_Map* _mp = so_alloca(sizeof(so_Map)); \
-    *_mp = (so_Map){_kp, _vp, _up, 0, _cap}; \
-    _mp;                                     \
-})
-
-// map_set inserts or updates a key-value pair in the map.
-// Panics if the map is full and the key is not found.
-#define so_map_set(K, V, m, key, val)                  \
-    do {                                               \
-        K _k = (key);                                  \
-        V _v = (val);                                  \
-        so_Map* _m = (m);                              \
-        uint64_t _h = so_key_hash(_k, (uintptr_t)_m);  \
-        size_t _mask = _m->cap - 1;                    \
-        size_t _step = (size_t)(_h >> 32) | 1;         \
-        size_t _idx = (size_t)_h & _mask;              \
-        for (size_t _p = 0;; _p++) {                   \
-            if (_p >= _m->cap)                         \
-                so_panic("map: out of capacity");      \
-            if (!_m->used[_idx]) {                     \
-                ((K*)_m->keys)[_idx] = _k;             \
-                ((V*)_m->vals)[_idx] = _v;             \
-                _m->used[_idx] = 1;                    \
-                _m->len++;                             \
-                break;                                 \
-            }                                          \
-            if (so_key_eq(((K*)_m->keys)[_idx], _k)) { \
-                ((V*)_m->vals)[_idx] = _v;             \
-                break;                                 \
-            }                                          \
-            _idx = (_idx + _step) & _mask;             \
-        }                                              \
-    } while (0)
-
-// map_get returns the value for the given key, or zero if not found.
-#define so_map_get(K, V, m, key) ({                    \
-    K _k = (key);                                      \
-    const so_Map* _m = (m);                            \
-    V _v = {0};                                        \
-    if (_m->cap > 0) {                                 \
-        uint64_t _h = so_key_hash(_k, (uintptr_t)_m);  \
-        size_t _mask = _m->cap - 1;                    \
-        size_t _step = (size_t)(_h >> 32) | 1;         \
-        size_t _idx = (size_t)_h & _mask;              \
-        for (size_t _p = 0; _p < _m->cap; _p++) {      \
-            if (!_m->used[_idx]) break;                \
-            if (so_key_eq(((K*)_m->keys)[_idx], _k)) { \
-                _v = ((V*)_m->vals)[_idx];             \
-                break;                                 \
-            }                                          \
-            _idx = (_idx + _step) & _mask;             \
-        }                                              \
-    }                                                  \
-    _v;                                                \
-})
-
-// map_has returns true if the map contains the given key.
-#define so_map_has(K, m, key) ({                       \
-    K _k = (key);                                      \
-    const so_Map* _m = (m);                            \
-    bool _found = false;                               \
-    if (_m->cap > 0) {                                 \
-        uint64_t _h = so_key_hash(_k, (uintptr_t)_m);  \
-        size_t _mask = _m->cap - 1;                    \
-        size_t _step = (size_t)(_h >> 32) | 1;         \
-        size_t _idx = (size_t)_h & _mask;              \
-        for (size_t _p = 0; _p < _m->cap; _p++) {      \
-            if (!_m->used[_idx]) break;                \
-            if (so_key_eq(((K*)_m->keys)[_idx], _k)) { \
-                _found = true;                         \
-                break;                                 \
-            }                                          \
-            _idx = (_idx + _step) & _mask;             \
-        }                                              \
-    }                                                  \
-    _found;                                            \
-})
-
-// map_lit creates a map from literal key/value arrays.
-#define so_map_lit(K, V, n, keys, vals) ({                     \
-    size_t _ml_n = (n);                                        \
-    so_Map* _ml_m = so_make_map(K, V, _ml_n);                  \
-    K* _ml_ks = (keys);                                        \
-    V* _ml_vs = (vals);                                        \
-    for (size_t _ml_i = 0; _ml_i < _ml_n; _ml_i++)             \
-        so_map_set(K, V, _ml_m, _ml_ks[_ml_i], _ml_vs[_ml_i]); \
-    _ml_m;                                                     \
-})
-
 // --- Min/Max ---
 
 // min returns the smaller of two values.
@@ -740,3 +564,191 @@ static inline void* unsafe_SliceData(so_Slice s) {
     }
     return s.ptr;
 }
+
+// --- Map type ---
+
+// Map is an open-addressed hash table with MSI (mask-step-index) probing.
+typedef struct {
+    void* keys;
+    void* vals;
+    uint8_t* used;  // 0=empty, 1=occupied
+    size_t len;
+    size_t cap;  // always power of 2
+} so_Map;
+
+// key_hash hashes a map key to a 64-bit value (FNV-1a).
+// The seed is the map's own address (randomized by ASLR).
+static inline uint64_t so_key_hash_def(const void* ptr, size_t n, uint64_t seed) {
+    const uint8_t* p = (const uint8_t*)ptr;
+    uint64_t h = seed;
+    for (size_t i = 0; i < n; i++) {
+        h ^= p[i];
+        h *= 0x100000001b3ULL;
+    }
+    return h;
+}
+static inline uint64_t so_key_hash_str(const void* ptr, size_t n, uint64_t seed) {
+    (void)n;
+    const so_String* s = (const so_String*)ptr;
+    return so_key_hash_def(s->ptr, s->len, seed);
+}
+
+#define so_key_hash(key) \
+    _Generic((key), so_String: so_key_hash_str, default: so_key_hash_def)
+
+// key_eq compares two map keys for equality.
+// Uses so_string_eq for strings, memcmp for everything else.
+static inline bool so_key_eq_def(const void* a, const void* b, size_t n) {
+    return memcmp(a, b, n) == 0;
+}
+static inline bool so_key_eq_str(const void* a, const void* b, size_t n) {
+    (void)n;
+    return so_string_eq(*(const so_String*)a, *(const so_String*)b);
+}
+
+#define so_key_eq(key) \
+    _Generic((key), so_String: so_key_eq_str, default: so_key_eq_def)
+
+// map_nextpow2 rounds up to the next power of 2.
+static inline size_t so_map_nextpow2(size_t n) {
+    if (n == 0) return 1;
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    return n + 1;
+}
+
+// map_cap computes the internal capacity for n elements (keeps load <= 75%).
+static inline size_t so_map_cap(size_t n) {
+    if (n == 0) return 0;
+    return so_map_nextpow2(n + n / 3 + 1);
+}
+
+// map_find looks up a key in the map.
+// If found, copies the value to out_val (when non-NULL) and sets *found = true.
+// If not found, sets *found = false and leaves out_val unchanged.
+static inline void so_map_find(const so_Map* m, const void* key, size_t key_size,
+                               void* out_val, size_t val_size,
+                               uint64_t hash, bool* found,
+                               bool (*eq)(const void*, const void*, size_t)) {
+    if (m->cap == 0) {
+        *found = false;
+        return;
+    }
+    size_t mask = m->cap - 1;
+    size_t step = (size_t)(hash >> 32) | 1;
+    size_t idx = (size_t)hash & mask;
+    for (size_t p = 0; p < m->cap; p++) {
+        if (!m->used[idx]) {
+            *found = false;
+            return;
+        }
+        if (eq((const char*)m->keys + idx * key_size, key, key_size)) {
+            if (out_val) {
+                memcpy(out_val, (const char*)m->vals + idx * val_size, val_size);
+            }
+            *found = true;
+            return;
+        }
+        idx = (idx + step) & mask;
+    }
+    *found = false;
+}
+
+// map_set_impl inserts or updates a key-value pair in the map.
+// Panics if the map is full and the key is not found.
+static inline void so_map_set_impl(so_Map* m, const void* key, size_t key_size,
+                                   const void* val, size_t val_size,
+                                   uint64_t hash,
+                                   bool (*eq)(const void*, const void*, size_t)) {
+    size_t mask = m->cap - 1;
+    size_t step = (size_t)(hash >> 32) | 1;
+    size_t idx = (size_t)hash & mask;
+    for (size_t p = 0;; p++) {
+        if (p >= m->cap)
+            so_panic("map: out of capacity");
+        if (!m->used[idx]) {
+            memcpy((char*)m->keys + idx * key_size, key, key_size);
+            memcpy((char*)m->vals + idx * val_size, val, val_size);
+            m->used[idx] = 1;
+            m->len++;
+            return;
+        }
+        if (eq((const char*)m->keys + idx * key_size, key, key_size)) {
+            memcpy((char*)m->vals + idx * val_size, val, val_size);
+            return;
+        }
+        idx = (idx + step) & mask;
+    }
+}
+
+// make_map creates a zero-initialized map on the stack.
+#define so_make_map(K, V, n) ({                  \
+    size_t _n = (n);                             \
+    if (_n == 0) so_panic("map: zero capacity"); \
+    size_t _cap = so_map_cap(_n);                \
+    size_t _ksz = sizeof(K) * _cap;              \
+    size_t _vsz = sizeof(V) * _cap;              \
+    size_t _usz = sizeof(uint8_t) * _cap;        \
+    void* _kp = so_alloca(_ksz);                 \
+    void* _vp = so_alloca(_vsz);                 \
+    uint8_t* _up = so_alloca(_usz);              \
+    if (_kp) memset(_kp, 0, _ksz);               \
+    if (_vp) memset(_vp, 0, _vsz);               \
+    if (_up) memset(_up, 0, _usz);               \
+    so_Map* _mp = so_alloca(sizeof(so_Map));     \
+    *_mp = (so_Map){_kp, _vp, _up, 0, _cap};     \
+    _mp;                                         \
+})
+
+// map_set inserts or updates a key-value pair in the map.
+#define so_map_set(K, V, m, key, val)                            \
+    do {                                                         \
+        so_Map* _m = (m);                                        \
+        K _k = (key);                                            \
+        V _v = (val);                                            \
+        uint64_t _seed = (uint64_t)_m;                           \
+        uint64_t _hash = so_key_hash(_k)(&_k, sizeof(K), _seed); \
+        so_map_set_impl(_m, &_k, sizeof(K), &_v, sizeof(V),      \
+                        _hash, so_key_eq(_k));                   \
+    } while (0)
+
+// map_get returns the value for the given key, or zero if not found.
+#define so_map_get(K, V, m, key) ({                          \
+    const so_Map* _m = (m);                                  \
+    K _k = (key);                                            \
+    V _v = {0};                                              \
+    bool _found = false;                                     \
+    uint64_t _seed = (uint64_t)_m;                           \
+    uint64_t _hash = so_key_hash(_k)(&_k, sizeof(K), _seed); \
+    so_map_find(_m, &_k, sizeof(K), &_v, sizeof(V),          \
+                _hash, &_found, so_key_eq(_k));              \
+    _v;                                                      \
+})
+
+// map_has returns true if the map contains the given key.
+#define so_map_has(K, m, key) ({                             \
+    const so_Map* _m = (m);                                  \
+    K _k = (key);                                            \
+    bool _found = false;                                     \
+    uint64_t _seed = (uint64_t)_m;                           \
+    uint64_t _hash = so_key_hash(_k)(&_k, sizeof(K), _seed); \
+    so_map_find(_m, &_k, sizeof(K), NULL, 0,                 \
+                _hash, &_found, so_key_eq(_k));              \
+    _found;                                                  \
+})
+
+// map_lit creates a map from literal key/value arrays.
+#define so_map_lit(K, V, n, keys, vals) ({                     \
+    size_t _ml_n = (n);                                        \
+    so_Map* _ml_m = so_make_map(K, V, _ml_n);                  \
+    K* _ml_ks = (keys);                                        \
+    V* _ml_vs = (vals);                                        \
+    for (size_t _ml_i = 0; _ml_i < _ml_n; _ml_i++)             \
+        so_map_set(K, V, _ml_m, _ml_ks[_ml_i], _ml_vs[_ml_i]); \
+    _ml_m;                                                     \
+})
