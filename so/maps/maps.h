@@ -1,17 +1,18 @@
 #include <time.h>
+#include "so/builtin/builtin.h"
 
-#if defined(__APPLE__)
+#if defined(so_build_darwin)
 #include <stdlib.h>
-#elif defined(__linux__)
+#elif defined(so_build_linux)
 #include <sys/random.h>
 #endif
 
 // seed returns a random 64-bit seed for hash randomization.
 static inline uint64_t maps_seed(void) {
     uint64_t seed = 0;
-#if defined(__APPLE__)
+#if defined(so_build_darwin)
     arc4random_buf(&seed, sizeof(seed));
-#elif defined(__linux__)
+#elif defined(so_build_linux)
     if (getrandom(&seed, sizeof(seed), 0) != sizeof(seed)) {
         // Fallback to time-based seed.
         struct timespec ts;
