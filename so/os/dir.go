@@ -9,7 +9,8 @@ import (
 	"solod.dev/so/strings"
 )
 
-// ReadDir reads the named directory, returning all its directory entries.
+// ReadDir reads the named directory, returning
+// all its directory entries sorted by filename.
 // If an error occurs reading the directory, returns the entries it was
 // able to read before the error, along with the error.
 //
@@ -17,6 +18,25 @@ import (
 // The returned slice and entry names are allocated; the caller owns them.
 // Use [FreeDirEntry] to free the result.
 func ReadDir(a mem.Allocator, name string) ([]DirEntry, error) {
+	entries, err := readDir(a, name)
+	slices.SortFunc(entries, compareEntry)
+	return entries, err
+}
+
+// FreeDirEntry frees a slice of DirEntry previously returned by [ReadDir].
+// It frees each entry's Name string and the slice itself.
+//
+// If the allocator is nil, uses the system allocator.
+func FreeDirEntry(a mem.Allocator, entries []DirEntry) {
+	for i := range entries {
+		mem.FreeString(a, entries[i].Name)
+	}
+	slices.Free(a, entries)
+}
+
+// readDir reads the named directory and returns
+// all its directory entries without sorting.
+func readDir(a mem.Allocator, name string) ([]DirEntry, error) {
 	dir := opendir(name)
 	if dir == nil {
 		return []DirEntry{}, mapError()
@@ -70,15 +90,11 @@ func ReadDir(a mem.Allocator, name string) ([]DirEntry, error) {
 	return entries, nil
 }
 
-// FreeDirEntry frees a slice of DirEntry previously returned by [ReadDir].
-// It frees each entry's Name string and the slice itself.
-//
-// If the allocator is nil, uses the system allocator.
-func FreeDirEntry(a mem.Allocator, entries []DirEntry) {
-	for i := range entries {
-		mem.FreeString(a, entries[i].Name)
-	}
-	slices.Free(a, entries)
+// compareEntry compares two DirEntry values by their name for sorting.
+func compareEntry(a, b any) int {
+	e1 := c.PtrAs[DirEntry](a)
+	e2 := c.PtrAs[DirEntry](b)
+	return strings.Compare(e1.Name, e2.Name)
 }
 
 // dtypeModeResult holds the result of dtypeToMode.

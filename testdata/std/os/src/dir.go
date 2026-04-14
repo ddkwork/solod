@@ -32,31 +32,20 @@ func dirTest() {
 			panic("ReadDir: wrong count")
 		}
 
-		// Check that we find each expected entry.
-		foundFile := false
-		foundDir := false
-		for _, entry := range entries {
-			if entry.Name == "aaa.txt" || entry.Name == "bbb.txt" {
-				foundFile = true
-				if entry.IsDir {
-					panic("ReadDir: file should not be dir")
-				}
-			}
-			if entry.Name == "subdir" {
-				foundDir = true
-				if !entry.IsDir {
-					panic("ReadDir: subdir should be dir")
-				}
-				if entry.Type&os.ModeDir == 0 {
-					panic("ReadDir: subdir Type should have ModeDir")
-				}
-			}
+		entry := entries[0]
+		if entry.Name != "aaa.txt" || entry.IsDir {
+			panic("ReadDir: want 1st = aaa.txt")
 		}
-		if !foundFile {
-			panic("ReadDir: did not find file entries")
+		entry = entries[1]
+		if entry.Name != "bbb.txt" || entry.IsDir {
+			panic("ReadDir: want 2nd = bbb.txt")
 		}
-		if !foundDir {
-			panic("ReadDir: did not find subdir")
+		entry = entries[2]
+		if entry.Name != "subdir" || !entry.IsDir {
+			panic("ReadDir: want 3rd = subdir")
+		}
+		if entry.Type&os.ModeDir == 0 {
+			panic("ReadDir: subdir should have ModeDir")
 		}
 	}
 	{

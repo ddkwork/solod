@@ -216,6 +216,18 @@ func ExampleMkdir() {
 	// ok
 }
 
+func ExampleReadDir() {
+	files, err := os.ReadDir(nil, ".")
+	if err != nil {
+		panic(err)
+	}
+	defer os.FreeDirEntry(nil, files)
+
+	for _, file := range files {
+		fmt.Println(file.Name)
+	}
+}
+
 func ExampleReadlink() {
 	// Create a temporary directory.
 	buf := make([]byte, 256)
