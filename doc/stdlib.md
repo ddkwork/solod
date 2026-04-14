@@ -5,12 +5,14 @@ Solod provides a growing set of high-level packages similar to Go's stdlib, and 
 [bytes](#sobytes) •
 [c](#soc) •
 [cmp](#socmp) •
+[encoding/binary](#soencodingbinary) •
 [errors](#soerrors) •
 [fmt](#sofmt) •
 [io](#soio) •
 [maps](#somaps) •
 [math](#somath) •
 [math/bits](#somathbits) •
+[math/rand](#somathrand) •
 [mem](#somem) •
 [os](#soos) •
 [runtime](#soruntime) •
@@ -75,6 +77,16 @@ Types:
 - `Func` is a comparison function `func(a, b any) int`.
 - `FuncFor` returns the appropriate comparison function for type T.
 
+## [so/encoding/binary](https://pkg.go.dev/solod.dev/so/encoding/binary)
+
+Translation between numbers and byte sequences. Based on Go's `encoding/binary` package.
+
+Types:
+
+- `ByteOrder` specifies how to convert byte slices into unsigned integers.
+- `AppendByteOrder` specifies how to append unsigned integers into a byte slice.
+- `LittleEndian` and `BigEndian` implement `ByteOrder` and `AppendByteOrder`.
+
 ## [so/errors](https://pkg.go.dev/solod.dev/so/errors)
 
 Error creation from text messages.
@@ -133,6 +145,26 @@ Mathematical functions and constants. Offers the same API as Go's `math` package
 
 Bit counting and manipulation functions. Offers the same API as Go's `math/bits` package.
 
+## [so/math/rand](https://pkg.go.dev/solod.dev/so/math/rand)
+
+Pseudo-random number generation. Based on Go's `math/rand/v2` package.
+
+Top-level functions use a global `Rand` with a `PCG` source seeded by `runtime.Seed`.
+
+Functions:
+
+- `Int`, `Int32`, `Int64` return non-negative pseudo-random integers.
+- `Uint`, `Uint32`, `Uint64` return pseudo-random unsigned integers.
+- `IntN`, `Int32N`, `Int64N` return non-negative pseudo-random integers in [0,n).
+- `UintN`, `Uint32N`, `Uint64N` return pseudo-random unsigned integers in [0,n).
+- `Float32` and `Float64` return pseudo-random floats in [0.0,1.0).
+
+Types:
+
+- `Source` is an interface for a source of pseudo-random `uint64` values.
+- `PCG` is a PCG generator with 128 bits of internal state. Implements `Source`.
+- `Rand` wraps a `Source` and provides the same methods as the top-level functions.
+
 ## [so/mem](https://pkg.go.dev/solod.dev/so/mem)
 
 Memory allocation with a pluggable allocator interface.
@@ -177,10 +209,11 @@ Types:
 
 ## [so/runtime](https://pkg.go.dev/solod.dev/so/runtime)
 
-Information about the environment where the program was compiled:
+Information about the environment where the program was compiled, and runtime utilities.
 
-- `Version` returns So's compiler version (git commit hash or tag).
 - `GOOS` and `GOARCH` specify the target operating system and architecture.
+- `Version` returns So's compiler version (git commit hash or tag).
+- `Seed` returns a cryptographically secure random 64-bit seed.
 
 ## [so/slices](https://pkg.go.dev/solod.dev/so/slices)
 

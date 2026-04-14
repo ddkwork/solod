@@ -20,6 +20,7 @@ import (
 
 	"solod.dev/so/c"
 	"solod.dev/so/mem"
+	"solod.dev/so/runtime"
 )
 
 const loadFactor = 0.85 // must be above 50%
@@ -49,7 +50,7 @@ type ByteMap struct {
 // The caller is responsible for freeing map resources
 // with [ByteMap.Free] when done using it.
 func NewByteMap(a mem.Allocator, size, ksize, vsize int) ByteMap {
-	m := ByteMap{a: a, ksize: ksize, vsize: vsize, seed: seed()}
+	m := ByteMap{a: a, ksize: ksize, vsize: vsize, seed: runtime.Seed()}
 	sz := 8
 	// The map must be large enough to hold size entries without resizing.
 	for int(float64(sz)*loadFactor) < size {

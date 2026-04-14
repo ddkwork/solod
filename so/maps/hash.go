@@ -72,6 +72,3 @@ func maps_hashString(keyPtr any, seed uint64) int {
 	s := *keyPtr.(*string)
 	return maps_hash(unsafe.StringData(s), len(s), seed)
 }
-
-//so:extern maps_seed
-func seed() uint64 { return 0 }
