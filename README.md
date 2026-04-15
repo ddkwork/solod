@@ -210,10 +210,6 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 
 ✅ Core language features.
 
-✅ C interop.
-
-✅ Limited generics and maps.
-
 ⏳ Core stdlib packages (v0.1):
 
 ```text
@@ -223,9 +219,9 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 ✗ flag        ✓ math    ✗ slog      ✓ unicode
 ```
 
-⬜ Networking (v0.2)
+⬜ Networking (v0.2).
 
-⬜ Concurrency (v0.3)
+⬜ Concurrency (v0.3).
 
 🤔 Full Windows support.
 
