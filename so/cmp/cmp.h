@@ -46,8 +46,8 @@ SO_DEFINE_CMP(cmp_f64, double)
 static inline so_int cmp_string(void* x, void* y) {
     const so_String* s1 = (const so_String*)x;
     const so_String* s2 = (const so_String*)y;
-    size_t n = s1->len < s2->len ? s1->len : s2->len;
-    int cmp = n > 0 ? memcmp(s1->ptr, s2->ptr, n) : 0;
+    so_int n = s1->len < s2->len ? s1->len : s2->len;
+    int cmp = n > 0 ? memcmp(s1->ptr, s2->ptr, (size_t)n) : 0;
     if (cmp != 0) return cmp;
     if (s1->len < s2->len) return -1;
     if (s1->len > s2->len) return +1;

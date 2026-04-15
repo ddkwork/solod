@@ -46,7 +46,7 @@ func FuncFor[T any]() Func {
 	if _, ok := any(zero).(string); ok {
 		type header struct {
 			ptr *byte
-			len uintptr
+			len int
 		}
 		return func(a, b any) int {
 			h1 := c.PtrAs[header](a)

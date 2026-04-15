@@ -20,8 +20,8 @@ var slices_h string
 //so:extern so_Slice
 type Slice struct {
 	ptr *byte
-	len uintptr
-	cap uintptr
+	len int
+	cap int
 }
 
 // Header returns the Slice header for a given slice.
@@ -30,8 +30,8 @@ type Slice struct {
 func Header[T any](s []T) Slice {
 	return Slice{
 		ptr: c.PtrAs[byte](unsafe.SliceData(s)),
-		len: uintptr(len(s)),
-		cap: uintptr(cap(s)),
+		len: len(s),
+		cap: cap(s),
 	}
 }
 

@@ -28,7 +28,7 @@ func Extend[T any](a mem.Allocator, s []T, other []T) []T {
 // for larger ones.
 //
 //so:inline
-func slices_nextcap(newLen, oldCap uintptr) uintptr {
+func slices_nextcap(newLen, oldCap int) int {
 	newCap := oldCap
 	doubleCap := newCap + newCap
 	if newLen > doubleCap {
@@ -52,7 +52,7 @@ func slices_nextcap(newLen, oldCap uintptr) uintptr {
 // If the allocator is nil, uses the system allocator.
 //
 //so:inline
-func slices_grow(a mem.Allocator, s Slice, newLen, elemSize, elemAlign uintptr) sliceResult {
+func slices_grow(a mem.Allocator, s Slice, newLen, elemSize, elemAlign int) sliceResult {
 	if a == nil {
 		a = mem.System
 	}
@@ -62,7 +62,7 @@ func slices_grow(a mem.Allocator, s Slice, newLen, elemSize, elemAlign uintptr) 
 	newCap := slices_nextcap(newLen, s.cap)
 	oldSize := s.cap * elemSize
 	newSize := newCap * elemSize
-	newPtr, err := a.Realloc(s.ptr, int(oldSize), int(newSize), int(elemAlign))
+	newPtr, err := a.Realloc(s.ptr, oldSize, newSize, elemAlign)
 	if err != nil {
 		return sliceResult{val: s, err: err}
 	}
@@ -76,13 +76,13 @@ func slices_grow(a mem.Allocator, s Slice, newLen, elemSize, elemAlign uintptr) 
 // If the allocator is nil, uses the system allocator.
 //
 //so:inline
-func slices_tryExtend(a mem.Allocator, s Slice, other Slice, elemSize, elemAlign uintptr) sliceResult {
+func slices_tryExtend(a mem.Allocator, s Slice, other Slice, elemSize, elemAlign int) sliceResult {
 	res := slices_grow(a, s, s.len+other.len, elemSize, elemAlign)
 	if res.err != nil {
 		return res
 	}
 	s = res.val
-	mem.Copy(c.PtrAdd(s.ptr, int(s.len*elemSize)), other.ptr, int(other.len*elemSize))
+	mem.Copy(c.PtrAdd(s.ptr, s.len*elemSize), other.ptr, other.len*elemSize)
 	s.len += other.len
 	return sliceResult{val: s, err: nil}
 }
@@ -92,7 +92,7 @@ func slices_tryExtend(a mem.Allocator, s Slice, other Slice, elemSize, elemAlign
 // If the allocator is nil, uses the system allocator.
 //
 //so:inline
-func slices_extend(a mem.Allocator, s Slice, other Slice, elemSize, elemAlign uintptr) Slice {
+func slices_extend(a mem.Allocator, s Slice, other Slice, elemSize, elemAlign int) Slice {
 	res := slices_tryExtend(a, s, other, elemSize, elemAlign)
 	if res.err != nil {
 		panic(res.err)

@@ -81,7 +81,7 @@ func SortFunc[T any](x []T, compare cmp.Func) {
 // SortWith sorts the slice using the provided Sorter.
 func SortWith(s Sorter) {
 	limit := bits.Len(uint(s.slice.len))
-	pdqsort_func(s, 0, int(s.slice.len), limit)
+	pdqsort_func(s, 0, s.slice.len, limit)
 }
 
 // SortStableFunc sorts the slice x while keeping the original order of equal
@@ -96,7 +96,7 @@ func SortStableFunc[T any](x []T, compare cmp.Func) {
 // SortStableWith sorts the slice using the provided Sorter
 // while keeping the original order of equal elements.
 func SortStableWith(s Sorter) {
-	stable_func(s, int(s.slice.len))
+	stable_func(s, s.slice.len)
 }
 
 // IsSorted reports whether x is sorted in ascending order.
@@ -119,7 +119,7 @@ func IsSortedFunc[T any](x []T, compare cmp.Func) bool {
 // IsSortedWith reports whether the slice is sorted
 // according to the provided Sorter.
 func IsSortedWith(s Sorter) bool {
-	for i := int(s.slice.len) - 1; i > 0; i-- {
+	for i := s.slice.len - 1; i > 0; i-- {
 		if s.Compare(i, i-1) < 0 {
 			return false
 		}

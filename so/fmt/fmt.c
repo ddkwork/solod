@@ -53,7 +53,7 @@ so_String fmt_Sprintf(fmt_Buffer buf, const char* format, ...) {
     } else if (n >= buf.Len) {
         n = buf.Len - 1;  // truncate output to fit buffer
     }
-    return (so_String){.ptr = (char*)buf.Ptr, .len = (size_t)n};
+    return (so_String){.ptr = (char*)buf.Ptr, .len = n};
 }
 
 so_R_int_err fmt_Fprintf(io_Writer w, const char* format, ...) {
@@ -67,11 +67,10 @@ so_R_int_err fmt_Fprintf(io_Writer w, const char* format, ...) {
         return (so_R_int_err){.err = fmt_ErrPrint};
     }
 
-    size_t size = (size_t)n;
-    if (size >= sizeof(buf)) {
+    if ((size_t)n >= sizeof(buf)) {
         return (so_R_int_err){.val = n, .err = fmt_ErrSize};
     }
-    so_Slice slice = {.ptr = buf, .len = size, .cap = size};
+    so_Slice slice = {.ptr = buf, .len = n, .cap = n};
     return w.Write(w.self, slice);
 }
 
@@ -95,7 +94,8 @@ so_R_int_err fmt_Sscanf(const char* str, const char* format, ...) {
 
 so_R_int_err fmt_Fscanf(io_Reader r, const char* format, ...) {
     char buf[fmt_BufSize];
-    so_Slice slice = {.ptr = buf, .len = sizeof(buf) - 1, .cap = sizeof(buf) - 1};
+    so_int len = sizeof(buf) - 1;  // leave space for null terminator
+    so_Slice slice = {.ptr = buf, .len = len, .cap = len};
     so_R_int_err res = r.Read(r.self, slice);
     if (res.err) {
         return (so_R_int_err){.err = res.err};
