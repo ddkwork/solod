@@ -3,7 +3,7 @@
 // -- Implementation --
 
 so_int main_Person_Sleep(void* self) {
-    main_Person* p = (main_Person*)self;
+    main_Person* p = self;
     p->Age += 1;
     return p->Age;
 }

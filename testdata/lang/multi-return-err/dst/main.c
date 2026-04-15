@@ -15,7 +15,7 @@ static main_FileResult create(so_int size);
 // -- Implementation --
 
 so_R_int_err main_File_Read(void* self, so_int buf) {
-    main_File* f = (main_File*)self;
+    main_File* f = self;
     (void)buf;
     return (so_R_int_err){.val = f->size, .err = NULL};
 }

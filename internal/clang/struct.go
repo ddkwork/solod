@@ -99,7 +99,7 @@ func (g *Generator) emitMethodDecl(decl *ast.FuncDecl) {
 		// Pointer receivers: cast void* self to the concrete type.
 		if named {
 			recvName := recv.Names[0].Name
-			fmt.Fprintf(w, "%s%s* %s = (%s*)self;\n", g.indent(), cStructType, recvName, cStructType)
+			fmt.Fprintf(w, "%s%s* %s = self;\n", g.indent(), cStructType, recvName)
 		} else {
 			fmt.Fprintf(w, "%s(void)self;\n", g.indent())
 		}

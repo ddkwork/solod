@@ -11,12 +11,12 @@ static main_Shape nilShape(void);
 // -- Implementation --
 
 so_int main_Rect_Area(void* self) {
-    main_Rect* r = (main_Rect*)self;
+    main_Rect* r = self;
     return r->width * r->height;
 }
 
 so_int main_Rect_Perim(void* self, so_int n) {
-    main_Rect* r = (main_Rect*)self;
+    main_Rect* r = self;
     return n * (2 * r->width + 2 * r->height);
 }
 

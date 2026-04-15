@@ -4,7 +4,7 @@
 
 // Scale scales the rectangle by a factor.
 void main_Rect_Scale(void* self, so_int factor) {
-    main_Rect* r = (main_Rect*)self;
+    main_Rect* r = self;
     r->W *= factor;
     r->H *= factor;
 }

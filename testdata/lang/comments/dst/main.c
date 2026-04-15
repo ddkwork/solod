@@ -17,7 +17,7 @@ main_Point main_NewPoint(so_int x, so_int y) {
 
 // Scale multiplies both coordinates by a factor.
 void main_Point_Scale(void* self, so_int factor) {
-    main_Point* p = (main_Point*)self;
+    main_Point* p = self;
     p->x = p->x * factor;
     p->y = p->y * factor;
 }

@@ -17,7 +17,7 @@ static so_R_int_err writer_Write(void* self, so_Slice p);
 // -- Implementation --
 
 static so_R_int_err reader_Read(void* self, so_Slice p) {
-    reader* r = (reader*)self;
+    reader* r = self;
     if (so_len(r->b) == 0) {
         return (so_R_int_err){.val = 0, .err = io_EOF};
     }
@@ -27,7 +27,7 @@ static so_R_int_err reader_Read(void* self, so_Slice p) {
 }
 
 static so_R_int_err writer_Write(void* self, so_Slice p) {
-    writer* w = (writer*)self;
+    writer* w = self;
     w->b = so_extend(so_byte, w->b, (p));
     return (so_R_int_err){.val = so_len(p), .err = NULL};
 }

@@ -14,12 +14,12 @@ static so_int circle_area(void* self);
 // -- Implementation --
 
 so_int main_Rect_Area(void* self) {
-    main_Rect* r = (main_Rect*)self;
+    main_Rect* r = self;
     return r->width * r->height;
 }
 
 static so_int main_Rect_perim(void* self, so_int n) {
-    main_Rect* r = (main_Rect*)self;
+    main_Rect* r = self;
     return n * (2 * r->width + 2 * r->height);
 }
 
@@ -30,7 +30,7 @@ static main_Rect main_Rect_resize(main_Rect r, so_int x) {
 }
 
 static so_int circle_area(void* self) {
-    circle* c = (circle*)self;
+    circle* c = self;
     return 3 * c->radius * c->radius;
 }
 
