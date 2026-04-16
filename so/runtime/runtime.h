@@ -48,6 +48,8 @@ static inline uint64_t runtime_Seed(void) {
 #define runtime_GOARCH so_str("amd64")
 #elif defined(so_build_arm64)
 #define runtime_GOARCH so_str("arm64")
+#elif defined(so_build_riscv64)
+#define runtime_GOARCH so_str("riscv64")
 #else
 #define runtime_GOARCH so_str("unknown")
 #endif

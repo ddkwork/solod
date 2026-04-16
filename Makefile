@@ -4,6 +4,7 @@ LDLIBS ?= -lm
 CLANG       = clang
 GCC_NATIVE  = gcc-15
 GCC_DOCKER  = docker run --rm -v "$(shell pwd)":/src -w /src gcc:15.2.0
+RISCV64 = docker run --rm --platform linux/riscv64 -v "$(shell pwd)":/src -w /src solod/riscv64
 
 compiler =
 RUN_CMD = ./build/main
@@ -18,6 +19,10 @@ else ifeq ($(compiler), docker)
     CC = $(GCC_DOCKER) gcc
 	CFLAGS += -fanalyzer -D_FORTIFY_SOURCE=2
     RUN_CMD = $(GCC_DOCKER) ./build/main
+else ifeq ($(compiler), riscv64)
+	CC = $(RISCV64) gcc
+	CFLAGS = -O1 -g -std=gnu11 -Wall -Wextra -Werror -Wno-shadow
+	RUN_CMD = $(RISCV64) ./build/main
 endif
 
 # Preload mimalloc if available.
@@ -41,12 +46,10 @@ test:
 	@go test ./so/...
 	@go test ./internal/...
 
-dist:
-	@rm -rf dist
-	@mkdir -p dist/solod/bin
-	@go build -o dist/solod/bin/so ./cmd/so
-	@tar -czf dist/solod.tar.gz -C dist solod
-	@echo "Created dist/solod.tar.gz"
+prepare-riscv64:
+	@printf 'FROM alpine:edge\nRUN apk add --no-cache gcc musl-dev\n' \
+		| docker build --platform=linux/riscv64 -t solod/riscv64 -
+	@docker run --rm -it --platform=linux/riscv64 -v $(shell pwd):/src solod/riscv64 uname -m
 
 update-dst:
 	make run-case name=$(name)

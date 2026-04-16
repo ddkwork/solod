@@ -52,6 +52,8 @@ typedef uint64_t so_uint;
 #define so_build_amd64
 #elif defined(__aarch64__) || defined(_M_ARM64)
 #define so_build_arm64
+#elif defined(__riscv) && __riscv_xlen == 64
+#define so_build_riscv64
 #endif
 
 // --- Alloca safety ---
