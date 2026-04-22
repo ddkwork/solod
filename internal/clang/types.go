@@ -77,6 +77,9 @@ func (g *Generator) mapType(node ast.Node, typ types.Type) string {
 		obj := t.Obj()
 		if obj.Pkg() != nil && obj.Pkg() != g.pkg.Types {
 			// This is a named type from another package.
+			if info, ok := g.getExtern(obj); ok && info.name != "" {
+				return info.name
+			}
 			return obj.Pkg().Name() + "_" + obj.Name()
 		}
 		if obj.Parent() == g.pkg.Types.Scope() {
