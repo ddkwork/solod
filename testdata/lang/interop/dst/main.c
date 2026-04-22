@@ -40,8 +40,13 @@ int main(void) {
     }
     {
         // Extern function pointer.
-        Account acc = (Account){.name = so_str("Charlie")};
-        acc.write = write_acc;
+        Account acc = (Account){.name = so_str("Charlie"), .write = write_acc};
         acc.write(&acc, "Balance: %d", 123);
+    }
+    {
+        // Extern function pointer on a type alias.
+        Account acc = (Account){.write = write_acc};
+        Account target = (Account){.name = so_str("Diana")};
+        acc.write(&target, "Balance: %d", 456);
     }
 }

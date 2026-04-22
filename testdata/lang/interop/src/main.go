@@ -7,13 +7,19 @@ package main
 //so:extern INT64_MAX
 const maxInt64 = 1<<63 - 1
 
+//so:extern write_func_t
+type WriteFunc func(a *Account, format string, args ...any)
+
 //so:extern Account
 type Account struct {
 	name    string
 	balance int64
 	flags   []uint8
-	write   func(a *Account, format string, args ...any)
+	write   WriteFunc
 }
+
+//so:extern Account
+type Acc Account
 
 func account_inc_balance(acc *Account, amount int64) int64
 
@@ -71,8 +77,13 @@ func main() {
 	}
 	{
 		// Extern function pointer.
-		acc := Account{name: "Charlie"}
-		acc.write = write_acc
+		acc := Account{name: "Charlie", write: write_acc}
 		acc.write(&acc, "Balance: %d", 123)
+	}
+	{
+		// Extern function pointer on a type alias.
+		acc := Acc{write: write_acc}
+		target := Account{name: "Diana"}
+		acc.write(&target, "Balance: %d", 456)
 	}
 }

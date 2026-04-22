@@ -134,7 +134,7 @@ func (g *Generator) emitHeaderGenDecl(w io.Writer, decl *ast.GenDecl) {
 			}
 			typ := g.types.Defs[name].Type()
 			ct := g.mapCType(spec, typ)
-			cName := g.symbolName(name.Name)
+			cName := g.symbolName(g.types.Defs[name])
 			switch decl.Tok {
 			case token.CONST:
 				fmt.Fprintf(w, "extern const %s;\n", ct.Decl(cName))

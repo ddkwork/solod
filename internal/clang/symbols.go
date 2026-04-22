@@ -43,7 +43,7 @@ func (g *Generator) collectSymbols() {
 				case token.TYPE:
 					for _, spec := range d.Specs {
 						ts := spec.(*ast.TypeSpec)
-						if g.hasExtern("", ts.Name.Name) {
+						if g.hasExtern(g.types.Defs[ts.Name]) {
 							continue
 						}
 						g.symbols = append(g.symbols, symbol{
@@ -77,7 +77,7 @@ func (g *Generator) collectSymbols() {
 					g.initFunc = d
 					continue
 				}
-				if g.hasExtern("", externFuncKey(d)) {
+				if g.hasExtern(g.types.Defs[d.Name]) {
 					continue
 				}
 				kind := symbolFunc
@@ -125,14 +125,14 @@ func (g *Generator) collectExterns() {
 		}
 
 		// Collect extern symbols from declarations.
-		g.collectFileExterns("", file)
+		g.collectFileExterns(g.types, file)
 	}
 
 	// Collect externs from imported packages so that callExtern
 	// can identify cross-package extern calls (e.g. stdio.Printf).
 	for _, imp := range g.pkg.Imports {
 		for _, file := range imp.Syntax {
-			g.collectFileExterns(imp.Name, file)
+			g.collectFileExterns(imp.TypesInfo, file)
 		}
 	}
 }

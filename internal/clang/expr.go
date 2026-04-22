@@ -374,7 +374,7 @@ func (g *Generator) emitIdent(n *ast.Ident) {
 			// Package-level declarations: exported names are prefixed
 			// with the package name (e.g. RectArea -> geom_RectArea),
 			// and extern overrides are applied (e.g. maxInt64 -> INT64_MAX).
-			name = g.symbolName(name)
+			name = g.symbolName(obj)
 		}
 	}
 	if g.state.macroParams[name] {
@@ -401,7 +401,7 @@ func (g *Generator) emitSelectorExpr(n *ast.SelectorExpr) {
 		if pkgName, ok := g.types.Uses[ident].(*types.PkgName); ok {
 			// Use the extern C name if the symbol has one
 			// (e.g. math.MaxInt64 → INT64_MAX).
-			if info, ok := g.getExtern(pkgName.Name(), n.Sel.Name); ok && info.name != "" {
+			if info, ok := g.getExtern(g.types.Uses[n.Sel]); ok && info.name != "" {
 				fmt.Fprintf(g.state.writer, "%s", info.name)
 				return
 			}

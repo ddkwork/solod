@@ -38,9 +38,9 @@ func (g *Generator) emitFuncProto(w io.Writer, decl *ast.FuncDecl) *types.Signat
 	}
 
 	// Name: methods use RecvType_Method, functions use symbolName.
-	name := g.symbolName(decl.Name.Name)
+	name := g.symbolName(g.types.Defs[decl.Name])
 	if decl.Recv != nil {
-		name = g.symbolName(recvTypeName(decl.Recv.List[0])) + "_" + decl.Name.Name
+		name = g.symbolName(g.recvTypeObj(decl.Recv.List[0])) + "_" + decl.Name.Name
 	}
 
 	// Parameters: methods prepend receiver
@@ -50,7 +50,7 @@ func (g *Generator) emitFuncProto(w io.Writer, decl *ast.FuncDecl) *types.Signat
 		recv := decl.Recv.List[0]
 		if _, ok := recv.Type.(*ast.Ident); ok {
 			// Value receiver: pass struct by value.
-			cStructType := g.symbolName(recvTypeName(recv))
+			cStructType := g.symbolName(g.recvTypeObj(recv))
 			recvName := "self"
 			if len(recv.Names) > 0 {
 				recvName = recv.Names[0].Name
@@ -90,7 +90,7 @@ func (g *Generator) emitFuncTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 		params = append(params, g.mapType(spec, parVar.Type()))
 	}
 
-	name := g.declSymbolName(spec.Name.Name)
+	name := g.declSymbolName(g.types.Defs[spec.Name])
 	fmt.Fprintf(w, "%stypedef %s (*%s)(%s);\n", g.indent(), retType, name, strings.Join(params, ", "))
 }
 
@@ -98,7 +98,7 @@ func (g *Generator) emitFuncTypeSpec(w io.Writer, spec *ast.TypeSpec) {
 // Inline functions are skipped here - they are emitted into the header
 // by [Generator.emitInlineFuncDecl].
 func (g *Generator) emitFuncDecl(decl *ast.FuncDecl) {
-	if decl.Body == nil || g.hasExtern("", externFuncKey(decl)) {
+	if decl.Body == nil || g.hasExtern(g.types.Defs[decl.Name]) {
 		return
 	}
 	if decl.Name.Name == "init" {
@@ -129,9 +129,9 @@ func (g *Generator) emitMacroFuncDecl(w io.Writer, decl *ast.FuncDecl) {
 	g.rejectNamedReturns(decl, sig)
 
 	// Build macro name.
-	name := g.symbolName(decl.Name.Name)
+	name := g.symbolName(g.types.Defs[decl.Name])
 	if decl.Recv != nil {
-		name = g.symbolName(recvTypeName(decl.Recv.List[0])) + "_" + decl.Name.Name
+		name = g.symbolName(g.recvTypeObj(decl.Recv.List[0])) + "_" + decl.Name.Name
 	}
 
 	// Build param list: type params, then receiver (for methods), then regular params.
@@ -448,6 +448,24 @@ func recvTypeName(recv *ast.Field) string {
 		return t.X.(*ast.Ident).Name
 	}
 	panic(fmt.Sprintf("unsupported receiver type: %T", recv.Type))
+}
+
+// recvTypeObj returns the types.Object for the receiver type of a method.
+func (g *Generator) recvTypeObj(recv *ast.Field) types.Object {
+	typ := recv.Type
+	if star, ok := typ.(*ast.StarExpr); ok {
+		typ = star.X
+	}
+	switch t := typ.(type) {
+	case *ast.Ident:
+		return g.types.Uses[t]
+	case *ast.IndexExpr:
+		return g.types.Uses[t.X.(*ast.Ident)]
+	case *ast.IndexListExpr:
+		return g.types.Uses[t.X.(*ast.Ident)]
+	}
+	g.fail(recv, "unsupported receiver type: %T", recv.Type)
+	return nil // unreachable
 }
 
 // recvTypeParams extracts type parameter names from a generic receiver field.

@@ -13,7 +13,7 @@ type externInfo struct {
 }
 
 // collectFileExterns collects extern symbols from a single file's declarations.
-func (g *Generator) collectFileExterns(pkgName string, file *ast.File) {
+func (g *Generator) collectFileExterns(typesInfo *types.Info, file *ast.File) {
 	for _, decl := range file.Decls {
 		switch d := decl.(type) {
 		case *ast.GenDecl:
@@ -24,18 +24,22 @@ func (g *Generator) collectFileExterns(pkgName string, file *ast.File) {
 			for _, spec := range d.Specs {
 				switch s := spec.(type) {
 				case *ast.TypeSpec:
-					g.markExtern(pkgName, s.Name.Name, info)
-					g.markExternFields(pkgName, s, info)
+					g.markExtern(typesInfo.Defs[s.Name], info)
+					g.markExternFields(s, info)
 				case *ast.ValueSpec:
 					for _, name := range s.Names {
-						g.markExtern(pkgName, name.Name, info)
+						g.markExtern(typesInfo.Defs[name], info)
 					}
 				}
 			}
 		case *ast.FuncDecl:
 			found, info := parseExternDirective(d.Doc)
 			if d.Body == nil || found {
-				g.markExtern(pkgName, externFuncKey(d), info)
+				if d.Recv != nil {
+					g.markExtern(typesInfo.Defs[d.Name], info)
+				} else {
+					g.markExtern(typesInfo.Defs[d.Name], info)
+				}
 			}
 		}
 	}
@@ -47,12 +51,12 @@ func (g *Generator) callExtern(call *ast.CallExpr) (externInfo, bool) {
 	switch fun := call.Fun.(type) {
 	case *ast.Ident:
 		// Local package call.
-		return g.getExtern("", fun.Name)
+		return g.getExtern(g.types.Uses[fun])
 	case *ast.SelectorExpr:
 		// Package-qualified call (e.g. stdio.Printf).
 		if ident, ok := fun.X.(*ast.Ident); ok {
-			if pkgName, ok := g.types.Uses[ident].(*types.PkgName); ok {
-				return g.getExtern(pkgName.Name(), fun.Sel.Name)
+			if _, ok := g.types.Uses[ident].(*types.PkgName); ok {
+				return g.getExtern(g.types.Uses[fun.Sel])
 			}
 		}
 		// Function pointer field on an extern struct (e.g. acc.write(...)).
@@ -68,25 +72,13 @@ func (g *Generator) callExternField(sel *ast.SelectorExpr) (externInfo, bool) {
 	if !ok || selection.Kind() != types.FieldVal {
 		return externInfo{}, false
 	}
-	recv := selection.Recv()
-	if ptr, ok := recv.(*types.Pointer); ok {
-		recv = ptr.Elem()
-	}
-	named, ok := recv.(*types.Named)
-	if !ok {
-		return externInfo{}, false
-	}
-	pkgName := ""
-	if typePkg := named.Obj().Pkg(); typePkg != nil && typePkg.Path() != g.pkg.PkgPath {
-		// The type is imported from another package.
-		pkgName = typePkg.Name()
-	}
-	return g.getExtern(pkgName, named.Obj().Name()+"."+sel.Sel.Name)
+	info, ok := g.externs[selection.Obj()]
+	return info, ok
 }
 
 // markExternFields registers function pointer fields of an extern struct type,
 // so that calls like acc.write(...) can be resolved via a map lookup.
-func (g *Generator) markExternFields(pkgName string, spec *ast.TypeSpec, info externInfo) {
+func (g *Generator) markExternFields(spec *ast.TypeSpec, info externInfo) {
 	obj := g.types.Defs[spec.Name]
 	if obj == nil {
 		return
@@ -97,46 +89,27 @@ func (g *Generator) markExternFields(pkgName string, spec *ast.TypeSpec, info ex
 	}
 	fieldInfo := externInfo{nodecay: info.nodecay}
 	for field := range st.Fields() {
-		if _, ok := field.Type().(*types.Signature); ok {
-			g.markExtern(pkgName, spec.Name.Name+"."+field.Name(), fieldInfo)
+		if _, ok := field.Type().Underlying().(*types.Signature); ok {
+			g.externs[field] = fieldInfo
 		}
 	}
 }
 
-// markExtern marks a symbol in a package as extern.
-func (g *Generator) markExtern(pkgName, name string, info externInfo) {
-	if pkgName != "" {
-		name = pkgName + "." + name
-	}
-	g.externs[name] = info
+// markExtern marks a types.Object as extern.
+func (g *Generator) markExtern(obj types.Object, info externInfo) {
+	g.externs[obj] = info
 }
 
-// hasExtern reports whether a symbol in a package is marked as extern.
-func (g *Generator) hasExtern(pkgName, name string) bool {
-	if pkgName != "" {
-		name = pkgName + "." + name
-	}
-	_, ok := g.externs[name]
+// hasExtern reports whether a types.Object is marked as extern.
+func (g *Generator) hasExtern(obj types.Object) bool {
+	_, ok := g.externs[obj]
 	return ok
 }
 
-// getExtern returns the extern metadata for a symbol.
-func (g *Generator) getExtern(pkgName, name string) (externInfo, bool) {
-	if pkgName != "" {
-		name = pkgName + "." + name
-	}
-	info, ok := g.externs[name]
+// getExtern returns the extern metadata for a types.Object.
+func (g *Generator) getExtern(obj types.Object) (externInfo, bool) {
+	info, ok := g.externs[obj]
 	return info, ok
-}
-
-// externFuncKey returns a map key for a function or method declaration.
-// Functions use their bare name (e.g. "Foo"), while methods use
-// "ReceiverType.Name" (e.g. "T.Foo") to avoid collisions.
-func externFuncKey(decl *ast.FuncDecl) string {
-	if decl.Recv != nil {
-		return recvTypeName(decl.Recv.List[0]) + "." + decl.Name.Name
-	}
-	return decl.Name.Name
 }
 
 // hasInlineDirective reports whether a comment group
