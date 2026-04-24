@@ -83,7 +83,7 @@ Plus an implementation file `main.c`:
 #include "main.h"
 
 so_int main_Person_Sleep(void* self) {
-    main_Person* p = (main_Person*)self;
+    main_Person* p = self;
     p->Age += 1;
     return p->Age;
 }
@@ -213,10 +213,10 @@ I have heard these several times, so it's [worth answering](doc/faq.md).
 ⏳ Core stdlib packages (v0.1):
 
 ```text
-✗ bufio       ✓ fmt     ✓ os        ✓ strings
+✓ bufio       ✓ fmt     ✓ os        ✓ strings
 ✓ bytes       ✓ io      ✓ rand      ✓ strconv
 ✗ filepath    ✓ maps    ✓ slices    ✓ time
-✗ flag        ✓ math    ✗ slog      ✓ unicode
+✗ flag        ✓ math    ✓ slog      ✓ unicode
 ```
 
 ⬜ Networking (v0.2).
