@@ -249,6 +249,10 @@ Functions:
 - `Getpid`, `Getppid`, `Getuid`, `Geteuid`, `Getgid`, `Getegid` return process/user info.
 - `Exit` terminates the program with the given status code.
 
+Variables:
+
+- `Args` holds the command-line arguments, starting with the program name.
+
 Types:
 
 - `File` represents an open file with methods for reading and writing data.

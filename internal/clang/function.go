@@ -70,7 +70,9 @@ func (g *Generator) emitFuncProto(w io.Writer, decl *ast.FuncDecl) *types.Signat
 		}
 	}
 	params := "void"
-	if len(parts) > 0 {
+	if decl.Name.Name == "main" && g.importsOS() {
+		params = "int argc, char* argv[]"
+	} else if len(parts) > 0 {
 		params = strings.Join(parts, ", ")
 	}
 
@@ -233,6 +235,10 @@ func (g *Generator) emitFuncBody(decl *ast.FuncDecl) {
 
 	// Emit function body, handling deferred calls if needed.
 	g.state.indent++
+	if decl.Name.Name == "main" && g.importsOS() {
+		fmt.Fprintf(w, "%sso_String _so_argv[argc];\n", g.indent())
+		fmt.Fprintf(w, "%sso_args_init(argc, argv, _so_argv);\n", g.indent())
+	}
 	g.walkStmts(decl.Body.List)
 	if !endsWithReturn(decl.Body.List) {
 		g.emitDeferredCalls()
@@ -414,6 +420,16 @@ func (g *Generator) hasUnexportedTypes(decl *ast.FuncDecl) bool {
 		}
 	}
 	return false
+}
+
+// importsOS reports whether the current package imports "os",
+// which determines whether we need to initialize argc/argv in main().
+func (g *Generator) importsOS() bool {
+	// Only check the main package for simplicity. If "os" is imported in
+	// a non-main package, the user will have to import "os" in main too
+	// to signal that they want argc/argv support.
+	_, ok := g.pkg.Imports["solod.dev/so/os"]
+	return ok
 }
 
 // funcSig returns the types.Signature for a function or method declaration.

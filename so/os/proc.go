@@ -6,6 +6,11 @@ import (
 	"solod.dev/so/c"
 )
 
+// Args holds the command-line arguments, starting with the program name.
+//
+//so:extern
+var Args []string
+
 // Getegid returns the numeric effective group id of the caller.
 func Getegid() int {
 	gid := getegid()
