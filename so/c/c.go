@@ -96,6 +96,11 @@ func PtrAt[T any](ptr *T, index int) *T {
 	return PtrAdd(ptr, index*Sizeof[T]())
 }
 
+// Raw emits a raw block of C code.
+//
+//so:extern
+func Raw(code string) { _ = code }
+
 // Sizeof returns the size of type T in bytes.
 //
 //	sizeof(T)
@@ -127,6 +132,15 @@ func Slice[T any](ptr *T, len int, cap int) []T {
 //
 //so:extern
 func String(ptr *Char) string { _ = ptr; return "" }
+
+// Val emits a typed C expression.
+//
+//so:extern
+func Val[T any](expr string) T {
+	var v T
+	_ = expr
+	return v
+}
 
 // Zero returns the zero value of type T.
 //

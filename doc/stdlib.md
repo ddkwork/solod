@@ -84,7 +84,9 @@ Functions:
 - `Alloca` allocates an array on the stack.
 - `Assert` aborts with a message if a condition is false.
 - `Bytes`, `Slice` and `String` wrap C pointers to So types.
+- `CString` converts a So string to a null-terminated C string.
 - `PtrAdd`, `PtrAs` and `PtrAt` manipulate pointers.
+- `Val` and `Raw` emit raw C code.
 - `Zero` returns the zero value of type T.
 
 Types:

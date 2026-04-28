@@ -192,6 +192,12 @@ func (g *Generator) emitBinaryExpr(n *ast.BinaryExpr) {
 func (g *Generator) emitCallExpr(n *ast.CallExpr) {
 	w := g.state.writer
 
+	// c.Val intrinsic: emit the string literal as a raw C expression.
+	if raw, ok := g.cIntrinsic(n); ok {
+		fmt.Fprintf(w, "%s", raw)
+		return
+	}
+
 	// Generic function call with explicit type argument (e.g. fn[T](a) or pkg.Fn[T](a)).
 	if indexExpr, ok := n.Fun.(*ast.IndexExpr); ok {
 		if ident := exprIdent(indexExpr.X); ident != nil {

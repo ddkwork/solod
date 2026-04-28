@@ -145,6 +145,13 @@ func (g *Generator) emitExprStmt(stmt *ast.ExprStmt) {
 	if g.isPanicCall(stmt.X) {
 		g.emitDeferredCalls()
 	}
+	// c.Raw intrinsic: emit the string literal as a raw C block.
+	if raw, ok := g.cIntrinsic(stmt.X); ok {
+		for line := range strings.SplitSeq(raw, "\n") {
+			fmt.Fprintf(w, "%s%s\n", g.indent(), line)
+		}
+		return
+	}
 	fmt.Fprintf(w, "%s", g.indent())
 	g.emitExpr(stmt.X)
 	fmt.Fprintf(w, ";\n")

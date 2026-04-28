@@ -2,7 +2,9 @@ package clang
 
 import (
 	"go/ast"
+	"go/token"
 	"go/types"
+	"strconv"
 	"strings"
 )
 
@@ -112,6 +114,48 @@ func (g *Generator) getExtern(obj types.Object) (externInfo, bool) {
 	return info, ok
 }
 
+// cIntrinsic checks whether an expression is a c.Raw or c.Val call
+// and returns the raw string content. The argument must be a string literal.
+func (g *Generator) cIntrinsic(expr ast.Expr) (string, bool) {
+	call, ok := expr.(*ast.CallExpr)
+	if !ok {
+		return "", false
+	}
+	// Unwrap IndexExpr for generic calls like c.Val[T]("...").
+	fun := call.Fun
+	if idx, ok := fun.(*ast.IndexExpr); ok {
+		fun = idx.X
+	}
+	sel, ok := fun.(*ast.SelectorExpr)
+	if !ok || (sel.Sel.Name != "Raw" && sel.Sel.Name != "Val") {
+		return "", false
+	}
+	obj := g.types.Uses[sel.Sel]
+	if obj == nil || obj.Pkg() == nil || obj.Pkg().Path() != "solod.dev/so/c" {
+		return "", false
+	}
+	if len(call.Args) != 1 {
+		g.fail(call, "Raw C call requires exactly one argument")
+	}
+	lit, ok := call.Args[0].(*ast.BasicLit)
+	if !ok || lit.Kind != token.STRING {
+		g.fail(call, "Raw C call argument must be a string literal")
+	}
+
+	// Extract raw content: strip backticks for raw strings, unquote interpreted strings.
+	var s string
+	if strings.HasPrefix(lit.Value, "`") {
+		s = lit.Value[1 : len(lit.Value)-1]
+	} else {
+		var err error
+		s, err = strconv.Unquote(lit.Value)
+		if err != nil {
+			g.fail(lit, "Raw C call: invalid string literal")
+		}
+	}
+	return dedent(s), true
+}
+
 // hasInlineDirective reports whether a comment group
 // contains the so:inline directive.
 func hasInlineDirective(doc *ast.CommentGroup) bool {
@@ -149,4 +193,44 @@ func parseExternDirective(doc *ast.CommentGroup) (bool, externInfo) {
 		return true, info
 	}
 	return false, externInfo{}
+}
+
+// dedent removes common leading whitespace from a multi-line string.
+// Also trims leading and trailing blank lines.
+func dedent(s string) string {
+	lines := strings.Split(s, "\n")
+
+	// Trim leading and trailing blank lines.
+	for len(lines) > 0 && strings.TrimSpace(lines[0]) == "" {
+		lines = lines[1:]
+	}
+	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
+		lines = lines[:len(lines)-1]
+	}
+	if len(lines) == 0 {
+		return ""
+	}
+
+	// Find the shortest whitespace prefix among non-empty lines.
+	minIndent := -1
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		indent := len(line) - len(strings.TrimLeft(line, " \t"))
+		if minIndent < 0 || indent < minIndent {
+			minIndent = indent
+		}
+	}
+	if minIndent <= 0 {
+		return strings.Join(lines, "\n")
+	}
+
+	// Strip the common prefix.
+	for i, line := range lines {
+		if len(line) >= minIndent {
+			lines[i] = line[minIndent:]
+		}
+	}
+	return strings.Join(lines, "\n")
 }
