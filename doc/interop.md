@@ -153,4 +153,4 @@ Functions:
 
 Types:
 
-- `Char` represents a C `char` type.
+- `Char` and `ConstChar` represent a C `char` type.

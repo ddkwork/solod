@@ -13,6 +13,11 @@ var c_h string
 //so:extern char
 type Char byte
 
+// ConstChar represents a C char type with a const modifier.
+//
+//so:extern so_const_char
+type ConstChar byte
+
 // Alignof returns the alignment of type T in bytes.
 //
 //	alignof(T)
@@ -131,7 +136,7 @@ func Slice[T any](ptr *T, len int, cap int) []T {
 //	(so_String){s, strlen(s)}
 //
 //so:extern
-func String(ptr *Char) string { _ = ptr; return "" }
+func String[T Char|ConstChar](ptr *T) string { _ = ptr; return "" }
 
 // Val emits a typed C expression.
 //

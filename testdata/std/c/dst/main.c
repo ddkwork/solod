@@ -1,9 +1,19 @@
 #include "main.h"
 #include <math.h>
 
+// -- Variables and constants --
+
 // -- Implementation --
 
 int main(void) {
+    {
+        // Return `const char*` from C.
+        so_const_char* cstr = get_cstring("Hello, C!");
+        so_String str = c_String(so_const_char, (cstr));
+        if (so_string_ne(str, so_str("Hello, C!"))) {
+            so_panic(so_cstr(so_string_add(so_str("unexpected string: "), str)));
+        }
+    }
     {
         // Typed C expression.
         double nan = NAN;

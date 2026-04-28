@@ -4,7 +4,21 @@ import "solod.dev/so/c"
 
 //so:include <math.h>
 
+//so:embed main.h
+var main_h string
+
+//so:extern
+func get_cstring(s string) *c.ConstChar
+
 func main() {
+	{
+		// Return `const char*` from C.
+		cstr := get_cstring("Hello, C!")
+		str := c.String(cstr)
+		if str != "Hello, C!" {
+			panic("unexpected string: " + str)
+		}
+	}
 	{
 		// Typed C expression.
 		nan := c.Val[float64]("NAN")

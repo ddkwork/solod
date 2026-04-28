@@ -2,6 +2,8 @@
 #include <string.h>
 #include "so/builtin/builtin.h"
 
+#define so_const_char const char
+
 #define c_Alignof(T) ((so_int)alignof(T))
 
 #define c_Alloca(T, n) ((T*)so_alloca(sizeof(T) * (size_t)(n)))
@@ -29,8 +31,9 @@ static inline char* c_CharPtr(void* ptr) {
 #define c_Slice(T, ptr, len, cap) \
     (ptr ? (so_Slice){(ptr), (len), (cap)} : (so_Slice){0})
 
-static inline so_String c_String(const char* s) {
-    return s ? (so_String){s, (so_int)strlen(s)} : (so_String){0};
-}
+#define c_String(T, ptr) ({                                            \
+    const char* _ptr = (const char*)(ptr);                             \
+    (_ptr ? (so_String){_ptr, (so_int)strlen(_ptr)} : (so_String){0}); \
+})
 
 #define c_Zero(T) ((T){0})
